@@ -24,14 +24,14 @@ SquareMatrix::SquareMatrix(int nDims, MatrixInitialiser mi){
 			initRandomRot();
 			break;
 	}
-	solve_epsilon = 0.00001;
+	solve_epsilon = 0.000001;
 }
 
 SquareMatrix::SquareMatrix(){
 	numberOfDims = 4; //defaults to unit matrix of size 4 by 4
 //	numberOfDims = 3; //defaults to unit matrix of size 3 by 3
 	createUnitMatrix(v);
-	solve_epsilon = 0.00001;
+	solve_epsilon = 0.000001;
 }
 
 

@@ -98,16 +98,48 @@
 #include <assert.h>
 #include "squarematrix.h"
 #include "trackball.h"
-
-///////////////////////////////////////+++++++++++++++ figdata
-
-// 
-
-float vertexTetrahedron[4][3] = { // Coordinates of vertices, in vertex order
-  {    0.577350f,    0.577350f,    0.577350f }, //   0
-  {    0.577350f,   -0.577350f,   -0.577350f }, //   1
-  {   -0.577350f,    0.577350f,   -0.577350f }, //   2
-  {   -0.577350f,   -0.577350f,    0.577350f }, //   3
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// figdata.c Generated on Sun May 14 18:08:50 2017
+// typedef struct figInfo {
+ // int numDims;                 // Number of dimensions (will be 3 or 4)
+ // int numVerts;                // Number of vertices in the whole figure
+ // int numEdges;                // Number of edges in the whole figure
+ // int numFaces;                // Number of faces in the whole figure
+ // int numCells;                // Always 1 for 3D figures
+ // int numVertsPerEdge;         // Always 2, can't be anything else
+ // int numVertsPerFace;         // Same as the number of edges per face
+ // int numVertsPerCell;         // Number of vertices in each cell (in 3d it is the same as numVerts)
+ // int numEdgesPerFace;         // Number of edges in a face, which is a regular polygon. Same as numVertsPerFace
+ // int numEdgesPerCell;         // Number of edges in a cell
+ // int numFacesPerCell;         // Number of faces in each cell
+ // int numFacesPerVert;         // Number of faces meeting at a vertex
+ // int numFacesPerEdge;         // Number of faces meeting at an edge
+ // int numCellsPerVert;         // Number of cells meeting at a vertex (always 1 for 3D figures)
+ // int numCellsPerEdge;         // Number of cells meeting at an edge (either 2 or 3, for 3d and 4d respectively)
+ // int numCellsPerFace;         // Number of cells meeting at a Face (1 for 3d, 2 for 4d)
+ // double dihedralCosine;        // Cosine of the angle between faces in a cell
+ // double cellRadius;            // Radius of an individual cell in a 4d figure
+ // double cellCentreRadius;      // Distance from the centre of figure to the centre of an individual cell
+ // double faceCentreRadius;      // Distance from the centre of figure to the centre of an individual face (3D)
+ // double *vertex;               // Pointer to the array of vertices (number of vertices X number of dimensions)
+ // int *edge;                   // Pointer to the array of edges (an edge is a pair of vertex numbers)
+ // int *vertToEdge;             // Pointer to the array of edges per vertex (number of vertices X number of edges meeting at a vertex)
+ // int *face;                   // Pointer to the array of faces (number of faces X edges per face)
+ // int *edgeToFace;             // Pointer to the array of faces per edge (number of edges X faces per edge)
+ // int *faceToVert;             // Pointer to the array of vertices per face (number of faces X vertices per face)
+ // int *vertToFace;             // Pointer to the array of faces per vertex (number of vertices X faces meeting at a vertex)
+ // int *faceToCell;             // Pointer to the array of cells per face (number of faces X cells per face (two in 4D))
+ // double *faceNormal;           // Pointer to the face normals (number of faces X number of dimensions)
+ // int *cell;                   // Pointer to the array of cells (a cell is a set of face numbers)
+ // double *cellNormal;           // Pointer to the cell normals (number of cells X number of dimensions
+ // int *cellToEdge;             // Pointer to the edges per cell (number of cells X edges per cell
+ // int *cellToOpposite;         // Pointer to the opposite cell, per cell (number of cells X 1
+// } FigInfo;
+double vertexTetrahedron[4][3] = { // Coordinates of vertices, in vertex order
+  {    0.5773502691896258,    0.5773502691896258,    0.5773502691896258 }, //   0
+  {    0.5773502691896258,   -0.5773502691896258,   -0.5773502691896258 }, //   1
+  {   -0.5773502691896258,    0.5773502691896258,   -0.5773502691896258 }, //   2
+  {   -0.5773502691896258,   -0.5773502691896258,    0.5773502691896258 }, //   3
 };
 int edgeTetrahedron[6][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    1 }, //   0
@@ -157,20 +189,20 @@ int faceToVertTetrahedron[4][3] = { // Vertices for each face, in face order
   {    0,    2,    3 }, //   2
   {    1,    3,    2 }, //   3
 };
-////////// The Edge Length of Tetrahedron is     1.632993
-////////// The face Radius of Tetrahedron is     0.942809
-////////// The cell Radius of Tetrahedron is     1.000000
+////////// The Edge Length of Tetrahedron is     1.6329931618554523
+////////// The face Radius of Tetrahedron is     0.9428090415820635
+////////// The cell Radius of Tetrahedron is     1.0000000000000000
 int vertToFaceTetrahedron[4][3] = { // Faces at each vertex, in vertex order
   {    0,    1,    2 }, //   0
   {    0,    1,    3 }, //   1
   {    0,    2,    3 }, //   2
   {    1,    2,    3 }, //   3
 };
-float faceNormalTetrahedron[4][3] = { // Normals of faces, in face order
-  {    0.577350f,    0.577350f,   -0.577350f }, //   0
-  {    0.577350f,   -0.577350f,    0.577350f }, //   1
-  {   -0.577350f,    0.577350f,    0.577350f }, //   2
-  {   -0.577350f,   -0.577350f,   -0.577350f }, //   3
+double faceNormalTetrahedron[4][3] = { // Normals of faces, in face order
+  {    0.5773502691896258,    0.5773502691896258,   -0.5773502691896258 }, //   0
+  {    0.5773502691896258,   -0.5773502691896258,    0.5773502691896258 }, //   1
+  {   -0.5773502691896258,    0.5773502691896258,    0.5773502691896258 }, //   2
+  {   -0.5773502691896258,   -0.5773502691896258,   -0.5773502691896258 }, //   3
 };
 FigInfo infoTetrahedron = {
     3, // numDims;
@@ -189,11 +221,11 @@ FigInfo infoTetrahedron = {
     0, // numCellsPerVert;
     1, // numCellsPerEdge;
     1, // numCellsPerFace;
-    0.333333f, // dihedralCosine;
-    1.000000f, // cellRadius;
-    0.000000f, // cellCentreRadius;
-    0.333333f, // faceCentreRadius;
-(float *)vertexTetrahedron, // The vertex matrix
+    0.3333333333333333, // dihedralCosine;
+    1.0000000000000000, // cellRadius;
+    0.0000000000000000, // cellCentreRadius;
+    0.3333333333333333, // faceCentreRadius;
+(double *)vertexTetrahedron, // The vertex matrix
 (int *)edgeTetrahedron, // The edge Matrix
 (int *)vertToEdgeTetrahedron, // The Matrix of vertices for each edge
 (int *)faceTetrahedron, // The face to edge matrix
@@ -201,20 +233,21 @@ FigInfo infoTetrahedron = {
 (int *)faceToVertTetrahedron, // The face to vert matrix
 (int *)vertToFaceTetrahedron, // Vertex to face matrix
 (int *)0, // Face to cell matrix (used in 4D)
-(float *)faceNormalTetrahedron, // The normal of a face (used in 3D)
+(double *)faceNormalTetrahedron, // The normal of a face (used in 3D)
 (int *)0,  // The cell matrix
-(float *)0, // The normal of a 4D cell
-(int *)0 // Pointer to the edges per cell (number of cells X edges per cell)
+(double *)0, // The normal of a 4D cell
+(int *)0, // Cell to edge of a 4D cell
+(int *)0, // Cell to opposite of a 4D cell
 };
-float vertexCube[8][3] = { // Coordinates of vertices, in vertex order
-  {    0.577350f,    0.577350f,    0.577350f }, //   0
-  {    0.577350f,    0.577350f,   -0.577350f }, //   1
-  {    0.577350f,   -0.577350f,    0.577350f }, //   2
-  {    0.577350f,   -0.577350f,   -0.577350f }, //   3
-  {   -0.577350f,    0.577350f,    0.577350f }, //   4
-  {   -0.577350f,    0.577350f,   -0.577350f }, //   5
-  {   -0.577350f,   -0.577350f,    0.577350f }, //   6
-  {   -0.577350f,   -0.577350f,   -0.577350f }, //   7
+double vertexCube[8][3] = { // Coordinates of vertices, in vertex order
+  {    0.5773502691896258,    0.5773502691896258,    0.5773502691896258 }, //   0
+  {    0.5773502691896258,    0.5773502691896258,   -0.5773502691896258 }, //   1
+  {    0.5773502691896258,   -0.5773502691896258,    0.5773502691896258 }, //   2
+  {    0.5773502691896258,   -0.5773502691896258,   -0.5773502691896258 }, //   3
+  {   -0.5773502691896258,    0.5773502691896258,    0.5773502691896258 }, //   4
+  {   -0.5773502691896258,    0.5773502691896258,   -0.5773502691896258 }, //   5
+  {   -0.5773502691896258,   -0.5773502691896258,    0.5773502691896258 }, //   6
+  {   -0.5773502691896258,   -0.5773502691896258,   -0.5773502691896258 }, //   7
 };
 int edgeCube[12][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    1 }, //   0
@@ -292,9 +325,9 @@ int faceToVertCube[6][4] = { // Vertices for each face, in face order
   {    2,    6,    7,    3 }, //   4
   {    4,    5,    7,    6 }, //   5
 };
-////////// The Edge Length of Cube is     1.154701
-////////// The face Radius of Cube is     0.816497
-////////// The cell Radius of Cube is     1.000000
+////////// The Edge Length of Cube is     1.1547005383792517
+////////// The face Radius of Cube is     0.8164965809277261
+////////// The cell Radius of Cube is     1.0000000000000000
 int vertToFaceCube[8][3] = { // Faces at each vertex, in vertex order
   {    0,    1,    2 }, //   0
   {    0,    1,    3 }, //   1
@@ -305,13 +338,13 @@ int vertToFaceCube[8][3] = { // Faces at each vertex, in vertex order
   {    2,    4,    5 }, //   6
   {    3,    4,    5 }, //   7
 };
-float faceNormalCube[6][3] = { // Normals of faces, in face order
-  {    1.000000f,    0.000000f,    0.000000f }, //   0
-  {    0.000000f,    1.000000f,    0.000000f }, //   1
-  {    0.000000f,    0.000000f,    1.000000f }, //   2
-  {    0.000000f,    0.000000f,   -1.000000f }, //   3
-  {    0.000000f,   -1.000000f,    0.000000f }, //   4
-  {   -1.000000f,    0.000000f,    0.000000f }, //   5
+double faceNormalCube[6][3] = { // Normals of faces, in face order
+  {    1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   0
+  {    0.0000000000000000,    1.0000000000000000,    0.0000000000000000 }, //   1
+  {    0.0000000000000000,    0.0000000000000000,    1.0000000000000000 }, //   2
+  {    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000 }, //   3
+  {    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000 }, //   4
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   5
 };
 FigInfo infoCube = {
     3, // numDims;
@@ -330,11 +363,11 @@ FigInfo infoCube = {
     0, // numCellsPerVert;
     1, // numCellsPerEdge;
     1, // numCellsPerFace;
-    0.000000f, // dihedralCosine;
-    1.000000f, // cellRadius;
-    0.000000f, // cellCentreRadius;
-    0.577350f, // faceCentreRadius;
-(float *)vertexCube, // The vertex matrix
+    0.0000000000000000, // dihedralCosine;
+    1.0000000000000000, // cellRadius;
+    0.0000000000000000, // cellCentreRadius;
+    0.5773502691896258, // faceCentreRadius;
+(double *)vertexCube, // The vertex matrix
 (int *)edgeCube, // The edge Matrix
 (int *)vertToEdgeCube, // The Matrix of vertices for each edge
 (int *)faceCube, // The face to edge matrix
@@ -342,18 +375,19 @@ FigInfo infoCube = {
 (int *)faceToVertCube, // The face to vert matrix
 (int *)vertToFaceCube, // Vertex to face matrix
 (int *)0, // Face to cell matrix (used in 4D)
-(float *)faceNormalCube, // The normal of a face (used in 3D)
+(double *)faceNormalCube, // The normal of a face (used in 3D)
 (int *)0,  // The cell matrix
-(float *)0, // The normal of a 4D cell
-(int *)0 // Pointer to the edges per cell (number of cells X edges per cell)
+(double *)0, // The normal of a 4D cell
+(int *)0, // Cell to edge of a 4D cell
+(int *)0, // Cell to opposite of a 4D cell
 };
-float vertexOctahedron[6][3] = { // Coordinates of vertices, in vertex order
-  {    0.000000f,    0.000000f,    1.000000f }, //   0
-  {    0.000000f,    1.000000f,    0.000000f }, //   1
-  {    1.000000f,    0.000000f,    0.000000f }, //   2
-  {   -1.000000f,    0.000000f,    0.000000f }, //   3
-  {    0.000000f,   -1.000000f,    0.000000f }, //   4
-  {    0.000000f,    0.000000f,   -1.000000f }, //   5
+double vertexOctahedron[6][3] = { // Coordinates of vertices, in vertex order
+  {    0.0000000000000000,    0.0000000000000000,    1.0000000000000000 }, //   0
+  {    0.0000000000000000,    1.0000000000000000,    0.0000000000000000 }, //   1
+  {    1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   2
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   3
+  {    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000 }, //   4
+  {    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000 }, //   5
 };
 int edgeOctahedron[12][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    1 }, //   0
@@ -435,9 +469,9 @@ int faceToVertOctahedron[8][3] = { // Vertices for each face, in face order
   {    2,    4,    5 }, //   6
   {    3,    5,    4 }, //   7
 };
-////////// The Edge Length of Octahedron is     1.414214
-////////// The face Radius of Octahedron is     0.816497
-////////// The cell Radius of Octahedron is     1.000000
+////////// The Edge Length of Octahedron is     1.4142135623730951
+////////// The face Radius of Octahedron is     0.8164965809277260
+////////// The cell Radius of Octahedron is     1.0000000000000000
 int vertToFaceOctahedron[6][4] = { // Faces at each vertex, in vertex order
   {    0,    1,    2,    3 }, //   0
   {    0,    1,    4,    5 }, //   1
@@ -446,15 +480,15 @@ int vertToFaceOctahedron[6][4] = { // Faces at each vertex, in vertex order
   {    2,    3,    6,    7 }, //   4
   {    4,    5,    6,    7 }, //   5
 };
-float faceNormalOctahedron[8][3] = { // Normals of faces, in face order
-  {    0.577350f,    0.577350f,    0.577350f }, //   0
-  {   -0.577350f,    0.577350f,    0.577350f }, //   1
-  {    0.577350f,   -0.577350f,    0.577350f }, //   2
-  {   -0.577350f,   -0.577350f,    0.577350f }, //   3
-  {    0.577350f,    0.577350f,   -0.577350f }, //   4
-  {   -0.577350f,    0.577350f,   -0.577350f }, //   5
-  {    0.577350f,   -0.577350f,   -0.577350f }, //   6
-  {   -0.577350f,   -0.577350f,   -0.577350f }, //   7
+double faceNormalOctahedron[8][3] = { // Normals of faces, in face order
+  {    0.5773502691896257,    0.5773502691896257,    0.5773502691896257 }, //   0
+  {   -0.5773502691896257,    0.5773502691896257,    0.5773502691896257 }, //   1
+  {    0.5773502691896257,   -0.5773502691896257,    0.5773502691896257 }, //   2
+  {   -0.5773502691896257,   -0.5773502691896257,    0.5773502691896257 }, //   3
+  {    0.5773502691896257,    0.5773502691896257,   -0.5773502691896257 }, //   4
+  {   -0.5773502691896257,    0.5773502691896257,   -0.5773502691896257 }, //   5
+  {    0.5773502691896257,   -0.5773502691896257,   -0.5773502691896257 }, //   6
+  {   -0.5773502691896257,   -0.5773502691896257,   -0.5773502691896257 }, //   7
 };
 FigInfo infoOctahedron = {
     3, // numDims;
@@ -473,11 +507,11 @@ FigInfo infoOctahedron = {
     0, // numCellsPerVert;
     1, // numCellsPerEdge;
     1, // numCellsPerFace;
-   -0.333333f, // dihedralCosine;
-    1.000000f, // cellRadius;
-    0.000000f, // cellCentreRadius;
-    0.577350f, // faceCentreRadius;
-(float *)vertexOctahedron, // The vertex matrix
+   -0.3333333333333333, // dihedralCosine;
+    1.0000000000000000, // cellRadius;
+    0.0000000000000000, // cellCentreRadius;
+    0.5773502691896257, // faceCentreRadius;
+(double *)vertexOctahedron, // The vertex matrix
 (int *)edgeOctahedron, // The edge Matrix
 (int *)vertToEdgeOctahedron, // The Matrix of vertices for each edge
 (int *)faceOctahedron, // The face to edge matrix
@@ -485,32 +519,33 @@ FigInfo infoOctahedron = {
 (int *)faceToVertOctahedron, // The face to vert matrix
 (int *)vertToFaceOctahedron, // Vertex to face matrix
 (int *)0, // Face to cell matrix (used in 4D)
-(float *)faceNormalOctahedron, // The normal of a face (used in 3D)
+(double *)faceNormalOctahedron, // The normal of a face (used in 3D)
 (int *)0,  // The cell matrix
-(float *)0, // The normal of a 4D cell
-(int *)0 // Pointer to the edges per cell (number of cells X edges per cell)
+(double *)0, // The normal of a 4D cell
+(int *)0, // Cell to edge of a 4D cell
+(int *)0, // Cell to opposite of a 4D cell
 };
-float vertexDodecahedron[20][3] = { // Coordinates of vertices, in vertex order
-  {    0.577350f,    0.577350f,    0.577350f }, //   0
-  {    0.577350f,    0.577350f,   -0.577350f }, //   1
-  {    0.577350f,   -0.577350f,    0.577350f }, //   2
-  {    0.577350f,   -0.577350f,   -0.577350f }, //   3
-  {   -0.577350f,    0.577350f,    0.577350f }, //   4
-  {   -0.577350f,    0.577350f,   -0.577350f }, //   5
-  {   -0.577350f,   -0.577350f,    0.577350f }, //   6
-  {   -0.577350f,   -0.577350f,   -0.577350f }, //   7
-  {    0.000000f,    0.356822f,    0.934172f }, //   8
-  {    0.000000f,    0.356822f,   -0.934172f }, //   9
-  {    0.000000f,   -0.356822f,    0.934172f }, //  10
-  {    0.000000f,   -0.356822f,   -0.934172f }, //  11
-  {    0.356822f,    0.934172f,    0.000000f }, //  12
-  {    0.356822f,   -0.934172f,    0.000000f }, //  13
-  {   -0.356822f,    0.934172f,    0.000000f }, //  14
-  {   -0.356822f,   -0.934172f,    0.000000f }, //  15
-  {    0.934172f,    0.000000f,    0.356822f }, //  16
-  {    0.934172f,    0.000000f,   -0.356822f }, //  17
-  {   -0.934172f,    0.000000f,    0.356822f }, //  18
-  {   -0.934172f,    0.000000f,   -0.356822f }, //  19
+double vertexDodecahedron[20][3] = { // Coordinates of vertices, in vertex order
+  {    0.5773502691896258,    0.5773502691896258,    0.5773502691896258 }, //   0
+  {    0.5773502691896258,    0.5773502691896258,   -0.5773502691896258 }, //   1
+  {    0.5773502691896258,   -0.5773502691896258,    0.5773502691896258 }, //   2
+  {    0.5773502691896258,   -0.5773502691896258,   -0.5773502691896258 }, //   3
+  {   -0.5773502691896258,    0.5773502691896258,    0.5773502691896258 }, //   4
+  {   -0.5773502691896258,    0.5773502691896258,   -0.5773502691896258 }, //   5
+  {   -0.5773502691896258,   -0.5773502691896258,    0.5773502691896258 }, //   6
+  {   -0.5773502691896258,   -0.5773502691896258,   -0.5773502691896258 }, //   7
+  {    0.0000000000000000,    0.3568220897730899,    0.9341723589627158 }, //   8
+  {    0.0000000000000000,    0.3568220897730899,   -0.9341723589627158 }, //   9
+  {    0.0000000000000000,   -0.3568220897730899,    0.9341723589627158 }, //  10
+  {    0.0000000000000000,   -0.3568220897730899,   -0.9341723589627158 }, //  11
+  {    0.3568220897730899,    0.9341723589627158,    0.0000000000000000 }, //  12
+  {    0.3568220897730899,   -0.9341723589627158,    0.0000000000000000 }, //  13
+  {   -0.3568220897730899,    0.9341723589627158,    0.0000000000000000 }, //  14
+  {   -0.3568220897730899,   -0.9341723589627158,    0.0000000000000000 }, //  15
+  {    0.9341723589627158,    0.0000000000000000,    0.3568220897730899 }, //  16
+  {    0.9341723589627158,    0.0000000000000000,   -0.3568220897730899 }, //  17
+  {   -0.9341723589627158,    0.0000000000000000,    0.3568220897730899 }, //  18
+  {   -0.9341723589627158,    0.0000000000000000,   -0.3568220897730899 }, //  19
 };
 int edgeDodecahedron[30][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    8 }, //   0
@@ -672,9 +707,9 @@ int faceToVertDodecahedron[12][5] = { // Vertices for each face, in face order
   {    5,    9,   11,    7,   19 }, //  10
   {    6,   18,   19,    7,   15 }, //  11
 };
-////////// The Edge Length of Dodecahedron is     0.713644
-////////// The face Radius of Dodecahedron is     0.607062
-////////// The cell Radius of Dodecahedron is     1.000000
+////////// The Edge Length of Dodecahedron is     0.7136441795461800
+////////// The face Radius of Dodecahedron is     0.6070619982066863
+////////// The cell Radius of Dodecahedron is     1.0000000000000000
 int vertToFaceDodecahedron[20][3] = { // Faces at each vertex, in vertex order
   {    0,    1,    2 }, //   0
   {    2,    3,    4 }, //   1
@@ -697,19 +732,19 @@ int vertToFaceDodecahedron[20][3] = { // Faces at each vertex, in vertex order
   {    8,    9,   11 }, //  18
   {    9,   10,   11 }, //  19
 };
-float faceNormalDodecahedron[12][3] = { // Normals of faces, in face order
-  {    0.000000f,    0.850651f,    0.525731f }, //   0
-  {    0.525731f,    0.000000f,    0.850651f }, //   1
-  {    0.850651f,    0.525731f,    0.000000f }, //   2
-  {    0.000000f,    0.850651f,   -0.525731f }, //   3
-  {    0.525731f,    0.000000f,   -0.850651f }, //   4
-  {    0.000000f,   -0.850651f,    0.525731f }, //   5
-  {    0.850651f,   -0.525731f,    0.000000f }, //   6
-  {    0.000000f,   -0.850651f,   -0.525731f }, //   7
-  {   -0.525731f,    0.000000f,    0.850651f }, //   8
-  {   -0.850651f,    0.525731f,    0.000000f }, //   9
-  {   -0.525731f,    0.000000f,   -0.850651f }, //  10
-  {   -0.850651f,   -0.525731f,    0.000000f }, //  11
+double faceNormalDodecahedron[12][3] = { // Normals of faces, in face order
+  {    0.0000000000000000,    0.8506508083520400,    0.5257311121191336 }, //   0
+  {    0.5257311121191336,    0.0000000000000000,    0.8506508083520400 }, //   1
+  {    0.8506508083520400,    0.5257311121191336,    0.0000000000000000 }, //   2
+  {    0.0000000000000000,    0.8506508083520400,   -0.5257311121191336 }, //   3
+  {    0.5257311121191336,    0.0000000000000000,   -0.8506508083520400 }, //   4
+  {    0.0000000000000000,   -0.8506508083520400,    0.5257311121191336 }, //   5
+  {    0.8506508083520400,   -0.5257311121191336,    0.0000000000000000 }, //   6
+  {    0.0000000000000000,   -0.8506508083520400,   -0.5257311121191336 }, //   7
+  {   -0.5257311121191336,    0.0000000000000000,    0.8506508083520400 }, //   8
+  {   -0.8506508083520400,    0.5257311121191336,    0.0000000000000000 }, //   9
+  {   -0.5257311121191336,    0.0000000000000000,   -0.8506508083520400 }, //  10
+  {   -0.8506508083520400,   -0.5257311121191336,    0.0000000000000000 }, //  11
 };
 FigInfo infoDodecahedron = {
     3, // numDims;
@@ -728,11 +763,11 @@ FigInfo infoDodecahedron = {
     0, // numCellsPerVert;
     1, // numCellsPerEdge;
     1, // numCellsPerFace;
-   -0.447214f, // dihedralCosine;
-    1.000000f, // cellRadius;
-    0.000000f, // cellCentreRadius;
-    0.794654f, // faceCentreRadius;
-(float *)vertexDodecahedron, // The vertex matrix
+   -0.4472135954999579, // dihedralCosine;
+    1.0000000000000000, // cellRadius;
+    0.0000000000000000, // cellCentreRadius;
+    0.7946544722917662, // faceCentreRadius;
+(double *)vertexDodecahedron, // The vertex matrix
 (int *)edgeDodecahedron, // The edge Matrix
 (int *)vertToEdgeDodecahedron, // The Matrix of vertices for each edge
 (int *)faceDodecahedron, // The face to edge matrix
@@ -740,24 +775,25 @@ FigInfo infoDodecahedron = {
 (int *)faceToVertDodecahedron, // The face to vert matrix
 (int *)vertToFaceDodecahedron, // Vertex to face matrix
 (int *)0, // Face to cell matrix (used in 4D)
-(float *)faceNormalDodecahedron, // The normal of a face (used in 3D)
+(double *)faceNormalDodecahedron, // The normal of a face (used in 3D)
 (int *)0,  // The cell matrix
-(float *)0, // The normal of a 4D cell
-(int *)0 // Pointer to the edges per cell (number of cells X edges per cell)
+(double *)0, // The normal of a 4D cell
+(int *)0, // Cell to edge of a 4D cell
+(int *)0, // Cell to opposite of a 4D cell
 };
-float vertexIcosahedron[12][3] = { // Coordinates of vertices, in vertex order
-  {    0.000000f,    0.525731f,    0.850651f }, //   0
-  {    0.000000f,    0.525731f,   -0.850651f }, //   1
-  {    0.000000f,   -0.525731f,    0.850651f }, //   2
-  {    0.000000f,   -0.525731f,   -0.850651f }, //   3
-  {    0.525731f,    0.850651f,    0.000000f }, //   4
-  {    0.525731f,   -0.850651f,    0.000000f }, //   5
-  {   -0.525731f,    0.850651f,    0.000000f }, //   6
-  {   -0.525731f,   -0.850651f,    0.000000f }, //   7
-  {    0.850651f,    0.000000f,    0.525731f }, //   8
-  {    0.850651f,    0.000000f,   -0.525731f }, //   9
-  {   -0.850651f,    0.000000f,    0.525731f }, //  10
-  {   -0.850651f,    0.000000f,   -0.525731f }, //  11
+double vertexIcosahedron[12][3] = { // Coordinates of vertices, in vertex order
+  {    0.0000000000000000,    0.5257311121191336,    0.8506508083520400 }, //   0
+  {    0.0000000000000000,    0.5257311121191336,   -0.8506508083520400 }, //   1
+  {    0.0000000000000000,   -0.5257311121191336,    0.8506508083520400 }, //   2
+  {    0.0000000000000000,   -0.5257311121191336,   -0.8506508083520400 }, //   3
+  {    0.5257311121191336,    0.8506508083520400,    0.0000000000000000 }, //   4
+  {    0.5257311121191336,   -0.8506508083520400,    0.0000000000000000 }, //   5
+  {   -0.5257311121191336,    0.8506508083520400,    0.0000000000000000 }, //   6
+  {   -0.5257311121191336,   -0.8506508083520400,    0.0000000000000000 }, //   7
+  {    0.8506508083520400,    0.0000000000000000,    0.5257311121191336 }, //   8
+  {    0.8506508083520400,    0.0000000000000000,   -0.5257311121191336 }, //   9
+  {   -0.8506508083520400,    0.0000000000000000,    0.5257311121191336 }, //  10
+  {   -0.8506508083520400,    0.0000000000000000,   -0.5257311121191336 }, //  11
 };
 int edgeIcosahedron[30][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    2 }, //   0
@@ -935,9 +971,9 @@ int faceToVertIcosahedron[20][3] = { // Vertices for each face, in face order
   {    6,   11,   10 }, //  18
   {    7,   10,   11 }, //  19
 };
-////////// The Edge Length of Icosahedron is     1.051462
-////////// The face Radius of Icosahedron is     0.607062
-////////// The cell Radius of Icosahedron is     1.000000
+////////// The Edge Length of Icosahedron is     1.0514622242382672
+////////// The face Radius of Icosahedron is     0.6070619982066864
+////////// The cell Radius of Icosahedron is     1.0000000000000000
 int vertToFaceIcosahedron[12][5] = { // Faces at each vertex, in vertex order
   {    0,    1,    2,    3,    4 }, //   0
   {    5,    6,    7,    8,    9 }, //   1
@@ -952,27 +988,27 @@ int vertToFaceIcosahedron[12][5] = { // Faces at each vertex, in vertex order
   {    1,    4,   12,   18,   19 }, //  10
   {    6,    9,   15,   18,   19 }, //  11
 };
-float faceNormalIcosahedron[20][3] = { // Normals of faces, in face order
-  {    0.356822f,    0.000000f,    0.934172f }, //   0
-  {   -0.356822f,    0.000000f,    0.934172f }, //   1
-  {    0.000000f,    0.934172f,    0.356822f }, //   2
-  {    0.577350f,    0.577350f,    0.577350f }, //   3
-  {   -0.577350f,    0.577350f,    0.577350f }, //   4
-  {    0.356822f,    0.000000f,   -0.934172f }, //   5
-  {   -0.356822f,    0.000000f,   -0.934172f }, //   6
-  {    0.000000f,    0.934172f,   -0.356822f }, //   7
-  {    0.577350f,    0.577350f,   -0.577350f }, //   8
-  {   -0.577350f,    0.577350f,   -0.577350f }, //   9
-  {    0.000000f,   -0.934172f,    0.356822f }, //  10
-  {    0.577350f,   -0.577350f,    0.577350f }, //  11
-  {   -0.577350f,   -0.577350f,    0.577350f }, //  12
-  {    0.000000f,   -0.934172f,   -0.356822f }, //  13
-  {    0.577350f,   -0.577350f,   -0.577350f }, //  14
-  {   -0.577350f,   -0.577350f,   -0.577350f }, //  15
-  {    0.934172f,    0.356822f,    0.000000f }, //  16
-  {    0.934172f,   -0.356822f,    0.000000f }, //  17
-  {   -0.934172f,    0.356822f,    0.000000f }, //  18
-  {   -0.934172f,   -0.356822f,    0.000000f }, //  19
+double faceNormalIcosahedron[20][3] = { // Normals of faces, in face order
+  {    0.3568220897730899,    0.0000000000000000,    0.9341723589627156 }, //   0
+  {   -0.3568220897730899,    0.0000000000000000,    0.9341723589627156 }, //   1
+  {    0.0000000000000000,    0.9341723589627156,    0.3568220897730899 }, //   2
+  {    0.5773502691896257,    0.5773502691896257,    0.5773502691896257 }, //   3
+  {   -0.5773502691896257,    0.5773502691896257,    0.5773502691896257 }, //   4
+  {    0.3568220897730899,    0.0000000000000000,   -0.9341723589627156 }, //   5
+  {   -0.3568220897730899,    0.0000000000000000,   -0.9341723589627156 }, //   6
+  {    0.0000000000000000,    0.9341723589627156,   -0.3568220897730899 }, //   7
+  {    0.5773502691896257,    0.5773502691896257,   -0.5773502691896257 }, //   8
+  {   -0.5773502691896257,    0.5773502691896257,   -0.5773502691896257 }, //   9
+  {    0.0000000000000000,   -0.9341723589627156,    0.3568220897730899 }, //  10
+  {    0.5773502691896257,   -0.5773502691896257,    0.5773502691896257 }, //  11
+  {   -0.5773502691896257,   -0.5773502691896257,    0.5773502691896257 }, //  12
+  {    0.0000000000000000,   -0.9341723589627156,   -0.3568220897730899 }, //  13
+  {    0.5773502691896257,   -0.5773502691896257,   -0.5773502691896257 }, //  14
+  {   -0.5773502691896257,   -0.5773502691896257,   -0.5773502691896257 }, //  15
+  {    0.9341723589627156,    0.3568220897730899,    0.0000000000000000 }, //  16
+  {    0.9341723589627156,   -0.3568220897730899,    0.0000000000000000 }, //  17
+  {   -0.9341723589627156,    0.3568220897730899,    0.0000000000000000 }, //  18
+  {   -0.9341723589627156,   -0.3568220897730899,    0.0000000000000000 }, //  19
 };
 FigInfo infoIcosahedron = {
     3, // numDims;
@@ -991,11 +1027,11 @@ FigInfo infoIcosahedron = {
     0, // numCellsPerVert;
     1, // numCellsPerEdge;
     1, // numCellsPerFace;
-   -0.745356f, // dihedralCosine;
-    1.000000f, // cellRadius;
-    0.000000f, // cellCentreRadius;
-    0.794654f, // faceCentreRadius;
-(float *)vertexIcosahedron, // The vertex matrix
+   -0.7453559924999299, // dihedralCosine;
+    1.0000000000000000, // cellRadius;
+    0.0000000000000000, // cellCentreRadius;
+    0.7946544722917662, // faceCentreRadius;
+(double *)vertexIcosahedron, // The vertex matrix
 (int *)edgeIcosahedron, // The edge Matrix
 (int *)vertToEdgeIcosahedron, // The Matrix of vertices for each edge
 (int *)faceIcosahedron, // The face to edge matrix
@@ -1003,17 +1039,18 @@ FigInfo infoIcosahedron = {
 (int *)faceToVertIcosahedron, // The face to vert matrix
 (int *)vertToFaceIcosahedron, // Vertex to face matrix
 (int *)0, // Face to cell matrix (used in 4D)
-(float *)faceNormalIcosahedron, // The normal of a face (used in 3D)
+(double *)faceNormalIcosahedron, // The normal of a face (used in 3D)
 (int *)0,  // The cell matrix
-(float *)0, // The normal of a 4D cell
-(int *)0 // Pointer to the edges per cell (number of cells X edges per cell)
+(double *)0, // The normal of a 4D cell
+(int *)0, // Cell to edge of a 4D cell
+(int *)0, // Cell to opposite of a 4D cell
 };
-float vertexK005[5][4] = { // Coordinates of vertices, in vertex order
-  {    0.250000f,    0.322749f,    0.456435f,    0.790569f }, //   0
-  {    0.250000f,    0.322749f,    0.456435f,   -0.790569f }, //   1
-  {    0.250000f,    0.322749f,   -0.912871f,    0.000000f }, //   2
-  {    0.250000f,   -0.968246f,    0.000000f,    0.000000f }, //   3
-  {   -1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   4
+double vertexK005[5][4] = { // Coordinates of vertices, in vertex order
+  {    0.2500000000000000,    0.3227486121839515,    0.4564354645876385,    0.7905694150420948 }, //   0
+  {    0.2500000000000000,    0.3227486121839515,    0.4564354645876385,   -0.7905694150420948 }, //   1
+  {    0.2500000000000000,    0.3227486121839515,   -0.9128709291752769,    0.0000000000000000 }, //   2
+  {    0.2500000000000000,   -0.9682458365518541,    0.0000000000000000,    0.0000000000000000 }, //   3
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   4
 };
 int edgeK005[10][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    1 }, //   0
@@ -1094,8 +1131,8 @@ int faceToVertK005[10][3] = { // Vertices for each face, in face order
   {    1,    4,    3 }, //   8
   {    2,    4,    3 }, //   9
 };
-////////// The Edge Length of K005 is     1.581139
-////////// The face Radius of K005 is     0.912871
+////////// The Edge Length of K005 is     1.5811388300841895
+////////// The face Radius of K005 is     0.9128709291752769
 int cellK005[5][4] = { // Faces bordering each cell, in cell order
   {    0,    1,    3,    6 }, //   0
   {    0,    2,    4,    7 }, //   1
@@ -1129,12 +1166,12 @@ int cellToVertK005[5][4] = { // Vertices on each cell, in cell order
   {    0,    2,    3,    4 }, //   3
   {    1,    2,    3,    4 }, //   4
 };
-float cellNormalK005[5][4] = { // Normals of cells, in cell order
-  {    1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   0
-  {   -0.250000f,    0.968246f,    0.000000f,    0.000000f }, //   1
-  {   -0.250000f,   -0.322749f,    0.912871f,    0.000000f }, //   2
-  {   -0.250000f,   -0.322749f,   -0.456435f,    0.790569f }, //   3
-  {   -0.250000f,   -0.322749f,   -0.456435f,   -0.790569f }, //   4
+double cellNormalK005[5][4] = { // Normals of cells, in cell order
+  {    1.0000000000000000,    0.0000000000000002,    0.0000000000000000,    0.0000000000000000 }, //   0
+  {   -0.2500000000000000,    0.9682458365518543,    0.0000000000000000,    0.0000000000000000 }, //   1
+  {   -0.2500000000000000,   -0.3227486121839512,    0.9128709291752769,    0.0000000000000000 }, //   2
+  {   -0.2500000000000000,   -0.3227486121839512,   -0.4564354645876385,    0.7905694150420948 }, //   3
+  {   -0.2500000000000000,   -0.3227486121839512,   -0.4564354645876385,   -0.7905694150420948 }, //   4
 };
 int cellToOppositeK005[5][4] = { // The opposite cell, in cell order
   {    1,    2,    3,    4 }, //   0
@@ -1143,9 +1180,9 @@ int cellToOppositeK005[5][4] = { // The opposite cell, in cell order
   {    0,    1,    2,    4 }, //   3
   {    0,    1,    2,    3 }, //   4
 };
-////////// The Radius of the whole K005 is 1. The radius of each cell is     0.968246
-////////// The Distance from the origin to the centre of each cell of K005 is     0.250000
-////////// The Sphere circumscribing each cell of K005 overlaps the origin by     0.718246
+////////// The Radius of the whole K005 is 1. The radius of each cell is     0.9682458365518541
+////////// The Distance from the origin to the centre of each cell of K005 is     0.2500000000000000
+////////// The Sphere circumscribing each cell of K005 overlaps the origin by     0.7182458365518541
 FigInfo infoK005 = {
     4, // numDims;
     5, // numVerts;
@@ -1163,11 +1200,11 @@ FigInfo infoK005 = {
     0, // numCellsPerVert;
     3, // numCellsPerEdge;
     2, // numCellsPerFace;
-    0.333333f, // dihedralCosine;
-    0.968246f, // cellRadius;
-    0.250000f, // cellCentreRadius;
-    0.408248f, // faceCentreRadius;
-(float *)vertexK005, // The vertex matrix
+    0.3333333333333333, // dihedralCosine;
+    0.9682458365518541, // cellRadius;
+    0.2500000000000000, // cellCentreRadius;
+    0.4082482904638631, // faceCentreRadius;
+(double *)vertexK005, // The vertex matrix
 (int *)edgeK005, // The edge Matrix
 (int *)vertToEdgeK005, // The Matrix of vertices for each edge
 (int *)faceK005, // The face to edge matrix
@@ -1175,29 +1212,29 @@ FigInfo infoK005 = {
 (int *)0, // Face To Vert (used in 3D)
 (int *)0, // Vertex to face (used in 3D)
 (int *)faceToCellK005, // Face to cell matrix (used in 4D)
-(float *)0, // The normal of a face (used in 3D)
+(double *)0, // The normal of a face (used in 3D)
 (int *)cellK005, // The cell matrix
-(float *)cellNormalK005, // The normal of a 4D cell
-(int *)cellToEdgeK005, // Pointer to the edges per cell (number of cells X edges per cell)
-(int *)cellToOppositeK005, // Pointer to the opposite cell per cell (number of cells X 1, but not for K005)
+(double *)cellNormalK005, // The normal of a 4D cell
+(int *)cellToEdgeK005, // The normal of a 4D cell
+(int *)cellToOppositeK005, // The opposite cell of a 4D cell
 };
-float vertexK008[16][4] = { // Coordinates of vertices, in vertex order
-  {    0.500000f,    0.500000f,    0.500000f,    0.500000f }, //   0
-  {    0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //   1
-  {    0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //   2
-  {    0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //   3
-  {    0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //   4
-  {    0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //   5
-  {    0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //   6
-  {    0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //   7
-  {   -0.500000f,    0.500000f,    0.500000f,    0.500000f }, //   8
-  {   -0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //   9
-  {   -0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //  10
-  {   -0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //  11
-  {   -0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //  12
-  {   -0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //  13
-  {   -0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //  14
-  {   -0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //  15
+double vertexK008[16][4] = { // Coordinates of vertices, in vertex order
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   0
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   1
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   2
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //   3
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   4
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   5
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   6
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //   7
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   8
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   9
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  10
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  11
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //  12
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  13
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  14
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  15
 };
 int edgeK008[32][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    1 }, //   0
@@ -1397,8 +1434,8 @@ int faceToVertK008[24][4] = { // Vertices for each face, in face order
   {   10,   14,   15,   11 }, //  22
   {   12,   14,   15,   13 }, //  23
 };
-////////// The Edge Length of K008 is     1.000000
-////////// The face Radius of K008 is     0.707107
+////////// The Edge Length of K008 is     1.0000000000000000
+////////// The face Radius of K008 is     0.7071067811865476
 int cellK008[8][6] = { // Faces bordering each cell, in cell order
   {    0,    1,    3,    9,    6,   13 }, //   0
   {    0,    2,    4,   10,    7,   18 }, //   1
@@ -1455,15 +1492,15 @@ int cellToVertK008[8][8] = { // Vertices on each cell, in cell order
   {    4,    5,    6,    7,   12,   13,   14,   15 }, //   6
   {    8,    9,   10,   11,   12,   13,   14,   15 }, //   7
 };
-float cellNormalK008[8][4] = { // Normals of cells, in cell order
-  {    1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   0
-  {    0.000000f,    1.000000f,    0.000000f,    0.000000f }, //   1
-  {    0.000000f,    0.000000f,    1.000000f,    0.000000f }, //   2
-  {    0.000000f,    0.000000f,    0.000000f,    1.000000f }, //   3
-  {    0.000000f,    0.000000f,    0.000000f,   -1.000000f }, //   4
-  {    0.000000f,    0.000000f,   -1.000000f,    0.000000f }, //   5
-  {    0.000000f,   -1.000000f,    0.000000f,    0.000000f }, //   6
-  {   -1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   7
+double cellNormalK008[8][4] = { // Normals of cells, in cell order
+  {    1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   0
+  {    0.0000000000000000,    1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   1
+  {    0.0000000000000000,    0.0000000000000000,    1.0000000000000000,    0.0000000000000000 }, //   2
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,    1.0000000000000000 }, //   3
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000 }, //   4
+  {    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000 }, //   5
+  {    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   6
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   7
 };
 int cellToOppositeK008[8] = { // The opposite cell, in cell order
       7, //   0
@@ -1475,9 +1512,9 @@ int cellToOppositeK008[8] = { // The opposite cell, in cell order
       1, //   6
       0, //   7
 };
-////////// The Radius of the whole K008 is 1. The radius of each cell is     0.866025
-////////// The Distance from the origin to the centre of each cell of K008 is     0.500000
-////////// The Sphere circumscribing each cell of K008 overlaps the origin by     0.366025
+////////// The Radius of the whole K008 is 1. The radius of each cell is     0.8660254037844386
+////////// The Distance from the origin to the centre of each cell of K008 is     0.5000000000000000
+////////// The Sphere circumscribing each cell of K008 overlaps the origin by     0.3660254037844386
 FigInfo infoK008 = {
     4, // numDims;
    16, // numVerts;
@@ -1495,11 +1532,11 @@ FigInfo infoK008 = {
     0, // numCellsPerVert;
     3, // numCellsPerEdge;
     2, // numCellsPerFace;
-    0.000000f, // dihedralCosine;
-    0.866025f, // cellRadius;
-    0.500000f, // cellCentreRadius;
-    0.707107f, // faceCentreRadius;
-(float *)vertexK008, // The vertex matrix
+    0.0000000000000000, // dihedralCosine;
+    0.8660254037844386, // cellRadius;
+    0.5000000000000000, // cellCentreRadius;
+    0.7071067811865476, // faceCentreRadius;
+(double *)vertexK008, // The vertex matrix
 (int *)edgeK008, // The edge Matrix
 (int *)vertToEdgeK008, // The Matrix of vertices for each edge
 (int *)faceK008, // The face to edge matrix
@@ -1507,21 +1544,21 @@ FigInfo infoK008 = {
 (int *)0, // Face To Vert (used in 3D)
 (int *)0, // Vertex to face (used in 3D)
 (int *)faceToCellK008, // Face to cell matrix (used in 4D)
-(float *)0, // The normal of a face (used in 3D)
+(double *)0, // The normal of a face (used in 3D)
 (int *)cellK008, // The cell matrix
-(float *)cellNormalK008, // The normal of a 4D cell
-(int *)cellToEdgeK008, // Pointer to the edges per cell (number of cells X edges per cell)
-(int *)cellToOppositeK008, // Pointer to the opposite cell per cell (number of cells X 1, but not for K005)
+(double *)cellNormalK008, // The normal of a 4D cell
+(int *)cellToEdgeK008, // The normal of a 4D cell
+(int *)cellToOppositeK008, // The opposite cell of a 4D cell
 };
-float vertexK016[8][4] = { // Coordinates of vertices, in vertex order
-  {    0.000000f,    0.000000f,    0.000000f,    1.000000f }, //   0
-  {    0.000000f,    0.000000f,    1.000000f,    0.000000f }, //   1
-  {    0.000000f,    1.000000f,    0.000000f,    0.000000f }, //   2
-  {    1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   3
-  {   -1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   4
-  {    0.000000f,   -1.000000f,    0.000000f,    0.000000f }, //   5
-  {    0.000000f,    0.000000f,   -1.000000f,    0.000000f }, //   6
-  {    0.000000f,    0.000000f,    0.000000f,   -1.000000f }, //   7
+double vertexK016[8][4] = { // Coordinates of vertices, in vertex order
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,    1.0000000000000000 }, //   0
+  {    0.0000000000000000,    0.0000000000000000,    1.0000000000000000,    0.0000000000000000 }, //   1
+  {    0.0000000000000000,    1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   2
+  {    1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   3
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   4
+  {    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   5
+  {    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000 }, //   6
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000 }, //   7
 };
 int edgeK016[24][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    1 }, //   0
@@ -1713,8 +1750,8 @@ int faceToVertK016[32][3] = { // Vertices for each face, in face order
   {    4,    7,    6 }, //  30
   {    5,    7,    6 }, //  31
 };
-////////// The Edge Length of K016 is     1.414214
-////////// The face Radius of K016 is     0.816497
+////////// The Edge Length of K016 is     1.4142135623730951
+////////// The face Radius of K016 is     0.8164965809277260
 int cellK016[16][4] = { // Faces bordering each cell, in cell order
   {    0,    1,    4,   12 }, //   0
   {    0,    2,    5,   13 }, //   1
@@ -1803,23 +1840,23 @@ int cellToVertK016[16][4] = { // Vertices on each cell, in cell order
   {    3,    5,    6,    7 }, //  14
   {    4,    5,    6,    7 }, //  15
 };
-float cellNormalK016[16][4] = { // Normals of cells, in cell order
-  {    0.500000f,    0.500000f,    0.500000f,    0.500000f }, //   0
-  {   -0.500000f,    0.500000f,    0.500000f,    0.500000f }, //   1
-  {    0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //   2
-  {   -0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //   3
-  {    0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //   4
-  {   -0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //   5
-  {    0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //   6
-  {   -0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //   7
-  {    0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //   8
-  {   -0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //   9
-  {    0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //  10
-  {   -0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //  11
-  {    0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //  12
-  {   -0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //  13
-  {    0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //  14
-  {   -0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //  15
+double cellNormalK016[16][4] = { // Normals of cells, in cell order
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   0
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   1
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   2
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   3
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   4
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   5
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   6
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   7
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   8
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   9
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  10
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  11
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  12
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  13
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  14
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  15
 };
 int cellToOppositeK016[16] = { // The opposite cell, in cell order
      15, //   0
@@ -1839,9 +1876,9 @@ int cellToOppositeK016[16] = { // The opposite cell, in cell order
       1, //  14
       0, //  15
 };
-////////// The Radius of the whole K016 is 1. The radius of each cell is     0.866025
-////////// The Distance from the origin to the centre of each cell of K016 is     0.500000
-////////// The Sphere circumscribing each cell of K016 overlaps the origin by     0.366025
+////////// The Radius of the whole K016 is 1. The radius of each cell is     0.8660254037844386
+////////// The Distance from the origin to the centre of each cell of K016 is     0.5000000000000000
+////////// The Sphere circumscribing each cell of K016 overlaps the origin by     0.3660254037844386
 FigInfo infoK016 = {
     4, // numDims;
     8, // numVerts;
@@ -1859,11 +1896,11 @@ FigInfo infoK016 = {
     0, // numCellsPerVert;
     4, // numCellsPerEdge;
     2, // numCellsPerFace;
-    0.333333f, // dihedralCosine;
-    0.866025f, // cellRadius;
-    0.500000f, // cellCentreRadius;
-    0.577350f, // faceCentreRadius;
-(float *)vertexK016, // The vertex matrix
+    0.3333333333333333, // dihedralCosine;
+    0.8660254037844386, // cellRadius;
+    0.5000000000000000, // cellCentreRadius;
+    0.5773502691896257, // faceCentreRadius;
+(double *)vertexK016, // The vertex matrix
 (int *)edgeK016, // The edge Matrix
 (int *)vertToEdgeK016, // The Matrix of vertices for each edge
 (int *)faceK016, // The face to edge matrix
@@ -1871,37 +1908,37 @@ FigInfo infoK016 = {
 (int *)0, // Face To Vert (used in 3D)
 (int *)0, // Vertex to face (used in 3D)
 (int *)faceToCellK016, // Face to cell matrix (used in 4D)
-(float *)0, // The normal of a face (used in 3D)
+(double *)0, // The normal of a face (used in 3D)
 (int *)cellK016, // The cell matrix
-(float *)cellNormalK016, // The normal of a 4D cell
-(int *)cellToEdgeK016, // Pointer to the edges per cell (number of cells X edges per cell)
-(int *)cellToOppositeK016, // Pointer to the opposite cell per cell (number of cells X 1, but not for K005)
+(double *)cellNormalK016, // The normal of a 4D cell
+(int *)cellToEdgeK016, // The normal of a 4D cell
+(int *)cellToOppositeK016, // The opposite cell of a 4D cell
 };
-float vertexK024[24][4] = { // Coordinates of vertices, in vertex order
-  {    0.000000f,    0.000000f,    0.000000f,    1.000000f }, //   0
-  {    0.000000f,    0.000000f,    1.000000f,    0.000000f }, //   1
-  {    0.000000f,    1.000000f,    0.000000f,    0.000000f }, //   2
-  {    1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   3
-  {   -1.000000f,    0.000000f,    0.000000f,    0.000000f }, //   4
-  {    0.000000f,   -1.000000f,    0.000000f,    0.000000f }, //   5
-  {    0.000000f,    0.000000f,   -1.000000f,    0.000000f }, //   6
-  {    0.000000f,    0.000000f,    0.000000f,   -1.000000f }, //   7
-  {    0.500000f,    0.500000f,    0.500000f,    0.500000f }, //   8
-  {    0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //   9
-  {    0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //  10
-  {    0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //  11
-  {    0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //  12
-  {    0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //  13
-  {    0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //  14
-  {    0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //  15
-  {   -0.500000f,    0.500000f,    0.500000f,    0.500000f }, //  16
-  {   -0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //  17
-  {   -0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //  18
-  {   -0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //  19
-  {   -0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //  20
-  {   -0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //  21
-  {   -0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //  22
-  {   -0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //  23
+double vertexK024[24][4] = { // Coordinates of vertices, in vertex order
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,    1.0000000000000000 }, //   0
+  {    0.0000000000000000,    0.0000000000000000,    1.0000000000000000,    0.0000000000000000 }, //   1
+  {    0.0000000000000000,    1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   2
+  {    1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   3
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   4
+  {    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //   5
+  {    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000 }, //   6
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000 }, //   7
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   8
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   9
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  10
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  11
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //  12
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  13
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  14
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  15
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //  16
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  17
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  18
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  19
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //  20
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  21
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  22
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  23
 };
 int edgeK024[96][2] = { // Vertex pairs defining each edge, in edge order
   {    0,    8 }, //   0
@@ -2517,8 +2554,8 @@ int faceToVertK024[96][3] = { // Vertices for each face, in face order
   {    7,   23,   19 }, //  94
   {    7,   23,   21 }, //  95
 };
-////////// The Edge Length of K024 is     1.000000
-////////// The face Radius of K024 is     0.577350
+////////// The Edge Length of K024 is     1.0000000000000000
+////////// The face Radius of K024 is     0.5773502691896258
 int cellK024[24][8] = { // Faces bordering each cell, in cell order
   {    0,    1,    3,   37,    5,   38,   42,   45 }, //   0
   {    0,    2,    4,   25,    8,   26,   30,   33 }, //   1
@@ -2695,31 +2732,31 @@ int cellToVertK024[24][6] = { // Vertices on each cell, in cell order
   {    5,    6,   14,   15,   22,   23 }, //  22
   {    6,    7,   11,   15,   19,   23 }, //  23
 };
-float cellNormalK024[24][4] = { // Normals of cells, in cell order
-  {    0.707107f,    0.000000f,    0.000000f,    0.707107f }, //   0
-  {    0.000000f,    0.707107f,    0.000000f,    0.707107f }, //   1
-  {    0.000000f,    0.000000f,    0.707107f,    0.707107f }, //   2
-  {    0.000000f,    0.000000f,   -0.707107f,    0.707107f }, //   3
-  {    0.000000f,   -0.707107f,    0.000000f,    0.707107f }, //   4
-  {   -0.707107f,    0.000000f,    0.000000f,    0.707107f }, //   5
-  {    0.707107f,    0.000000f,    0.707107f,    0.000000f }, //   6
-  {    0.000000f,    0.707107f,    0.707107f,    0.000000f }, //   7
-  {    0.000000f,    0.000000f,    0.707107f,   -0.707107f }, //   8
-  {    0.000000f,   -0.707107f,    0.707107f,    0.000000f }, //   9
-  {   -0.707107f,    0.000000f,    0.707107f,    0.000000f }, //  10
-  {    0.707107f,    0.707107f,    0.000000f,    0.000000f }, //  11
-  {    0.000000f,    0.707107f,    0.000000f,   -0.707107f }, //  12
-  {    0.000000f,    0.707107f,   -0.707107f,    0.000000f }, //  13
-  {   -0.707107f,    0.707107f,    0.000000f,    0.000000f }, //  14
-  {    0.707107f,    0.000000f,    0.000000f,   -0.707107f }, //  15
-  {    0.707107f,    0.000000f,   -0.707107f,    0.000000f }, //  16
-  {    0.707107f,   -0.707107f,    0.000000f,    0.000000f }, //  17
-  {   -0.707107f,    0.000000f,    0.000000f,   -0.707107f }, //  18
-  {   -0.707107f,    0.000000f,   -0.707107f,    0.000000f }, //  19
-  {   -0.707107f,   -0.707107f,    0.000000f,    0.000000f }, //  20
-  {    0.000000f,   -0.707107f,    0.000000f,   -0.707107f }, //  21
-  {    0.000000f,   -0.707107f,   -0.707107f,    0.000000f }, //  22
-  {    0.000000f,    0.000000f,   -0.707107f,   -0.707107f }, //  23
+double cellNormalK024[24][4] = { // Normals of cells, in cell order
+  {    0.7071067811865475,    0.0000000000000000,    0.0000000000000000,    0.7071067811865475 }, //   0
+  {    0.0000000000000000,    0.7071067811865475,    0.0000000000000000,    0.7071067811865475 }, //   1
+  {    0.0000000000000000,    0.0000000000000000,    0.7071067811865475,    0.7071067811865475 }, //   2
+  {    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475,    0.7071067811865475 }, //   3
+  {    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000,    0.7071067811865475 }, //   4
+  {   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000,    0.7071067811865475 }, //   5
+  {    0.7071067811865475,    0.0000000000000000,    0.7071067811865475,    0.0000000000000000 }, //   6
+  {    0.0000000000000000,    0.7071067811865475,    0.7071067811865475,    0.0000000000000000 }, //   7
+  {    0.0000000000000000,    0.0000000000000000,    0.7071067811865475,   -0.7071067811865475 }, //   8
+  {    0.0000000000000000,   -0.7071067811865475,    0.7071067811865475,    0.0000000000000000 }, //   9
+  {   -0.7071067811865475,    0.0000000000000000,    0.7071067811865475,    0.0000000000000000 }, //  10
+  {    0.7071067811865475,    0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //  11
+  {    0.0000000000000000,    0.7071067811865475,    0.0000000000000000,   -0.7071067811865475 }, //  12
+  {    0.0000000000000000,    0.7071067811865475,   -0.7071067811865475,    0.0000000000000000 }, //  13
+  {   -0.7071067811865475,    0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //  14
+  {    0.7071067811865475,    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475 }, //  15
+  {    0.7071067811865475,    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000 }, //  16
+  {    0.7071067811865475,   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //  17
+  {   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475 }, //  18
+  {   -0.7071067811865475,    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000 }, //  19
+  {   -0.7071067811865475,   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //  20
+  {    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000,   -0.7071067811865475 }, //  21
+  {    0.0000000000000000,   -0.7071067811865475,   -0.7071067811865475,    0.0000000000000000 }, //  22
+  {    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475,   -0.7071067811865475 }, //  23
 };
 int cellToOppositeK024[24] = { // The opposite cell, in cell order
      18, //   0
@@ -2747,9 +2784,9 @@ int cellToOppositeK024[24] = { // The opposite cell, in cell order
       7, //  22
       2, //  23
 };
-////////// The Radius of the whole K024 is 1. The radius of each cell is     0.707107
-////////// The Distance from the origin to the centre of each cell of K024 is     0.707107
-////////// The Sphere circumscribing each cell of K024 overlaps the origin by     0.000000
+////////// The Radius of the whole K024 is 1. The radius of each cell is     0.7071067811865476
+////////// The Distance from the origin to the centre of each cell of K024 is     0.7071067811865476
+////////// The Sphere circumscribing each cell of K024 overlaps the origin by     0.0000000000000000
 FigInfo infoK024 = {
     4, // numDims;
    24, // numVerts;
@@ -2767,11 +2804,11 @@ FigInfo infoK024 = {
     0, // numCellsPerVert;
     3, // numCellsPerEdge;
     2, // numCellsPerFace;
-   -0.333333f, // dihedralCosine;
-    0.707107f, // cellRadius;
-    0.707107f, // cellCentreRadius;
-    0.816497f, // faceCentreRadius;
-(float *)vertexK024, // The vertex matrix
+   -0.3333333333333333, // dihedralCosine;
+    0.7071067811865476, // cellRadius;
+    0.7071067811865476, // cellCentreRadius;
+    0.8164965809277260, // faceCentreRadius;
+(double *)vertexK024, // The vertex matrix
 (int *)edgeK024, // The edge Matrix
 (int *)vertToEdgeK024, // The Matrix of vertices for each edge
 (int *)faceK024, // The face to edge matrix
@@ -2779,613 +2816,613 @@ FigInfo infoK024 = {
 (int *)0, // Face To Vert (used in 3D)
 (int *)0, // Vertex to face (used in 3D)
 (int *)faceToCellK024, // Face to cell matrix (used in 4D)
-(float *)0, // The normal of a face (used in 3D)
+(double *)0, // The normal of a face (used in 3D)
 (int *)cellK024, // The cell matrix
-(float *)cellNormalK024, // The normal of a 4D cell
-(int *)cellToEdgeK024, // Pointer to the edges per cell (number of cells X edges per cell)
-(int *)cellToOppositeK024, // Pointer to the opposite cell per cell (number of cells X 1, but not for K005)
+(double *)cellNormalK024, // The normal of a 4D cell
+(int *)cellToEdgeK024, // The normal of a 4D cell
+(int *)cellToOppositeK024, // The opposite cell of a 4D cell
 };
-float vertexK120[600][4] = { // Coordinates of vertices, in vertex order
-  {    0.707107f,    0.707107f,    0.000000f,    0.000000f }, //   0
-  {    0.707107f,   -0.707107f,    0.000000f,    0.000000f }, //   1
-  {   -0.707107f,    0.707107f,    0.000000f,    0.000000f }, //   2
-  {   -0.707107f,   -0.707107f,    0.000000f,    0.000000f }, //   3
-  {    0.707107f,    0.000000f,    0.707107f,    0.000000f }, //   4
-  {    0.707107f,    0.000000f,   -0.707107f,    0.000000f }, //   5
-  {   -0.707107f,    0.000000f,    0.707107f,    0.000000f }, //   6
-  {   -0.707107f,    0.000000f,   -0.707107f,    0.000000f }, //   7
-  {    0.707107f,    0.000000f,    0.000000f,    0.707107f }, //   8
-  {    0.707107f,    0.000000f,    0.000000f,   -0.707107f }, //   9
-  {   -0.707107f,    0.000000f,    0.000000f,    0.707107f }, //  10
-  {   -0.707107f,    0.000000f,    0.000000f,   -0.707107f }, //  11
-  {    0.000000f,    0.707107f,    0.707107f,    0.000000f }, //  12
-  {    0.000000f,    0.707107f,   -0.707107f,    0.000000f }, //  13
-  {    0.000000f,   -0.707107f,    0.707107f,    0.000000f }, //  14
-  {    0.000000f,   -0.707107f,   -0.707107f,    0.000000f }, //  15
-  {    0.000000f,    0.707107f,    0.000000f,    0.707107f }, //  16
-  {    0.000000f,    0.707107f,    0.000000f,   -0.707107f }, //  17
-  {    0.000000f,   -0.707107f,    0.000000f,    0.707107f }, //  18
-  {    0.000000f,   -0.707107f,    0.000000f,   -0.707107f }, //  19
-  {    0.000000f,    0.000000f,    0.707107f,    0.707107f }, //  20
-  {    0.000000f,    0.000000f,    0.707107f,   -0.707107f }, //  21
-  {    0.000000f,    0.000000f,   -0.707107f,    0.707107f }, //  22
-  {    0.000000f,    0.000000f,   -0.707107f,   -0.707107f }, //  23
-  {    0.790569f,    0.353553f,    0.353553f,    0.353553f }, //  24
-  {    0.790569f,    0.353553f,    0.353553f,   -0.353553f }, //  25
-  {    0.790569f,    0.353553f,   -0.353553f,    0.353553f }, //  26
-  {    0.790569f,    0.353553f,   -0.353553f,   -0.353553f }, //  27
-  {    0.790569f,   -0.353553f,    0.353553f,    0.353553f }, //  28
-  {    0.790569f,   -0.353553f,    0.353553f,   -0.353553f }, //  29
-  {    0.790569f,   -0.353553f,   -0.353553f,    0.353553f }, //  30
-  {    0.790569f,   -0.353553f,   -0.353553f,   -0.353553f }, //  31
-  {   -0.790569f,    0.353553f,    0.353553f,    0.353553f }, //  32
-  {   -0.790569f,    0.353553f,    0.353553f,   -0.353553f }, //  33
-  {   -0.790569f,    0.353553f,   -0.353553f,    0.353553f }, //  34
-  {   -0.790569f,    0.353553f,   -0.353553f,   -0.353553f }, //  35
-  {   -0.790569f,   -0.353553f,    0.353553f,    0.353553f }, //  36
-  {   -0.790569f,   -0.353553f,    0.353553f,   -0.353553f }, //  37
-  {   -0.790569f,   -0.353553f,   -0.353553f,    0.353553f }, //  38
-  {   -0.790569f,   -0.353553f,   -0.353553f,   -0.353553f }, //  39
-  {    0.353553f,    0.790569f,    0.353553f,    0.353553f }, //  40
-  {    0.353553f,    0.790569f,    0.353553f,   -0.353553f }, //  41
-  {    0.353553f,    0.790569f,   -0.353553f,    0.353553f }, //  42
-  {    0.353553f,    0.790569f,   -0.353553f,   -0.353553f }, //  43
-  {    0.353553f,   -0.790569f,    0.353553f,    0.353553f }, //  44
-  {    0.353553f,   -0.790569f,    0.353553f,   -0.353553f }, //  45
-  {    0.353553f,   -0.790569f,   -0.353553f,    0.353553f }, //  46
-  {    0.353553f,   -0.790569f,   -0.353553f,   -0.353553f }, //  47
-  {   -0.353553f,    0.790569f,    0.353553f,    0.353553f }, //  48
-  {   -0.353553f,    0.790569f,    0.353553f,   -0.353553f }, //  49
-  {   -0.353553f,    0.790569f,   -0.353553f,    0.353553f }, //  50
-  {   -0.353553f,    0.790569f,   -0.353553f,   -0.353553f }, //  51
-  {   -0.353553f,   -0.790569f,    0.353553f,    0.353553f }, //  52
-  {   -0.353553f,   -0.790569f,    0.353553f,   -0.353553f }, //  53
-  {   -0.353553f,   -0.790569f,   -0.353553f,    0.353553f }, //  54
-  {   -0.353553f,   -0.790569f,   -0.353553f,   -0.353553f }, //  55
-  {    0.353553f,    0.353553f,    0.790569f,    0.353553f }, //  56
-  {    0.353553f,    0.353553f,    0.790569f,   -0.353553f }, //  57
-  {    0.353553f,    0.353553f,   -0.790569f,    0.353553f }, //  58
-  {    0.353553f,    0.353553f,   -0.790569f,   -0.353553f }, //  59
-  {    0.353553f,   -0.353553f,    0.790569f,    0.353553f }, //  60
-  {    0.353553f,   -0.353553f,    0.790569f,   -0.353553f }, //  61
-  {    0.353553f,   -0.353553f,   -0.790569f,    0.353553f }, //  62
-  {    0.353553f,   -0.353553f,   -0.790569f,   -0.353553f }, //  63
-  {   -0.353553f,    0.353553f,    0.790569f,    0.353553f }, //  64
-  {   -0.353553f,    0.353553f,    0.790569f,   -0.353553f }, //  65
-  {   -0.353553f,    0.353553f,   -0.790569f,    0.353553f }, //  66
-  {   -0.353553f,    0.353553f,   -0.790569f,   -0.353553f }, //  67
-  {   -0.353553f,   -0.353553f,    0.790569f,    0.353553f }, //  68
-  {   -0.353553f,   -0.353553f,    0.790569f,   -0.353553f }, //  69
-  {   -0.353553f,   -0.353553f,   -0.790569f,    0.353553f }, //  70
-  {   -0.353553f,   -0.353553f,   -0.790569f,   -0.353553f }, //  71
-  {    0.353553f,    0.353553f,    0.353553f,    0.790569f }, //  72
-  {    0.353553f,    0.353553f,    0.353553f,   -0.790569f }, //  73
-  {    0.353553f,    0.353553f,   -0.353553f,    0.790569f }, //  74
-  {    0.353553f,    0.353553f,   -0.353553f,   -0.790569f }, //  75
-  {    0.353553f,   -0.353553f,    0.353553f,    0.790569f }, //  76
-  {    0.353553f,   -0.353553f,    0.353553f,   -0.790569f }, //  77
-  {    0.353553f,   -0.353553f,   -0.353553f,    0.790569f }, //  78
-  {    0.353553f,   -0.353553f,   -0.353553f,   -0.790569f }, //  79
-  {   -0.353553f,    0.353553f,    0.353553f,    0.790569f }, //  80
-  {   -0.353553f,    0.353553f,    0.353553f,   -0.790569f }, //  81
-  {   -0.353553f,    0.353553f,   -0.353553f,    0.790569f }, //  82
-  {   -0.353553f,    0.353553f,   -0.353553f,   -0.790569f }, //  83
-  {   -0.353553f,   -0.353553f,    0.353553f,    0.790569f }, //  84
-  {   -0.353553f,   -0.353553f,    0.353553f,   -0.790569f }, //  85
-  {   -0.353553f,   -0.353553f,   -0.353553f,    0.790569f }, //  86
-  {   -0.353553f,   -0.353553f,   -0.353553f,   -0.790569f }, //  87
-  {    0.135045f,    0.572061f,    0.572061f,    0.572061f }, //  88
-  {    0.135045f,    0.572061f,    0.572061f,   -0.572061f }, //  89
-  {    0.135045f,    0.572061f,   -0.572061f,    0.572061f }, //  90
-  {    0.135045f,    0.572061f,   -0.572061f,   -0.572061f }, //  91
-  {    0.135045f,   -0.572061f,    0.572061f,    0.572061f }, //  92
-  {    0.135045f,   -0.572061f,    0.572061f,   -0.572061f }, //  93
-  {    0.135045f,   -0.572061f,   -0.572061f,    0.572061f }, //  94
-  {    0.135045f,   -0.572061f,   -0.572061f,   -0.572061f }, //  95
-  {   -0.135045f,    0.572061f,    0.572061f,    0.572061f }, //  96
-  {   -0.135045f,    0.572061f,    0.572061f,   -0.572061f }, //  97
-  {   -0.135045f,    0.572061f,   -0.572061f,    0.572061f }, //  98
-  {   -0.135045f,    0.572061f,   -0.572061f,   -0.572061f }, //  99
-  {   -0.135045f,   -0.572061f,    0.572061f,    0.572061f }, // 100
-  {   -0.135045f,   -0.572061f,    0.572061f,   -0.572061f }, // 101
-  {   -0.135045f,   -0.572061f,   -0.572061f,    0.572061f }, // 102
-  {   -0.135045f,   -0.572061f,   -0.572061f,   -0.572061f }, // 103
-  {    0.572061f,    0.135045f,    0.572061f,    0.572061f }, // 104
-  {    0.572061f,    0.135045f,    0.572061f,   -0.572061f }, // 105
-  {    0.572061f,    0.135045f,   -0.572061f,    0.572061f }, // 106
-  {    0.572061f,    0.135045f,   -0.572061f,   -0.572061f }, // 107
-  {    0.572061f,   -0.135045f,    0.572061f,    0.572061f }, // 108
-  {    0.572061f,   -0.135045f,    0.572061f,   -0.572061f }, // 109
-  {    0.572061f,   -0.135045f,   -0.572061f,    0.572061f }, // 110
-  {    0.572061f,   -0.135045f,   -0.572061f,   -0.572061f }, // 111
-  {   -0.572061f,    0.135045f,    0.572061f,    0.572061f }, // 112
-  {   -0.572061f,    0.135045f,    0.572061f,   -0.572061f }, // 113
-  {   -0.572061f,    0.135045f,   -0.572061f,    0.572061f }, // 114
-  {   -0.572061f,    0.135045f,   -0.572061f,   -0.572061f }, // 115
-  {   -0.572061f,   -0.135045f,    0.572061f,    0.572061f }, // 116
-  {   -0.572061f,   -0.135045f,    0.572061f,   -0.572061f }, // 117
-  {   -0.572061f,   -0.135045f,   -0.572061f,    0.572061f }, // 118
-  {   -0.572061f,   -0.135045f,   -0.572061f,   -0.572061f }, // 119
-  {    0.572061f,    0.572061f,    0.135045f,    0.572061f }, // 120
-  {    0.572061f,    0.572061f,    0.135045f,   -0.572061f }, // 121
-  {    0.572061f,    0.572061f,   -0.135045f,    0.572061f }, // 122
-  {    0.572061f,    0.572061f,   -0.135045f,   -0.572061f }, // 123
-  {    0.572061f,   -0.572061f,    0.135045f,    0.572061f }, // 124
-  {    0.572061f,   -0.572061f,    0.135045f,   -0.572061f }, // 125
-  {    0.572061f,   -0.572061f,   -0.135045f,    0.572061f }, // 126
-  {    0.572061f,   -0.572061f,   -0.135045f,   -0.572061f }, // 127
-  {   -0.572061f,    0.572061f,    0.135045f,    0.572061f }, // 128
-  {   -0.572061f,    0.572061f,    0.135045f,   -0.572061f }, // 129
-  {   -0.572061f,    0.572061f,   -0.135045f,    0.572061f }, // 130
-  {   -0.572061f,    0.572061f,   -0.135045f,   -0.572061f }, // 131
-  {   -0.572061f,   -0.572061f,    0.135045f,    0.572061f }, // 132
-  {   -0.572061f,   -0.572061f,    0.135045f,   -0.572061f }, // 133
-  {   -0.572061f,   -0.572061f,   -0.135045f,    0.572061f }, // 134
-  {   -0.572061f,   -0.572061f,   -0.135045f,   -0.572061f }, // 135
-  {    0.572061f,    0.572061f,    0.572061f,    0.135045f }, // 136
-  {    0.572061f,    0.572061f,    0.572061f,   -0.135045f }, // 137
-  {    0.572061f,    0.572061f,   -0.572061f,    0.135045f }, // 138
-  {    0.572061f,    0.572061f,   -0.572061f,   -0.135045f }, // 139
-  {    0.572061f,   -0.572061f,    0.572061f,    0.135045f }, // 140
-  {    0.572061f,   -0.572061f,    0.572061f,   -0.135045f }, // 141
-  {    0.572061f,   -0.572061f,   -0.572061f,    0.135045f }, // 142
-  {    0.572061f,   -0.572061f,   -0.572061f,   -0.135045f }, // 143
-  {   -0.572061f,    0.572061f,    0.572061f,    0.135045f }, // 144
-  {   -0.572061f,    0.572061f,    0.572061f,   -0.135045f }, // 145
-  {   -0.572061f,    0.572061f,   -0.572061f,    0.135045f }, // 146
-  {   -0.572061f,    0.572061f,   -0.572061f,   -0.135045f }, // 147
-  {   -0.572061f,   -0.572061f,    0.572061f,    0.135045f }, // 148
-  {   -0.572061f,   -0.572061f,    0.572061f,   -0.135045f }, // 149
-  {   -0.572061f,   -0.572061f,   -0.572061f,    0.135045f }, // 150
-  {   -0.572061f,   -0.572061f,   -0.572061f,   -0.135045f }, // 151
-  {    0.925615f,    0.218508f,    0.218508f,    0.218508f }, // 152
-  {    0.925615f,    0.218508f,    0.218508f,   -0.218508f }, // 153
-  {    0.925615f,    0.218508f,   -0.218508f,    0.218508f }, // 154
-  {    0.925615f,    0.218508f,   -0.218508f,   -0.218508f }, // 155
-  {    0.925615f,   -0.218508f,    0.218508f,    0.218508f }, // 156
-  {    0.925615f,   -0.218508f,    0.218508f,   -0.218508f }, // 157
-  {    0.925615f,   -0.218508f,   -0.218508f,    0.218508f }, // 158
-  {    0.925615f,   -0.218508f,   -0.218508f,   -0.218508f }, // 159
-  {   -0.925615f,    0.218508f,    0.218508f,    0.218508f }, // 160
-  {   -0.925615f,    0.218508f,    0.218508f,   -0.218508f }, // 161
-  {   -0.925615f,    0.218508f,   -0.218508f,    0.218508f }, // 162
-  {   -0.925615f,    0.218508f,   -0.218508f,   -0.218508f }, // 163
-  {   -0.925615f,   -0.218508f,    0.218508f,    0.218508f }, // 164
-  {   -0.925615f,   -0.218508f,    0.218508f,   -0.218508f }, // 165
-  {   -0.925615f,   -0.218508f,   -0.218508f,    0.218508f }, // 166
-  {   -0.925615f,   -0.218508f,   -0.218508f,   -0.218508f }, // 167
-  {    0.218508f,    0.925615f,    0.218508f,    0.218508f }, // 168
-  {    0.218508f,    0.925615f,    0.218508f,   -0.218508f }, // 169
-  {    0.218508f,    0.925615f,   -0.218508f,    0.218508f }, // 170
-  {    0.218508f,    0.925615f,   -0.218508f,   -0.218508f }, // 171
-  {    0.218508f,   -0.925615f,    0.218508f,    0.218508f }, // 172
-  {    0.218508f,   -0.925615f,    0.218508f,   -0.218508f }, // 173
-  {    0.218508f,   -0.925615f,   -0.218508f,    0.218508f }, // 174
-  {    0.218508f,   -0.925615f,   -0.218508f,   -0.218508f }, // 175
-  {   -0.218508f,    0.925615f,    0.218508f,    0.218508f }, // 176
-  {   -0.218508f,    0.925615f,    0.218508f,   -0.218508f }, // 177
-  {   -0.218508f,    0.925615f,   -0.218508f,    0.218508f }, // 178
-  {   -0.218508f,    0.925615f,   -0.218508f,   -0.218508f }, // 179
-  {   -0.218508f,   -0.925615f,    0.218508f,    0.218508f }, // 180
-  {   -0.218508f,   -0.925615f,    0.218508f,   -0.218508f }, // 181
-  {   -0.218508f,   -0.925615f,   -0.218508f,    0.218508f }, // 182
-  {   -0.218508f,   -0.925615f,   -0.218508f,   -0.218508f }, // 183
-  {    0.218508f,    0.218508f,    0.925615f,    0.218508f }, // 184
-  {    0.218508f,    0.218508f,    0.925615f,   -0.218508f }, // 185
-  {    0.218508f,    0.218508f,   -0.925615f,    0.218508f }, // 186
-  {    0.218508f,    0.218508f,   -0.925615f,   -0.218508f }, // 187
-  {    0.218508f,   -0.218508f,    0.925615f,    0.218508f }, // 188
-  {    0.218508f,   -0.218508f,    0.925615f,   -0.218508f }, // 189
-  {    0.218508f,   -0.218508f,   -0.925615f,    0.218508f }, // 190
-  {    0.218508f,   -0.218508f,   -0.925615f,   -0.218508f }, // 191
-  {   -0.218508f,    0.218508f,    0.925615f,    0.218508f }, // 192
-  {   -0.218508f,    0.218508f,    0.925615f,   -0.218508f }, // 193
-  {   -0.218508f,    0.218508f,   -0.925615f,    0.218508f }, // 194
-  {   -0.218508f,    0.218508f,   -0.925615f,   -0.218508f }, // 195
-  {   -0.218508f,   -0.218508f,    0.925615f,    0.218508f }, // 196
-  {   -0.218508f,   -0.218508f,    0.925615f,   -0.218508f }, // 197
-  {   -0.218508f,   -0.218508f,   -0.925615f,    0.218508f }, // 198
-  {   -0.218508f,   -0.218508f,   -0.925615f,   -0.218508f }, // 199
-  {    0.218508f,    0.218508f,    0.218508f,    0.925615f }, // 200
-  {    0.218508f,    0.218508f,    0.218508f,   -0.925615f }, // 201
-  {    0.218508f,    0.218508f,   -0.218508f,    0.925615f }, // 202
-  {    0.218508f,    0.218508f,   -0.218508f,   -0.925615f }, // 203
-  {    0.218508f,   -0.218508f,    0.218508f,    0.925615f }, // 204
-  {    0.218508f,   -0.218508f,    0.218508f,   -0.925615f }, // 205
-  {    0.218508f,   -0.218508f,   -0.218508f,    0.925615f }, // 206
-  {    0.218508f,   -0.218508f,   -0.218508f,   -0.925615f }, // 207
-  {   -0.218508f,    0.218508f,    0.218508f,    0.925615f }, // 208
-  {   -0.218508f,    0.218508f,    0.218508f,   -0.925615f }, // 209
-  {   -0.218508f,    0.218508f,   -0.218508f,    0.925615f }, // 210
-  {   -0.218508f,    0.218508f,   -0.218508f,   -0.925615f }, // 211
-  {   -0.218508f,   -0.218508f,    0.218508f,    0.925615f }, // 212
-  {   -0.218508f,   -0.218508f,    0.218508f,   -0.925615f }, // 213
-  {   -0.218508f,   -0.218508f,   -0.218508f,    0.925615f }, // 214
-  {   -0.218508f,   -0.218508f,   -0.218508f,   -0.925615f }, // 215
-  {    0.925615f,    0.135045f,    0.353553f,    0.000000f }, // 216
-  {    0.925615f,    0.135045f,   -0.353553f,    0.000000f }, // 217
-  {    0.925615f,   -0.135045f,    0.353553f,    0.000000f }, // 218
-  {    0.925615f,   -0.135045f,   -0.353553f,    0.000000f }, // 219
-  {   -0.925615f,    0.135045f,    0.353553f,    0.000000f }, // 220
-  {   -0.925615f,    0.135045f,   -0.353553f,    0.000000f }, // 221
-  {   -0.925615f,   -0.135045f,    0.353553f,    0.000000f }, // 222
-  {   -0.925615f,   -0.135045f,   -0.353553f,    0.000000f }, // 223
-  {    0.135045f,    0.353553f,    0.925615f,    0.000000f }, // 224
-  {    0.135045f,    0.353553f,   -0.925615f,    0.000000f }, // 225
-  {    0.135045f,   -0.353553f,    0.925615f,    0.000000f }, // 226
-  {    0.135045f,   -0.353553f,   -0.925615f,    0.000000f }, // 227
-  {   -0.135045f,    0.353553f,    0.925615f,    0.000000f }, // 228
-  {   -0.135045f,    0.353553f,   -0.925615f,    0.000000f }, // 229
-  {   -0.135045f,   -0.353553f,    0.925615f,    0.000000f }, // 230
-  {   -0.135045f,   -0.353553f,   -0.925615f,    0.000000f }, // 231
-  {    0.925615f,    0.353553f,    0.000000f,    0.135045f }, // 232
-  {    0.925615f,    0.353553f,    0.000000f,   -0.135045f }, // 233
-  {    0.925615f,   -0.353553f,    0.000000f,    0.135045f }, // 234
-  {    0.925615f,   -0.353553f,    0.000000f,   -0.135045f }, // 235
-  {   -0.925615f,    0.353553f,    0.000000f,    0.135045f }, // 236
-  {   -0.925615f,    0.353553f,    0.000000f,   -0.135045f }, // 237
-  {   -0.925615f,   -0.353553f,    0.000000f,    0.135045f }, // 238
-  {   -0.925615f,   -0.353553f,    0.000000f,   -0.135045f }, // 239
-  {    0.925615f,    0.000000f,    0.135045f,    0.353553f }, // 240
-  {    0.925615f,    0.000000f,    0.135045f,   -0.353553f }, // 241
-  {    0.925615f,    0.000000f,   -0.135045f,    0.353553f }, // 242
-  {    0.925615f,    0.000000f,   -0.135045f,   -0.353553f }, // 243
-  {   -0.925615f,    0.000000f,    0.135045f,    0.353553f }, // 244
-  {   -0.925615f,    0.000000f,    0.135045f,   -0.353553f }, // 245
-  {   -0.925615f,    0.000000f,   -0.135045f,    0.353553f }, // 246
-  {   -0.925615f,    0.000000f,   -0.135045f,   -0.353553f }, // 247
-  {    0.353553f,    0.925615f,    0.135045f,    0.000000f }, // 248
-  {    0.353553f,    0.925615f,   -0.135045f,    0.000000f }, // 249
-  {    0.353553f,   -0.925615f,    0.135045f,    0.000000f }, // 250
-  {    0.353553f,   -0.925615f,   -0.135045f,    0.000000f }, // 251
-  {   -0.353553f,    0.925615f,    0.135045f,    0.000000f }, // 252
-  {   -0.353553f,    0.925615f,   -0.135045f,    0.000000f }, // 253
-  {   -0.353553f,   -0.925615f,    0.135045f,    0.000000f }, // 254
-  {   -0.353553f,   -0.925615f,   -0.135045f,    0.000000f }, // 255
-  {    0.135045f,    0.925615f,    0.000000f,    0.353553f }, // 256
-  {    0.135045f,    0.925615f,    0.000000f,   -0.353553f }, // 257
-  {    0.135045f,   -0.925615f,    0.000000f,    0.353553f }, // 258
-  {    0.135045f,   -0.925615f,    0.000000f,   -0.353553f }, // 259
-  {   -0.135045f,    0.925615f,    0.000000f,    0.353553f }, // 260
-  {   -0.135045f,    0.925615f,    0.000000f,   -0.353553f }, // 261
-  {   -0.135045f,   -0.925615f,    0.000000f,    0.353553f }, // 262
-  {   -0.135045f,   -0.925615f,    0.000000f,   -0.353553f }, // 263
-  {    0.000000f,    0.353553f,    0.135045f,    0.925615f }, // 264
-  {    0.000000f,    0.353553f,    0.135045f,   -0.925615f }, // 265
-  {    0.000000f,    0.353553f,   -0.135045f,    0.925615f }, // 266
-  {    0.000000f,    0.353553f,   -0.135045f,   -0.925615f }, // 267
-  {    0.000000f,   -0.353553f,    0.135045f,    0.925615f }, // 268
-  {    0.000000f,   -0.353553f,    0.135045f,   -0.925615f }, // 269
-  {    0.000000f,   -0.353553f,   -0.135045f,    0.925615f }, // 270
-  {    0.000000f,   -0.353553f,   -0.135045f,   -0.925615f }, // 271
-  {    0.000000f,    0.925615f,    0.353553f,    0.135045f }, // 272
-  {    0.000000f,    0.925615f,    0.353553f,   -0.135045f }, // 273
-  {    0.000000f,    0.925615f,   -0.353553f,    0.135045f }, // 274
-  {    0.000000f,    0.925615f,   -0.353553f,   -0.135045f }, // 275
-  {    0.000000f,   -0.925615f,    0.353553f,    0.135045f }, // 276
-  {    0.000000f,   -0.925615f,    0.353553f,   -0.135045f }, // 277
-  {    0.000000f,   -0.925615f,   -0.353553f,    0.135045f }, // 278
-  {    0.000000f,   -0.925615f,   -0.353553f,   -0.135045f }, // 279
-  {    0.135045f,    0.000000f,    0.353553f,    0.925615f }, // 280
-  {    0.135045f,    0.000000f,    0.353553f,   -0.925615f }, // 281
-  {    0.135045f,    0.000000f,   -0.353553f,    0.925615f }, // 282
-  {    0.135045f,    0.000000f,   -0.353553f,   -0.925615f }, // 283
-  {   -0.135045f,    0.000000f,    0.353553f,    0.925615f }, // 284
-  {   -0.135045f,    0.000000f,    0.353553f,   -0.925615f }, // 285
-  {   -0.135045f,    0.000000f,   -0.353553f,    0.925615f }, // 286
-  {   -0.135045f,    0.000000f,   -0.353553f,   -0.925615f }, // 287
-  {    0.353553f,    0.135045f,    0.000000f,    0.925615f }, // 288
-  {    0.353553f,    0.135045f,    0.000000f,   -0.925615f }, // 289
-  {    0.353553f,   -0.135045f,    0.000000f,    0.925615f }, // 290
-  {    0.353553f,   -0.135045f,    0.000000f,   -0.925615f }, // 291
-  {   -0.353553f,    0.135045f,    0.000000f,    0.925615f }, // 292
-  {   -0.353553f,    0.135045f,    0.000000f,   -0.925615f }, // 293
-  {   -0.353553f,   -0.135045f,    0.000000f,    0.925615f }, // 294
-  {   -0.353553f,   -0.135045f,    0.000000f,   -0.925615f }, // 295
-  {    0.000000f,    0.135045f,    0.925615f,    0.353553f }, // 296
-  {    0.000000f,    0.135045f,    0.925615f,   -0.353553f }, // 297
-  {    0.000000f,    0.135045f,   -0.925615f,    0.353553f }, // 298
-  {    0.000000f,    0.135045f,   -0.925615f,   -0.353553f }, // 299
-  {    0.000000f,   -0.135045f,    0.925615f,    0.353553f }, // 300
-  {    0.000000f,   -0.135045f,    0.925615f,   -0.353553f }, // 301
-  {    0.000000f,   -0.135045f,   -0.925615f,    0.353553f }, // 302
-  {    0.000000f,   -0.135045f,   -0.925615f,   -0.353553f }, // 303
-  {    0.353553f,    0.000000f,    0.925615f,    0.135045f }, // 304
-  {    0.353553f,    0.000000f,    0.925615f,   -0.135045f }, // 305
-  {    0.353553f,    0.000000f,   -0.925615f,    0.135045f }, // 306
-  {    0.353553f,    0.000000f,   -0.925615f,   -0.135045f }, // 307
-  {   -0.353553f,    0.000000f,    0.925615f,    0.135045f }, // 308
-  {   -0.353553f,    0.000000f,    0.925615f,   -0.135045f }, // 309
-  {   -0.353553f,    0.000000f,   -0.925615f,    0.135045f }, // 310
-  {   -0.353553f,    0.000000f,   -0.925615f,   -0.135045f }, // 311
-  {    0.790569f,    0.218508f,    0.572061f,    0.000000f }, // 312
-  {    0.790569f,    0.218508f,   -0.572061f,    0.000000f }, // 313
-  {    0.790569f,   -0.218508f,    0.572061f,    0.000000f }, // 314
-  {    0.790569f,   -0.218508f,   -0.572061f,    0.000000f }, // 315
-  {   -0.790569f,    0.218508f,    0.572061f,    0.000000f }, // 316
-  {   -0.790569f,    0.218508f,   -0.572061f,    0.000000f }, // 317
-  {   -0.790569f,   -0.218508f,    0.572061f,    0.000000f }, // 318
-  {   -0.790569f,   -0.218508f,   -0.572061f,    0.000000f }, // 319
-  {    0.218508f,    0.572061f,    0.790569f,    0.000000f }, // 320
-  {    0.218508f,    0.572061f,   -0.790569f,    0.000000f }, // 321
-  {    0.218508f,   -0.572061f,    0.790569f,    0.000000f }, // 322
-  {    0.218508f,   -0.572061f,   -0.790569f,    0.000000f }, // 323
-  {   -0.218508f,    0.572061f,    0.790569f,    0.000000f }, // 324
-  {   -0.218508f,    0.572061f,   -0.790569f,    0.000000f }, // 325
-  {   -0.218508f,   -0.572061f,    0.790569f,    0.000000f }, // 326
-  {   -0.218508f,   -0.572061f,   -0.790569f,    0.000000f }, // 327
-  {    0.790569f,    0.572061f,    0.000000f,    0.218508f }, // 328
-  {    0.790569f,    0.572061f,    0.000000f,   -0.218508f }, // 329
-  {    0.790569f,   -0.572061f,    0.000000f,    0.218508f }, // 330
-  {    0.790569f,   -0.572061f,    0.000000f,   -0.218508f }, // 331
-  {   -0.790569f,    0.572061f,    0.000000f,    0.218508f }, // 332
-  {   -0.790569f,    0.572061f,    0.000000f,   -0.218508f }, // 333
-  {   -0.790569f,   -0.572061f,    0.000000f,    0.218508f }, // 334
-  {   -0.790569f,   -0.572061f,    0.000000f,   -0.218508f }, // 335
-  {    0.790569f,    0.000000f,    0.218508f,    0.572061f }, // 336
-  {    0.790569f,    0.000000f,    0.218508f,   -0.572061f }, // 337
-  {    0.790569f,    0.000000f,   -0.218508f,    0.572061f }, // 338
-  {    0.790569f,    0.000000f,   -0.218508f,   -0.572061f }, // 339
-  {   -0.790569f,    0.000000f,    0.218508f,    0.572061f }, // 340
-  {   -0.790569f,    0.000000f,    0.218508f,   -0.572061f }, // 341
-  {   -0.790569f,    0.000000f,   -0.218508f,    0.572061f }, // 342
-  {   -0.790569f,    0.000000f,   -0.218508f,   -0.572061f }, // 343
-  {    0.572061f,    0.790569f,    0.218508f,    0.000000f }, // 344
-  {    0.572061f,    0.790569f,   -0.218508f,    0.000000f }, // 345
-  {    0.572061f,   -0.790569f,    0.218508f,    0.000000f }, // 346
-  {    0.572061f,   -0.790569f,   -0.218508f,    0.000000f }, // 347
-  {   -0.572061f,    0.790569f,    0.218508f,    0.000000f }, // 348
-  {   -0.572061f,    0.790569f,   -0.218508f,    0.000000f }, // 349
-  {   -0.572061f,   -0.790569f,    0.218508f,    0.000000f }, // 350
-  {   -0.572061f,   -0.790569f,   -0.218508f,    0.000000f }, // 351
-  {    0.218508f,    0.790569f,    0.000000f,    0.572061f }, // 352
-  {    0.218508f,    0.790569f,    0.000000f,   -0.572061f }, // 353
-  {    0.218508f,   -0.790569f,    0.000000f,    0.572061f }, // 354
-  {    0.218508f,   -0.790569f,    0.000000f,   -0.572061f }, // 355
-  {   -0.218508f,    0.790569f,    0.000000f,    0.572061f }, // 356
-  {   -0.218508f,    0.790569f,    0.000000f,   -0.572061f }, // 357
-  {   -0.218508f,   -0.790569f,    0.000000f,    0.572061f }, // 358
-  {   -0.218508f,   -0.790569f,    0.000000f,   -0.572061f }, // 359
-  {    0.000000f,    0.572061f,    0.218508f,    0.790569f }, // 360
-  {    0.000000f,    0.572061f,    0.218508f,   -0.790569f }, // 361
-  {    0.000000f,    0.572061f,   -0.218508f,    0.790569f }, // 362
-  {    0.000000f,    0.572061f,   -0.218508f,   -0.790569f }, // 363
-  {    0.000000f,   -0.572061f,    0.218508f,    0.790569f }, // 364
-  {    0.000000f,   -0.572061f,    0.218508f,   -0.790569f }, // 365
-  {    0.000000f,   -0.572061f,   -0.218508f,    0.790569f }, // 366
-  {    0.000000f,   -0.572061f,   -0.218508f,   -0.790569f }, // 367
-  {    0.000000f,    0.790569f,    0.572061f,    0.218508f }, // 368
-  {    0.000000f,    0.790569f,    0.572061f,   -0.218508f }, // 369
-  {    0.000000f,    0.790569f,   -0.572061f,    0.218508f }, // 370
-  {    0.000000f,    0.790569f,   -0.572061f,   -0.218508f }, // 371
-  {    0.000000f,   -0.790569f,    0.572061f,    0.218508f }, // 372
-  {    0.000000f,   -0.790569f,    0.572061f,   -0.218508f }, // 373
-  {    0.000000f,   -0.790569f,   -0.572061f,    0.218508f }, // 374
-  {    0.000000f,   -0.790569f,   -0.572061f,   -0.218508f }, // 375
-  {    0.218508f,    0.000000f,    0.572061f,    0.790569f }, // 376
-  {    0.218508f,    0.000000f,    0.572061f,   -0.790569f }, // 377
-  {    0.218508f,    0.000000f,   -0.572061f,    0.790569f }, // 378
-  {    0.218508f,    0.000000f,   -0.572061f,   -0.790569f }, // 379
-  {   -0.218508f,    0.000000f,    0.572061f,    0.790569f }, // 380
-  {   -0.218508f,    0.000000f,    0.572061f,   -0.790569f }, // 381
-  {   -0.218508f,    0.000000f,   -0.572061f,    0.790569f }, // 382
-  {   -0.218508f,    0.000000f,   -0.572061f,   -0.790569f }, // 383
-  {    0.572061f,    0.218508f,    0.000000f,    0.790569f }, // 384
-  {    0.572061f,    0.218508f,    0.000000f,   -0.790569f }, // 385
-  {    0.572061f,   -0.218508f,    0.000000f,    0.790569f }, // 386
-  {    0.572061f,   -0.218508f,    0.000000f,   -0.790569f }, // 387
-  {   -0.572061f,    0.218508f,    0.000000f,    0.790569f }, // 388
-  {   -0.572061f,    0.218508f,    0.000000f,   -0.790569f }, // 389
-  {   -0.572061f,   -0.218508f,    0.000000f,    0.790569f }, // 390
-  {   -0.572061f,   -0.218508f,    0.000000f,   -0.790569f }, // 391
-  {    0.000000f,    0.218508f,    0.790569f,    0.572061f }, // 392
-  {    0.000000f,    0.218508f,    0.790569f,   -0.572061f }, // 393
-  {    0.000000f,    0.218508f,   -0.790569f,    0.572061f }, // 394
-  {    0.000000f,    0.218508f,   -0.790569f,   -0.572061f }, // 395
-  {    0.000000f,   -0.218508f,    0.790569f,    0.572061f }, // 396
-  {    0.000000f,   -0.218508f,    0.790569f,   -0.572061f }, // 397
-  {    0.000000f,   -0.218508f,   -0.790569f,    0.572061f }, // 398
-  {    0.000000f,   -0.218508f,   -0.790569f,   -0.572061f }, // 399
-  {    0.572061f,    0.000000f,    0.790569f,    0.218508f }, // 400
-  {    0.572061f,    0.000000f,    0.790569f,   -0.218508f }, // 401
-  {    0.572061f,    0.000000f,   -0.790569f,    0.218508f }, // 402
-  {    0.572061f,    0.000000f,   -0.790569f,   -0.218508f }, // 403
-  {   -0.572061f,    0.000000f,    0.790569f,    0.218508f }, // 404
-  {   -0.572061f,    0.000000f,    0.790569f,   -0.218508f }, // 405
-  {   -0.572061f,    0.000000f,   -0.790569f,    0.218508f }, // 406
-  {   -0.572061f,    0.000000f,   -0.790569f,   -0.218508f }, // 407
-  {    0.707107f,    0.353553f,    0.572061f,    0.218508f }, // 408
-  {    0.707107f,    0.353553f,   -0.572061f,    0.218508f }, // 409
-  {    0.707107f,   -0.353553f,    0.572061f,    0.218508f }, // 410
-  {    0.707107f,   -0.353553f,   -0.572061f,    0.218508f }, // 411
-  {   -0.707107f,    0.353553f,    0.572061f,    0.218508f }, // 412
-  {   -0.707107f,    0.353553f,   -0.572061f,    0.218508f }, // 413
-  {   -0.707107f,   -0.353553f,    0.572061f,    0.218508f }, // 414
-  {   -0.707107f,   -0.353553f,   -0.572061f,    0.218508f }, // 415
-  {    0.707107f,    0.353553f,    0.572061f,   -0.218508f }, // 416
-  {    0.707107f,    0.353553f,   -0.572061f,   -0.218508f }, // 417
-  {    0.707107f,   -0.353553f,    0.572061f,   -0.218508f }, // 418
-  {    0.707107f,   -0.353553f,   -0.572061f,   -0.218508f }, // 419
-  {   -0.707107f,    0.353553f,    0.572061f,   -0.218508f }, // 420
-  {   -0.707107f,    0.353553f,   -0.572061f,   -0.218508f }, // 421
-  {   -0.707107f,   -0.353553f,    0.572061f,   -0.218508f }, // 422
-  {   -0.707107f,   -0.353553f,   -0.572061f,   -0.218508f }, // 423
-  {    0.353553f,    0.572061f,    0.707107f,    0.218508f }, // 424
-  {    0.353553f,    0.572061f,   -0.707107f,    0.218508f }, // 425
-  {    0.353553f,   -0.572061f,    0.707107f,    0.218508f }, // 426
-  {    0.353553f,   -0.572061f,   -0.707107f,    0.218508f }, // 427
-  {   -0.353553f,    0.572061f,    0.707107f,    0.218508f }, // 428
-  {   -0.353553f,    0.572061f,   -0.707107f,    0.218508f }, // 429
-  {   -0.353553f,   -0.572061f,    0.707107f,    0.218508f }, // 430
-  {   -0.353553f,   -0.572061f,   -0.707107f,    0.218508f }, // 431
-  {    0.353553f,    0.572061f,    0.707107f,   -0.218508f }, // 432
-  {    0.353553f,    0.572061f,   -0.707107f,   -0.218508f }, // 433
-  {    0.353553f,   -0.572061f,    0.707107f,   -0.218508f }, // 434
-  {    0.353553f,   -0.572061f,   -0.707107f,   -0.218508f }, // 435
-  {   -0.353553f,    0.572061f,    0.707107f,   -0.218508f }, // 436
-  {   -0.353553f,    0.572061f,   -0.707107f,   -0.218508f }, // 437
-  {   -0.353553f,   -0.572061f,    0.707107f,   -0.218508f }, // 438
-  {   -0.353553f,   -0.572061f,   -0.707107f,   -0.218508f }, // 439
-  {    0.707107f,    0.572061f,    0.218508f,    0.353553f }, // 440
-  {    0.707107f,    0.572061f,    0.218508f,   -0.353553f }, // 441
-  {    0.707107f,   -0.572061f,    0.218508f,    0.353553f }, // 442
-  {    0.707107f,   -0.572061f,    0.218508f,   -0.353553f }, // 443
-  {   -0.707107f,    0.572061f,    0.218508f,    0.353553f }, // 444
-  {   -0.707107f,    0.572061f,    0.218508f,   -0.353553f }, // 445
-  {   -0.707107f,   -0.572061f,    0.218508f,    0.353553f }, // 446
-  {   -0.707107f,   -0.572061f,    0.218508f,   -0.353553f }, // 447
-  {    0.707107f,    0.572061f,   -0.218508f,    0.353553f }, // 448
-  {    0.707107f,    0.572061f,   -0.218508f,   -0.353553f }, // 449
-  {    0.707107f,   -0.572061f,   -0.218508f,    0.353553f }, // 450
-  {    0.707107f,   -0.572061f,   -0.218508f,   -0.353553f }, // 451
-  {   -0.707107f,    0.572061f,   -0.218508f,    0.353553f }, // 452
-  {   -0.707107f,    0.572061f,   -0.218508f,   -0.353553f }, // 453
-  {   -0.707107f,   -0.572061f,   -0.218508f,    0.353553f }, // 454
-  {   -0.707107f,   -0.572061f,   -0.218508f,   -0.353553f }, // 455
-  {    0.707107f,    0.218508f,    0.353553f,    0.572061f }, // 456
-  {    0.707107f,    0.218508f,    0.353553f,   -0.572061f }, // 457
-  {    0.707107f,    0.218508f,   -0.353553f,    0.572061f }, // 458
-  {    0.707107f,    0.218508f,   -0.353553f,   -0.572061f }, // 459
-  {   -0.707107f,    0.218508f,    0.353553f,    0.572061f }, // 460
-  {   -0.707107f,    0.218508f,    0.353553f,   -0.572061f }, // 461
-  {   -0.707107f,    0.218508f,   -0.353553f,    0.572061f }, // 462
-  {   -0.707107f,    0.218508f,   -0.353553f,   -0.572061f }, // 463
-  {    0.707107f,   -0.218508f,    0.353553f,    0.572061f }, // 464
-  {    0.707107f,   -0.218508f,    0.353553f,   -0.572061f }, // 465
-  {    0.707107f,   -0.218508f,   -0.353553f,    0.572061f }, // 466
-  {    0.707107f,   -0.218508f,   -0.353553f,   -0.572061f }, // 467
-  {   -0.707107f,   -0.218508f,    0.353553f,    0.572061f }, // 468
-  {   -0.707107f,   -0.218508f,    0.353553f,   -0.572061f }, // 469
-  {   -0.707107f,   -0.218508f,   -0.353553f,    0.572061f }, // 470
-  {   -0.707107f,   -0.218508f,   -0.353553f,   -0.572061f }, // 471
-  {    0.572061f,    0.707107f,    0.353553f,    0.218508f }, // 472
-  {    0.572061f,    0.707107f,   -0.353553f,    0.218508f }, // 473
-  {    0.572061f,   -0.707107f,    0.353553f,    0.218508f }, // 474
-  {    0.572061f,   -0.707107f,   -0.353553f,    0.218508f }, // 475
-  {   -0.572061f,    0.707107f,    0.353553f,    0.218508f }, // 476
-  {   -0.572061f,    0.707107f,   -0.353553f,    0.218508f }, // 477
-  {   -0.572061f,   -0.707107f,    0.353553f,    0.218508f }, // 478
-  {   -0.572061f,   -0.707107f,   -0.353553f,    0.218508f }, // 479
-  {    0.572061f,    0.707107f,    0.353553f,   -0.218508f }, // 480
-  {    0.572061f,    0.707107f,   -0.353553f,   -0.218508f }, // 481
-  {    0.572061f,   -0.707107f,    0.353553f,   -0.218508f }, // 482
-  {    0.572061f,   -0.707107f,   -0.353553f,   -0.218508f }, // 483
-  {   -0.572061f,    0.707107f,    0.353553f,   -0.218508f }, // 484
-  {   -0.572061f,    0.707107f,   -0.353553f,   -0.218508f }, // 485
-  {   -0.572061f,   -0.707107f,    0.353553f,   -0.218508f }, // 486
-  {   -0.572061f,   -0.707107f,   -0.353553f,   -0.218508f }, // 487
-  {    0.353553f,    0.707107f,    0.218508f,    0.572061f }, // 488
-  {    0.353553f,    0.707107f,    0.218508f,   -0.572061f }, // 489
-  {    0.353553f,   -0.707107f,    0.218508f,    0.572061f }, // 490
-  {    0.353553f,   -0.707107f,    0.218508f,   -0.572061f }, // 491
-  {   -0.353553f,    0.707107f,    0.218508f,    0.572061f }, // 492
-  {   -0.353553f,    0.707107f,    0.218508f,   -0.572061f }, // 493
-  {   -0.353553f,   -0.707107f,    0.218508f,    0.572061f }, // 494
-  {   -0.353553f,   -0.707107f,    0.218508f,   -0.572061f }, // 495
-  {    0.353553f,    0.707107f,   -0.218508f,    0.572061f }, // 496
-  {    0.353553f,    0.707107f,   -0.218508f,   -0.572061f }, // 497
-  {    0.353553f,   -0.707107f,   -0.218508f,    0.572061f }, // 498
-  {    0.353553f,   -0.707107f,   -0.218508f,   -0.572061f }, // 499
-  {   -0.353553f,    0.707107f,   -0.218508f,    0.572061f }, // 500
-  {   -0.353553f,    0.707107f,   -0.218508f,   -0.572061f }, // 501
-  {   -0.353553f,   -0.707107f,   -0.218508f,    0.572061f }, // 502
-  {   -0.353553f,   -0.707107f,   -0.218508f,   -0.572061f }, // 503
-  {    0.218508f,    0.572061f,    0.353553f,    0.707107f }, // 504
-  {    0.218508f,    0.572061f,    0.353553f,   -0.707107f }, // 505
-  {    0.218508f,    0.572061f,   -0.353553f,    0.707107f }, // 506
-  {    0.218508f,    0.572061f,   -0.353553f,   -0.707107f }, // 507
-  {    0.218508f,   -0.572061f,    0.353553f,    0.707107f }, // 508
-  {    0.218508f,   -0.572061f,    0.353553f,   -0.707107f }, // 509
-  {    0.218508f,   -0.572061f,   -0.353553f,    0.707107f }, // 510
-  {    0.218508f,   -0.572061f,   -0.353553f,   -0.707107f }, // 511
-  {   -0.218508f,    0.572061f,    0.353553f,    0.707107f }, // 512
-  {   -0.218508f,    0.572061f,    0.353553f,   -0.707107f }, // 513
-  {   -0.218508f,    0.572061f,   -0.353553f,    0.707107f }, // 514
-  {   -0.218508f,    0.572061f,   -0.353553f,   -0.707107f }, // 515
-  {   -0.218508f,   -0.572061f,    0.353553f,    0.707107f }, // 516
-  {   -0.218508f,   -0.572061f,    0.353553f,   -0.707107f }, // 517
-  {   -0.218508f,   -0.572061f,   -0.353553f,    0.707107f }, // 518
-  {   -0.218508f,   -0.572061f,   -0.353553f,   -0.707107f }, // 519
-  {    0.218508f,    0.707107f,    0.572061f,    0.353553f }, // 520
-  {    0.218508f,    0.707107f,    0.572061f,   -0.353553f }, // 521
-  {    0.218508f,    0.707107f,   -0.572061f,    0.353553f }, // 522
-  {    0.218508f,    0.707107f,   -0.572061f,   -0.353553f }, // 523
-  {    0.218508f,   -0.707107f,    0.572061f,    0.353553f }, // 524
-  {    0.218508f,   -0.707107f,    0.572061f,   -0.353553f }, // 525
-  {    0.218508f,   -0.707107f,   -0.572061f,    0.353553f }, // 526
-  {    0.218508f,   -0.707107f,   -0.572061f,   -0.353553f }, // 527
-  {   -0.218508f,    0.707107f,    0.572061f,    0.353553f }, // 528
-  {   -0.218508f,    0.707107f,    0.572061f,   -0.353553f }, // 529
-  {   -0.218508f,    0.707107f,   -0.572061f,    0.353553f }, // 530
-  {   -0.218508f,    0.707107f,   -0.572061f,   -0.353553f }, // 531
-  {   -0.218508f,   -0.707107f,    0.572061f,    0.353553f }, // 532
-  {   -0.218508f,   -0.707107f,    0.572061f,   -0.353553f }, // 533
-  {   -0.218508f,   -0.707107f,   -0.572061f,    0.353553f }, // 534
-  {   -0.218508f,   -0.707107f,   -0.572061f,   -0.353553f }, // 535
-  {    0.353553f,    0.218508f,    0.572061f,    0.707107f }, // 536
-  {    0.353553f,    0.218508f,    0.572061f,   -0.707107f }, // 537
-  {    0.353553f,    0.218508f,   -0.572061f,    0.707107f }, // 538
-  {    0.353553f,    0.218508f,   -0.572061f,   -0.707107f }, // 539
-  {   -0.353553f,    0.218508f,    0.572061f,    0.707107f }, // 540
-  {   -0.353553f,    0.218508f,    0.572061f,   -0.707107f }, // 541
-  {   -0.353553f,    0.218508f,   -0.572061f,    0.707107f }, // 542
-  {   -0.353553f,    0.218508f,   -0.572061f,   -0.707107f }, // 543
-  {    0.353553f,   -0.218508f,    0.572061f,    0.707107f }, // 544
-  {    0.353553f,   -0.218508f,    0.572061f,   -0.707107f }, // 545
-  {    0.353553f,   -0.218508f,   -0.572061f,    0.707107f }, // 546
-  {    0.353553f,   -0.218508f,   -0.572061f,   -0.707107f }, // 547
-  {   -0.353553f,   -0.218508f,    0.572061f,    0.707107f }, // 548
-  {   -0.353553f,   -0.218508f,    0.572061f,   -0.707107f }, // 549
-  {   -0.353553f,   -0.218508f,   -0.572061f,    0.707107f }, // 550
-  {   -0.353553f,   -0.218508f,   -0.572061f,   -0.707107f }, // 551
-  {    0.572061f,    0.353553f,    0.218508f,    0.707107f }, // 552
-  {    0.572061f,    0.353553f,    0.218508f,   -0.707107f }, // 553
-  {    0.572061f,   -0.353553f,    0.218508f,    0.707107f }, // 554
-  {    0.572061f,   -0.353553f,    0.218508f,   -0.707107f }, // 555
-  {   -0.572061f,    0.353553f,    0.218508f,    0.707107f }, // 556
-  {   -0.572061f,    0.353553f,    0.218508f,   -0.707107f }, // 557
-  {   -0.572061f,   -0.353553f,    0.218508f,    0.707107f }, // 558
-  {   -0.572061f,   -0.353553f,    0.218508f,   -0.707107f }, // 559
-  {    0.572061f,    0.353553f,   -0.218508f,    0.707107f }, // 560
-  {    0.572061f,    0.353553f,   -0.218508f,   -0.707107f }, // 561
-  {    0.572061f,   -0.353553f,   -0.218508f,    0.707107f }, // 562
-  {    0.572061f,   -0.353553f,   -0.218508f,   -0.707107f }, // 563
-  {   -0.572061f,    0.353553f,   -0.218508f,    0.707107f }, // 564
-  {   -0.572061f,    0.353553f,   -0.218508f,   -0.707107f }, // 565
-  {   -0.572061f,   -0.353553f,   -0.218508f,    0.707107f }, // 566
-  {   -0.572061f,   -0.353553f,   -0.218508f,   -0.707107f }, // 567
-  {    0.218508f,    0.353553f,    0.707107f,    0.572061f }, // 568
-  {    0.218508f,    0.353553f,    0.707107f,   -0.572061f }, // 569
-  {    0.218508f,    0.353553f,   -0.707107f,    0.572061f }, // 570
-  {    0.218508f,    0.353553f,   -0.707107f,   -0.572061f }, // 571
-  {    0.218508f,   -0.353553f,    0.707107f,    0.572061f }, // 572
-  {    0.218508f,   -0.353553f,    0.707107f,   -0.572061f }, // 573
-  {    0.218508f,   -0.353553f,   -0.707107f,    0.572061f }, // 574
-  {    0.218508f,   -0.353553f,   -0.707107f,   -0.572061f }, // 575
-  {   -0.218508f,    0.353553f,    0.707107f,    0.572061f }, // 576
-  {   -0.218508f,    0.353553f,    0.707107f,   -0.572061f }, // 577
-  {   -0.218508f,    0.353553f,   -0.707107f,    0.572061f }, // 578
-  {   -0.218508f,    0.353553f,   -0.707107f,   -0.572061f }, // 579
-  {   -0.218508f,   -0.353553f,    0.707107f,    0.572061f }, // 580
-  {   -0.218508f,   -0.353553f,    0.707107f,   -0.572061f }, // 581
-  {   -0.218508f,   -0.353553f,   -0.707107f,    0.572061f }, // 582
-  {   -0.218508f,   -0.353553f,   -0.707107f,   -0.572061f }, // 583
-  {    0.572061f,    0.218508f,    0.707107f,    0.353553f }, // 584
-  {    0.572061f,    0.218508f,    0.707107f,   -0.353553f }, // 585
-  {    0.572061f,    0.218508f,   -0.707107f,    0.353553f }, // 586
-  {    0.572061f,    0.218508f,   -0.707107f,   -0.353553f }, // 587
-  {   -0.572061f,    0.218508f,    0.707107f,    0.353553f }, // 588
-  {   -0.572061f,    0.218508f,    0.707107f,   -0.353553f }, // 589
-  {   -0.572061f,    0.218508f,   -0.707107f,    0.353553f }, // 590
-  {   -0.572061f,    0.218508f,   -0.707107f,   -0.353553f }, // 591
-  {    0.572061f,   -0.218508f,    0.707107f,    0.353553f }, // 592
-  {    0.572061f,   -0.218508f,    0.707107f,   -0.353553f }, // 593
-  {    0.572061f,   -0.218508f,   -0.707107f,    0.353553f }, // 594
-  {    0.572061f,   -0.218508f,   -0.707107f,   -0.353553f }, // 595
-  {   -0.572061f,   -0.218508f,    0.707107f,    0.353553f }, // 596
-  {   -0.572061f,   -0.218508f,    0.707107f,   -0.353553f }, // 597
-  {   -0.572061f,   -0.218508f,   -0.707107f,    0.353553f }, // 598
-  {   -0.572061f,   -0.218508f,   -0.707107f,   -0.353553f }, // 599
+double vertexK120[600][4] = { // Coordinates of vertices, in vertex order
+  {    0.7071067811865475,    0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //   0
+  {    0.7071067811865475,   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //   1
+  {   -0.7071067811865475,    0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //   2
+  {   -0.7071067811865475,   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, //   3
+  {    0.7071067811865475,    0.0000000000000000,    0.7071067811865475,    0.0000000000000000 }, //   4
+  {    0.7071067811865475,    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000 }, //   5
+  {   -0.7071067811865475,    0.0000000000000000,    0.7071067811865475,    0.0000000000000000 }, //   6
+  {   -0.7071067811865475,    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000 }, //   7
+  {    0.7071067811865475,    0.0000000000000000,    0.0000000000000000,    0.7071067811865475 }, //   8
+  {    0.7071067811865475,    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475 }, //   9
+  {   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000,    0.7071067811865475 }, //  10
+  {   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475 }, //  11
+  {    0.0000000000000000,    0.7071067811865475,    0.7071067811865475,    0.0000000000000000 }, //  12
+  {    0.0000000000000000,    0.7071067811865475,   -0.7071067811865475,    0.0000000000000000 }, //  13
+  {    0.0000000000000000,   -0.7071067811865475,    0.7071067811865475,    0.0000000000000000 }, //  14
+  {    0.0000000000000000,   -0.7071067811865475,   -0.7071067811865475,    0.0000000000000000 }, //  15
+  {    0.0000000000000000,    0.7071067811865475,    0.0000000000000000,    0.7071067811865475 }, //  16
+  {    0.0000000000000000,    0.7071067811865475,    0.0000000000000000,   -0.7071067811865475 }, //  17
+  {    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000,    0.7071067811865475 }, //  18
+  {    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000,   -0.7071067811865475 }, //  19
+  {    0.0000000000000000,    0.0000000000000000,    0.7071067811865475,    0.7071067811865475 }, //  20
+  {    0.0000000000000000,    0.0000000000000000,    0.7071067811865475,   -0.7071067811865475 }, //  21
+  {    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475,    0.7071067811865475 }, //  22
+  {    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475,   -0.7071067811865475 }, //  23
+  {    0.7905694150420948,    0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, //  24
+  {    0.7905694150420948,    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, //  25
+  {    0.7905694150420948,    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, //  26
+  {    0.7905694150420948,    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, //  27
+  {    0.7905694150420948,   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, //  28
+  {    0.7905694150420948,   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, //  29
+  {    0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, //  30
+  {    0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, //  31
+  {   -0.7905694150420948,    0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, //  32
+  {   -0.7905694150420948,    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, //  33
+  {   -0.7905694150420948,    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, //  34
+  {   -0.7905694150420948,    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, //  35
+  {   -0.7905694150420948,   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, //  36
+  {   -0.7905694150420948,   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, //  37
+  {   -0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, //  38
+  {   -0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, //  39
+  {    0.3535533905932737,    0.7905694150420948,    0.3535533905932737,    0.3535533905932737 }, //  40
+  {    0.3535533905932737,    0.7905694150420948,    0.3535533905932737,   -0.3535533905932737 }, //  41
+  {    0.3535533905932737,    0.7905694150420948,   -0.3535533905932737,    0.3535533905932737 }, //  42
+  {    0.3535533905932737,    0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737 }, //  43
+  {    0.3535533905932737,   -0.7905694150420948,    0.3535533905932737,    0.3535533905932737 }, //  44
+  {    0.3535533905932737,   -0.7905694150420948,    0.3535533905932737,   -0.3535533905932737 }, //  45
+  {    0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737,    0.3535533905932737 }, //  46
+  {    0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737 }, //  47
+  {   -0.3535533905932737,    0.7905694150420948,    0.3535533905932737,    0.3535533905932737 }, //  48
+  {   -0.3535533905932737,    0.7905694150420948,    0.3535533905932737,   -0.3535533905932737 }, //  49
+  {   -0.3535533905932737,    0.7905694150420948,   -0.3535533905932737,    0.3535533905932737 }, //  50
+  {   -0.3535533905932737,    0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737 }, //  51
+  {   -0.3535533905932737,   -0.7905694150420948,    0.3535533905932737,    0.3535533905932737 }, //  52
+  {   -0.3535533905932737,   -0.7905694150420948,    0.3535533905932737,   -0.3535533905932737 }, //  53
+  {   -0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737,    0.3535533905932737 }, //  54
+  {   -0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737,   -0.3535533905932737 }, //  55
+  {    0.3535533905932737,    0.3535533905932737,    0.7905694150420948,    0.3535533905932737 }, //  56
+  {    0.3535533905932737,    0.3535533905932737,    0.7905694150420948,   -0.3535533905932737 }, //  57
+  {    0.3535533905932737,    0.3535533905932737,   -0.7905694150420948,    0.3535533905932737 }, //  58
+  {    0.3535533905932737,    0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737 }, //  59
+  {    0.3535533905932737,   -0.3535533905932737,    0.7905694150420948,    0.3535533905932737 }, //  60
+  {    0.3535533905932737,   -0.3535533905932737,    0.7905694150420948,   -0.3535533905932737 }, //  61
+  {    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948,    0.3535533905932737 }, //  62
+  {    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737 }, //  63
+  {   -0.3535533905932737,    0.3535533905932737,    0.7905694150420948,    0.3535533905932737 }, //  64
+  {   -0.3535533905932737,    0.3535533905932737,    0.7905694150420948,   -0.3535533905932737 }, //  65
+  {   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420948,    0.3535533905932737 }, //  66
+  {   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737 }, //  67
+  {   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420948,    0.3535533905932737 }, //  68
+  {   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420948,   -0.3535533905932737 }, //  69
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948,    0.3535533905932737 }, //  70
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948,   -0.3535533905932737 }, //  71
+  {    0.3535533905932737,    0.3535533905932737,    0.3535533905932737,    0.7905694150420948 }, //  72
+  {    0.3535533905932737,    0.3535533905932737,    0.3535533905932737,   -0.7905694150420948 }, //  73
+  {    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,    0.7905694150420948 }, //  74
+  {    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948 }, //  75
+  {    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,    0.7905694150420948 }, //  76
+  {    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420948 }, //  77
+  {    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420948 }, //  78
+  {    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948 }, //  79
+  {   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737,    0.7905694150420948 }, //  80
+  {   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737,   -0.7905694150420948 }, //  81
+  {   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,    0.7905694150420948 }, //  82
+  {   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948 }, //  83
+  {   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,    0.7905694150420948 }, //  84
+  {   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420948 }, //  85
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420948 }, //  86
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420948 }, //  87
+  {    0.1350453783688632,    0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, //  88
+  {    0.1350453783688632,    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, //  89
+  {    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, //  90
+  {    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, //  91
+  {    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, //  92
+  {    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, //  93
+  {    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, //  94
+  {    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, //  95
+  {   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, //  96
+  {   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, //  97
+  {   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, //  98
+  {   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, //  99
+  {   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, // 100
+  {   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, // 101
+  {   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, // 102
+  {   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, // 103
+  {    0.5720614028176843,    0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, // 104
+  {    0.5720614028176843,    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, // 105
+  {    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, // 106
+  {    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, // 107
+  {    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, // 108
+  {    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, // 109
+  {    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, // 110
+  {    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, // 111
+  {   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, // 112
+  {   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, // 113
+  {   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, // 114
+  {   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, // 115
+  {   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, // 116
+  {   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, // 117
+  {   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, // 118
+  {   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, // 119
+  {    0.5720614028176843,    0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, // 120
+  {    0.5720614028176843,    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, // 121
+  {    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, // 122
+  {    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, // 123
+  {    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, // 124
+  {    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, // 125
+  {    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, // 126
+  {    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, // 127
+  {   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, // 128
+  {   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, // 129
+  {   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, // 130
+  {   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, // 131
+  {   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, // 132
+  {   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, // 133
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, // 134
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, // 135
+  {    0.5720614028176843,    0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, // 136
+  {    0.5720614028176843,    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, // 137
+  {    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, // 138
+  {    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, // 139
+  {    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, // 140
+  {    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, // 141
+  {    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, // 142
+  {    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, // 143
+  {   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, // 144
+  {   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, // 145
+  {   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, // 146
+  {   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, // 147
+  {   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, // 148
+  {   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, // 149
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, // 150
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, // 151
+  {    0.9256147934109580,    0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 152
+  {    0.9256147934109580,    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 153
+  {    0.9256147934109580,    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 154
+  {    0.9256147934109580,    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 155
+  {    0.9256147934109580,   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 156
+  {    0.9256147934109580,   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 157
+  {    0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 158
+  {    0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 159
+  {   -0.9256147934109580,    0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 160
+  {   -0.9256147934109580,    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 161
+  {   -0.9256147934109580,    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 162
+  {   -0.9256147934109580,    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 163
+  {   -0.9256147934109580,   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 164
+  {   -0.9256147934109580,   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 165
+  {   -0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 166
+  {   -0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 167
+  {    0.2185080122244105,    0.9256147934109580,    0.2185080122244105,    0.2185080122244105 }, // 168
+  {    0.2185080122244105,    0.9256147934109580,    0.2185080122244105,   -0.2185080122244105 }, // 169
+  {    0.2185080122244105,    0.9256147934109580,   -0.2185080122244105,    0.2185080122244105 }, // 170
+  {    0.2185080122244105,    0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105 }, // 171
+  {    0.2185080122244105,   -0.9256147934109580,    0.2185080122244105,    0.2185080122244105 }, // 172
+  {    0.2185080122244105,   -0.9256147934109580,    0.2185080122244105,   -0.2185080122244105 }, // 173
+  {    0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105,    0.2185080122244105 }, // 174
+  {    0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105 }, // 175
+  {   -0.2185080122244105,    0.9256147934109580,    0.2185080122244105,    0.2185080122244105 }, // 176
+  {   -0.2185080122244105,    0.9256147934109580,    0.2185080122244105,   -0.2185080122244105 }, // 177
+  {   -0.2185080122244105,    0.9256147934109580,   -0.2185080122244105,    0.2185080122244105 }, // 178
+  {   -0.2185080122244105,    0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105 }, // 179
+  {   -0.2185080122244105,   -0.9256147934109580,    0.2185080122244105,    0.2185080122244105 }, // 180
+  {   -0.2185080122244105,   -0.9256147934109580,    0.2185080122244105,   -0.2185080122244105 }, // 181
+  {   -0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105,    0.2185080122244105 }, // 182
+  {   -0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105,   -0.2185080122244105 }, // 183
+  {    0.2185080122244105,    0.2185080122244105,    0.9256147934109580,    0.2185080122244105 }, // 184
+  {    0.2185080122244105,    0.2185080122244105,    0.9256147934109580,   -0.2185080122244105 }, // 185
+  {    0.2185080122244105,    0.2185080122244105,   -0.9256147934109580,    0.2185080122244105 }, // 186
+  {    0.2185080122244105,    0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105 }, // 187
+  {    0.2185080122244105,   -0.2185080122244105,    0.9256147934109580,    0.2185080122244105 }, // 188
+  {    0.2185080122244105,   -0.2185080122244105,    0.9256147934109580,   -0.2185080122244105 }, // 189
+  {    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580,    0.2185080122244105 }, // 190
+  {    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105 }, // 191
+  {   -0.2185080122244105,    0.2185080122244105,    0.9256147934109580,    0.2185080122244105 }, // 192
+  {   -0.2185080122244105,    0.2185080122244105,    0.9256147934109580,   -0.2185080122244105 }, // 193
+  {   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109580,    0.2185080122244105 }, // 194
+  {   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105 }, // 195
+  {   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109580,    0.2185080122244105 }, // 196
+  {   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109580,   -0.2185080122244105 }, // 197
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580,    0.2185080122244105 }, // 198
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580,   -0.2185080122244105 }, // 199
+  {    0.2185080122244105,    0.2185080122244105,    0.2185080122244105,    0.9256147934109580 }, // 200
+  {    0.2185080122244105,    0.2185080122244105,    0.2185080122244105,   -0.9256147934109580 }, // 201
+  {    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,    0.9256147934109580 }, // 202
+  {    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580 }, // 203
+  {    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,    0.9256147934109580 }, // 204
+  {    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109580 }, // 205
+  {    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109580 }, // 206
+  {    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580 }, // 207
+  {   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105,    0.9256147934109580 }, // 208
+  {   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105,   -0.9256147934109580 }, // 209
+  {   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,    0.9256147934109580 }, // 210
+  {   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580 }, // 211
+  {   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,    0.9256147934109580 }, // 212
+  {   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109580 }, // 213
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109580 }, // 214
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109580 }, // 215
+  {    0.9256147934109580,    0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 216
+  {    0.9256147934109580,    0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 217
+  {    0.9256147934109580,   -0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 218
+  {    0.9256147934109580,   -0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 219
+  {   -0.9256147934109580,    0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 220
+  {   -0.9256147934109580,    0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 221
+  {   -0.9256147934109580,   -0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 222
+  {   -0.9256147934109580,   -0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 223
+  {    0.1350453783688632,    0.3535533905932737,    0.9256147934109580,    0.0000000000000000 }, // 224
+  {    0.1350453783688632,    0.3535533905932737,   -0.9256147934109580,    0.0000000000000000 }, // 225
+  {    0.1350453783688632,   -0.3535533905932737,    0.9256147934109580,    0.0000000000000000 }, // 226
+  {    0.1350453783688632,   -0.3535533905932737,   -0.9256147934109580,    0.0000000000000000 }, // 227
+  {   -0.1350453783688632,    0.3535533905932737,    0.9256147934109580,    0.0000000000000000 }, // 228
+  {   -0.1350453783688632,    0.3535533905932737,   -0.9256147934109580,    0.0000000000000000 }, // 229
+  {   -0.1350453783688632,   -0.3535533905932737,    0.9256147934109580,    0.0000000000000000 }, // 230
+  {   -0.1350453783688632,   -0.3535533905932737,   -0.9256147934109580,    0.0000000000000000 }, // 231
+  {    0.9256147934109580,    0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 232
+  {    0.9256147934109580,    0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 233
+  {    0.9256147934109580,   -0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 234
+  {    0.9256147934109580,   -0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 235
+  {   -0.9256147934109580,    0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 236
+  {   -0.9256147934109580,    0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 237
+  {   -0.9256147934109580,   -0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 238
+  {   -0.9256147934109580,   -0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 239
+  {    0.9256147934109580,    0.0000000000000000,    0.1350453783688632,    0.3535533905932737 }, // 240
+  {    0.9256147934109580,    0.0000000000000000,    0.1350453783688632,   -0.3535533905932737 }, // 241
+  {    0.9256147934109580,    0.0000000000000000,   -0.1350453783688632,    0.3535533905932737 }, // 242
+  {    0.9256147934109580,    0.0000000000000000,   -0.1350453783688632,   -0.3535533905932737 }, // 243
+  {   -0.9256147934109580,    0.0000000000000000,    0.1350453783688632,    0.3535533905932737 }, // 244
+  {   -0.9256147934109580,    0.0000000000000000,    0.1350453783688632,   -0.3535533905932737 }, // 245
+  {   -0.9256147934109580,    0.0000000000000000,   -0.1350453783688632,    0.3535533905932737 }, // 246
+  {   -0.9256147934109580,    0.0000000000000000,   -0.1350453783688632,   -0.3535533905932737 }, // 247
+  {    0.3535533905932737,    0.9256147934109580,    0.1350453783688632,    0.0000000000000000 }, // 248
+  {    0.3535533905932737,    0.9256147934109580,   -0.1350453783688632,    0.0000000000000000 }, // 249
+  {    0.3535533905932737,   -0.9256147934109580,    0.1350453783688632,    0.0000000000000000 }, // 250
+  {    0.3535533905932737,   -0.9256147934109580,   -0.1350453783688632,    0.0000000000000000 }, // 251
+  {   -0.3535533905932737,    0.9256147934109580,    0.1350453783688632,    0.0000000000000000 }, // 252
+  {   -0.3535533905932737,    0.9256147934109580,   -0.1350453783688632,    0.0000000000000000 }, // 253
+  {   -0.3535533905932737,   -0.9256147934109580,    0.1350453783688632,    0.0000000000000000 }, // 254
+  {   -0.3535533905932737,   -0.9256147934109580,   -0.1350453783688632,    0.0000000000000000 }, // 255
+  {    0.1350453783688632,    0.9256147934109580,    0.0000000000000000,    0.3535533905932737 }, // 256
+  {    0.1350453783688632,    0.9256147934109580,    0.0000000000000000,   -0.3535533905932737 }, // 257
+  {    0.1350453783688632,   -0.9256147934109580,    0.0000000000000000,    0.3535533905932737 }, // 258
+  {    0.1350453783688632,   -0.9256147934109580,    0.0000000000000000,   -0.3535533905932737 }, // 259
+  {   -0.1350453783688632,    0.9256147934109580,    0.0000000000000000,    0.3535533905932737 }, // 260
+  {   -0.1350453783688632,    0.9256147934109580,    0.0000000000000000,   -0.3535533905932737 }, // 261
+  {   -0.1350453783688632,   -0.9256147934109580,    0.0000000000000000,    0.3535533905932737 }, // 262
+  {   -0.1350453783688632,   -0.9256147934109580,    0.0000000000000000,   -0.3535533905932737 }, // 263
+  {    0.0000000000000000,    0.3535533905932737,    0.1350453783688632,    0.9256147934109580 }, // 264
+  {    0.0000000000000000,    0.3535533905932737,    0.1350453783688632,   -0.9256147934109580 }, // 265
+  {    0.0000000000000000,    0.3535533905932737,   -0.1350453783688632,    0.9256147934109580 }, // 266
+  {    0.0000000000000000,    0.3535533905932737,   -0.1350453783688632,   -0.9256147934109580 }, // 267
+  {    0.0000000000000000,   -0.3535533905932737,    0.1350453783688632,    0.9256147934109580 }, // 268
+  {    0.0000000000000000,   -0.3535533905932737,    0.1350453783688632,   -0.9256147934109580 }, // 269
+  {    0.0000000000000000,   -0.3535533905932737,   -0.1350453783688632,    0.9256147934109580 }, // 270
+  {    0.0000000000000000,   -0.3535533905932737,   -0.1350453783688632,   -0.9256147934109580 }, // 271
+  {    0.0000000000000000,    0.9256147934109580,    0.3535533905932737,    0.1350453783688632 }, // 272
+  {    0.0000000000000000,    0.9256147934109580,    0.3535533905932737,   -0.1350453783688632 }, // 273
+  {    0.0000000000000000,    0.9256147934109580,   -0.3535533905932737,    0.1350453783688632 }, // 274
+  {    0.0000000000000000,    0.9256147934109580,   -0.3535533905932737,   -0.1350453783688632 }, // 275
+  {    0.0000000000000000,   -0.9256147934109580,    0.3535533905932737,    0.1350453783688632 }, // 276
+  {    0.0000000000000000,   -0.9256147934109580,    0.3535533905932737,   -0.1350453783688632 }, // 277
+  {    0.0000000000000000,   -0.9256147934109580,   -0.3535533905932737,    0.1350453783688632 }, // 278
+  {    0.0000000000000000,   -0.9256147934109580,   -0.3535533905932737,   -0.1350453783688632 }, // 279
+  {    0.1350453783688632,    0.0000000000000000,    0.3535533905932737,    0.9256147934109580 }, // 280
+  {    0.1350453783688632,    0.0000000000000000,    0.3535533905932737,   -0.9256147934109580 }, // 281
+  {    0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,    0.9256147934109580 }, // 282
+  {    0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,   -0.9256147934109580 }, // 283
+  {   -0.1350453783688632,    0.0000000000000000,    0.3535533905932737,    0.9256147934109580 }, // 284
+  {   -0.1350453783688632,    0.0000000000000000,    0.3535533905932737,   -0.9256147934109580 }, // 285
+  {   -0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,    0.9256147934109580 }, // 286
+  {   -0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,   -0.9256147934109580 }, // 287
+  {    0.3535533905932737,    0.1350453783688632,    0.0000000000000000,    0.9256147934109580 }, // 288
+  {    0.3535533905932737,    0.1350453783688632,    0.0000000000000000,   -0.9256147934109580 }, // 289
+  {    0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,    0.9256147934109580 }, // 290
+  {    0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,   -0.9256147934109580 }, // 291
+  {   -0.3535533905932737,    0.1350453783688632,    0.0000000000000000,    0.9256147934109580 }, // 292
+  {   -0.3535533905932737,    0.1350453783688632,    0.0000000000000000,   -0.9256147934109580 }, // 293
+  {   -0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,    0.9256147934109580 }, // 294
+  {   -0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,   -0.9256147934109580 }, // 295
+  {    0.0000000000000000,    0.1350453783688632,    0.9256147934109580,    0.3535533905932737 }, // 296
+  {    0.0000000000000000,    0.1350453783688632,    0.9256147934109580,   -0.3535533905932737 }, // 297
+  {    0.0000000000000000,    0.1350453783688632,   -0.9256147934109580,    0.3535533905932737 }, // 298
+  {    0.0000000000000000,    0.1350453783688632,   -0.9256147934109580,   -0.3535533905932737 }, // 299
+  {    0.0000000000000000,   -0.1350453783688632,    0.9256147934109580,    0.3535533905932737 }, // 300
+  {    0.0000000000000000,   -0.1350453783688632,    0.9256147934109580,   -0.3535533905932737 }, // 301
+  {    0.0000000000000000,   -0.1350453783688632,   -0.9256147934109580,    0.3535533905932737 }, // 302
+  {    0.0000000000000000,   -0.1350453783688632,   -0.9256147934109580,   -0.3535533905932737 }, // 303
+  {    0.3535533905932737,    0.0000000000000000,    0.9256147934109580,    0.1350453783688632 }, // 304
+  {    0.3535533905932737,    0.0000000000000000,    0.9256147934109580,   -0.1350453783688632 }, // 305
+  {    0.3535533905932737,    0.0000000000000000,   -0.9256147934109580,    0.1350453783688632 }, // 306
+  {    0.3535533905932737,    0.0000000000000000,   -0.9256147934109580,   -0.1350453783688632 }, // 307
+  {   -0.3535533905932737,    0.0000000000000000,    0.9256147934109580,    0.1350453783688632 }, // 308
+  {   -0.3535533905932737,    0.0000000000000000,    0.9256147934109580,   -0.1350453783688632 }, // 309
+  {   -0.3535533905932737,    0.0000000000000000,   -0.9256147934109580,    0.1350453783688632 }, // 310
+  {   -0.3535533905932737,    0.0000000000000000,   -0.9256147934109580,   -0.1350453783688632 }, // 311
+  {    0.7905694150420948,    0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 312
+  {    0.7905694150420948,    0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 313
+  {    0.7905694150420948,   -0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 314
+  {    0.7905694150420948,   -0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 315
+  {   -0.7905694150420948,    0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 316
+  {   -0.7905694150420948,    0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 317
+  {   -0.7905694150420948,   -0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 318
+  {   -0.7905694150420948,   -0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 319
+  {    0.2185080122244105,    0.5720614028176843,    0.7905694150420948,    0.0000000000000000 }, // 320
+  {    0.2185080122244105,    0.5720614028176843,   -0.7905694150420948,    0.0000000000000000 }, // 321
+  {    0.2185080122244105,   -0.5720614028176843,    0.7905694150420948,    0.0000000000000000 }, // 322
+  {    0.2185080122244105,   -0.5720614028176843,   -0.7905694150420948,    0.0000000000000000 }, // 323
+  {   -0.2185080122244105,    0.5720614028176843,    0.7905694150420948,    0.0000000000000000 }, // 324
+  {   -0.2185080122244105,    0.5720614028176843,   -0.7905694150420948,    0.0000000000000000 }, // 325
+  {   -0.2185080122244105,   -0.5720614028176843,    0.7905694150420948,    0.0000000000000000 }, // 326
+  {   -0.2185080122244105,   -0.5720614028176843,   -0.7905694150420948,    0.0000000000000000 }, // 327
+  {    0.7905694150420948,    0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 328
+  {    0.7905694150420948,    0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 329
+  {    0.7905694150420948,   -0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 330
+  {    0.7905694150420948,   -0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 331
+  {   -0.7905694150420948,    0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 332
+  {   -0.7905694150420948,    0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 333
+  {   -0.7905694150420948,   -0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 334
+  {   -0.7905694150420948,   -0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 335
+  {    0.7905694150420948,    0.0000000000000000,    0.2185080122244105,    0.5720614028176843 }, // 336
+  {    0.7905694150420948,    0.0000000000000000,    0.2185080122244105,   -0.5720614028176843 }, // 337
+  {    0.7905694150420948,    0.0000000000000000,   -0.2185080122244105,    0.5720614028176843 }, // 338
+  {    0.7905694150420948,    0.0000000000000000,   -0.2185080122244105,   -0.5720614028176843 }, // 339
+  {   -0.7905694150420948,    0.0000000000000000,    0.2185080122244105,    0.5720614028176843 }, // 340
+  {   -0.7905694150420948,    0.0000000000000000,    0.2185080122244105,   -0.5720614028176843 }, // 341
+  {   -0.7905694150420948,    0.0000000000000000,   -0.2185080122244105,    0.5720614028176843 }, // 342
+  {   -0.7905694150420948,    0.0000000000000000,   -0.2185080122244105,   -0.5720614028176843 }, // 343
+  {    0.5720614028176843,    0.7905694150420948,    0.2185080122244105,    0.0000000000000000 }, // 344
+  {    0.5720614028176843,    0.7905694150420948,   -0.2185080122244105,    0.0000000000000000 }, // 345
+  {    0.5720614028176843,   -0.7905694150420948,    0.2185080122244105,    0.0000000000000000 }, // 346
+  {    0.5720614028176843,   -0.7905694150420948,   -0.2185080122244105,    0.0000000000000000 }, // 347
+  {   -0.5720614028176843,    0.7905694150420948,    0.2185080122244105,    0.0000000000000000 }, // 348
+  {   -0.5720614028176843,    0.7905694150420948,   -0.2185080122244105,    0.0000000000000000 }, // 349
+  {   -0.5720614028176843,   -0.7905694150420948,    0.2185080122244105,    0.0000000000000000 }, // 350
+  {   -0.5720614028176843,   -0.7905694150420948,   -0.2185080122244105,    0.0000000000000000 }, // 351
+  {    0.2185080122244105,    0.7905694150420948,    0.0000000000000000,    0.5720614028176843 }, // 352
+  {    0.2185080122244105,    0.7905694150420948,    0.0000000000000000,   -0.5720614028176843 }, // 353
+  {    0.2185080122244105,   -0.7905694150420948,    0.0000000000000000,    0.5720614028176843 }, // 354
+  {    0.2185080122244105,   -0.7905694150420948,    0.0000000000000000,   -0.5720614028176843 }, // 355
+  {   -0.2185080122244105,    0.7905694150420948,    0.0000000000000000,    0.5720614028176843 }, // 356
+  {   -0.2185080122244105,    0.7905694150420948,    0.0000000000000000,   -0.5720614028176843 }, // 357
+  {   -0.2185080122244105,   -0.7905694150420948,    0.0000000000000000,    0.5720614028176843 }, // 358
+  {   -0.2185080122244105,   -0.7905694150420948,    0.0000000000000000,   -0.5720614028176843 }, // 359
+  {    0.0000000000000000,    0.5720614028176843,    0.2185080122244105,    0.7905694150420948 }, // 360
+  {    0.0000000000000000,    0.5720614028176843,    0.2185080122244105,   -0.7905694150420948 }, // 361
+  {    0.0000000000000000,    0.5720614028176843,   -0.2185080122244105,    0.7905694150420948 }, // 362
+  {    0.0000000000000000,    0.5720614028176843,   -0.2185080122244105,   -0.7905694150420948 }, // 363
+  {    0.0000000000000000,   -0.5720614028176843,    0.2185080122244105,    0.7905694150420948 }, // 364
+  {    0.0000000000000000,   -0.5720614028176843,    0.2185080122244105,   -0.7905694150420948 }, // 365
+  {    0.0000000000000000,   -0.5720614028176843,   -0.2185080122244105,    0.7905694150420948 }, // 366
+  {    0.0000000000000000,   -0.5720614028176843,   -0.2185080122244105,   -0.7905694150420948 }, // 367
+  {    0.0000000000000000,    0.7905694150420948,    0.5720614028176843,    0.2185080122244105 }, // 368
+  {    0.0000000000000000,    0.7905694150420948,    0.5720614028176843,   -0.2185080122244105 }, // 369
+  {    0.0000000000000000,    0.7905694150420948,   -0.5720614028176843,    0.2185080122244105 }, // 370
+  {    0.0000000000000000,    0.7905694150420948,   -0.5720614028176843,   -0.2185080122244105 }, // 371
+  {    0.0000000000000000,   -0.7905694150420948,    0.5720614028176843,    0.2185080122244105 }, // 372
+  {    0.0000000000000000,   -0.7905694150420948,    0.5720614028176843,   -0.2185080122244105 }, // 373
+  {    0.0000000000000000,   -0.7905694150420948,   -0.5720614028176843,    0.2185080122244105 }, // 374
+  {    0.0000000000000000,   -0.7905694150420948,   -0.5720614028176843,   -0.2185080122244105 }, // 375
+  {    0.2185080122244105,    0.0000000000000000,    0.5720614028176843,    0.7905694150420948 }, // 376
+  {    0.2185080122244105,    0.0000000000000000,    0.5720614028176843,   -0.7905694150420948 }, // 377
+  {    0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,    0.7905694150420948 }, // 378
+  {    0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,   -0.7905694150420948 }, // 379
+  {   -0.2185080122244105,    0.0000000000000000,    0.5720614028176843,    0.7905694150420948 }, // 380
+  {   -0.2185080122244105,    0.0000000000000000,    0.5720614028176843,   -0.7905694150420948 }, // 381
+  {   -0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,    0.7905694150420948 }, // 382
+  {   -0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,   -0.7905694150420948 }, // 383
+  {    0.5720614028176843,    0.2185080122244105,    0.0000000000000000,    0.7905694150420948 }, // 384
+  {    0.5720614028176843,    0.2185080122244105,    0.0000000000000000,   -0.7905694150420948 }, // 385
+  {    0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,    0.7905694150420948 }, // 386
+  {    0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,   -0.7905694150420948 }, // 387
+  {   -0.5720614028176843,    0.2185080122244105,    0.0000000000000000,    0.7905694150420948 }, // 388
+  {   -0.5720614028176843,    0.2185080122244105,    0.0000000000000000,   -0.7905694150420948 }, // 389
+  {   -0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,    0.7905694150420948 }, // 390
+  {   -0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,   -0.7905694150420948 }, // 391
+  {    0.0000000000000000,    0.2185080122244105,    0.7905694150420948,    0.5720614028176843 }, // 392
+  {    0.0000000000000000,    0.2185080122244105,    0.7905694150420948,   -0.5720614028176843 }, // 393
+  {    0.0000000000000000,    0.2185080122244105,   -0.7905694150420948,    0.5720614028176843 }, // 394
+  {    0.0000000000000000,    0.2185080122244105,   -0.7905694150420948,   -0.5720614028176843 }, // 395
+  {    0.0000000000000000,   -0.2185080122244105,    0.7905694150420948,    0.5720614028176843 }, // 396
+  {    0.0000000000000000,   -0.2185080122244105,    0.7905694150420948,   -0.5720614028176843 }, // 397
+  {    0.0000000000000000,   -0.2185080122244105,   -0.7905694150420948,    0.5720614028176843 }, // 398
+  {    0.0000000000000000,   -0.2185080122244105,   -0.7905694150420948,   -0.5720614028176843 }, // 399
+  {    0.5720614028176843,    0.0000000000000000,    0.7905694150420948,    0.2185080122244105 }, // 400
+  {    0.5720614028176843,    0.0000000000000000,    0.7905694150420948,   -0.2185080122244105 }, // 401
+  {    0.5720614028176843,    0.0000000000000000,   -0.7905694150420948,    0.2185080122244105 }, // 402
+  {    0.5720614028176843,    0.0000000000000000,   -0.7905694150420948,   -0.2185080122244105 }, // 403
+  {   -0.5720614028176843,    0.0000000000000000,    0.7905694150420948,    0.2185080122244105 }, // 404
+  {   -0.5720614028176843,    0.0000000000000000,    0.7905694150420948,   -0.2185080122244105 }, // 405
+  {   -0.5720614028176843,    0.0000000000000000,   -0.7905694150420948,    0.2185080122244105 }, // 406
+  {   -0.5720614028176843,    0.0000000000000000,   -0.7905694150420948,   -0.2185080122244105 }, // 407
+  {    0.7071067811865475,    0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, // 408
+  {    0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, // 409
+  {    0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, // 410
+  {    0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, // 411
+  {   -0.7071067811865475,    0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, // 412
+  {   -0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, // 413
+  {   -0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, // 414
+  {   -0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, // 415
+  {    0.7071067811865475,    0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, // 416
+  {    0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, // 417
+  {    0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, // 418
+  {    0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, // 419
+  {   -0.7071067811865475,    0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, // 420
+  {   -0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, // 421
+  {   -0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, // 422
+  {   -0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, // 423
+  {    0.3535533905932737,    0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, // 424
+  {    0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, // 425
+  {    0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, // 426
+  {    0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, // 427
+  {   -0.3535533905932737,    0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, // 428
+  {   -0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, // 429
+  {   -0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, // 430
+  {   -0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, // 431
+  {    0.3535533905932737,    0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, // 432
+  {    0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, // 433
+  {    0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, // 434
+  {    0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, // 435
+  {   -0.3535533905932737,    0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, // 436
+  {   -0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, // 437
+  {   -0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, // 438
+  {   -0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, // 439
+  {    0.7071067811865475,    0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, // 440
+  {    0.7071067811865475,    0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, // 441
+  {    0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, // 442
+  {    0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, // 443
+  {   -0.7071067811865475,    0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, // 444
+  {   -0.7071067811865475,    0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, // 445
+  {   -0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, // 446
+  {   -0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, // 447
+  {    0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, // 448
+  {    0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, // 449
+  {    0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, // 450
+  {    0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, // 451
+  {   -0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, // 452
+  {   -0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, // 453
+  {   -0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, // 454
+  {   -0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, // 455
+  {    0.7071067811865475,    0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, // 456
+  {    0.7071067811865475,    0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, // 457
+  {    0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, // 458
+  {    0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, // 459
+  {   -0.7071067811865475,    0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, // 460
+  {   -0.7071067811865475,    0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, // 461
+  {   -0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, // 462
+  {   -0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, // 463
+  {    0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, // 464
+  {    0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, // 465
+  {    0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, // 466
+  {    0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, // 467
+  {   -0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, // 468
+  {   -0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, // 469
+  {   -0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, // 470
+  {   -0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, // 471
+  {    0.5720614028176843,    0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, // 472
+  {    0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, // 473
+  {    0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, // 474
+  {    0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, // 475
+  {   -0.5720614028176843,    0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, // 476
+  {   -0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, // 477
+  {   -0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, // 478
+  {   -0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, // 479
+  {    0.5720614028176843,    0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, // 480
+  {    0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, // 481
+  {    0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, // 482
+  {    0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, // 483
+  {   -0.5720614028176843,    0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, // 484
+  {   -0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, // 485
+  {   -0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, // 486
+  {   -0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, // 487
+  {    0.3535533905932737,    0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, // 488
+  {    0.3535533905932737,    0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, // 489
+  {    0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, // 490
+  {    0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, // 491
+  {   -0.3535533905932737,    0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, // 492
+  {   -0.3535533905932737,    0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, // 493
+  {   -0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, // 494
+  {   -0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, // 495
+  {    0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, // 496
+  {    0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, // 497
+  {    0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, // 498
+  {    0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, // 499
+  {   -0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, // 500
+  {   -0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, // 501
+  {   -0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, // 502
+  {   -0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, // 503
+  {    0.2185080122244105,    0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, // 504
+  {    0.2185080122244105,    0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, // 505
+  {    0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, // 506
+  {    0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, // 507
+  {    0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, // 508
+  {    0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, // 509
+  {    0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, // 510
+  {    0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, // 511
+  {   -0.2185080122244105,    0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, // 512
+  {   -0.2185080122244105,    0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, // 513
+  {   -0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, // 514
+  {   -0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, // 515
+  {   -0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, // 516
+  {   -0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, // 517
+  {   -0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, // 518
+  {   -0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, // 519
+  {    0.2185080122244105,    0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, // 520
+  {    0.2185080122244105,    0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, // 521
+  {    0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, // 522
+  {    0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, // 523
+  {    0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, // 524
+  {    0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, // 525
+  {    0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, // 526
+  {    0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, // 527
+  {   -0.2185080122244105,    0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, // 528
+  {   -0.2185080122244105,    0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, // 529
+  {   -0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, // 530
+  {   -0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, // 531
+  {   -0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, // 532
+  {   -0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, // 533
+  {   -0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, // 534
+  {   -0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, // 535
+  {    0.3535533905932737,    0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, // 536
+  {    0.3535533905932737,    0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, // 537
+  {    0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, // 538
+  {    0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, // 539
+  {   -0.3535533905932737,    0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, // 540
+  {   -0.3535533905932737,    0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, // 541
+  {   -0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, // 542
+  {   -0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, // 543
+  {    0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, // 544
+  {    0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, // 545
+  {    0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, // 546
+  {    0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, // 547
+  {   -0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, // 548
+  {   -0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, // 549
+  {   -0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, // 550
+  {   -0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, // 551
+  {    0.5720614028176843,    0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, // 552
+  {    0.5720614028176843,    0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, // 553
+  {    0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, // 554
+  {    0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, // 555
+  {   -0.5720614028176843,    0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, // 556
+  {   -0.5720614028176843,    0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, // 557
+  {   -0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, // 558
+  {   -0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, // 559
+  {    0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, // 560
+  {    0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, // 561
+  {    0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, // 562
+  {    0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, // 563
+  {   -0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, // 564
+  {   -0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, // 565
+  {   -0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, // 566
+  {   -0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, // 567
+  {    0.2185080122244105,    0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, // 568
+  {    0.2185080122244105,    0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, // 569
+  {    0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, // 570
+  {    0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, // 571
+  {    0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, // 572
+  {    0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, // 573
+  {    0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, // 574
+  {    0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, // 575
+  {   -0.2185080122244105,    0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, // 576
+  {   -0.2185080122244105,    0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, // 577
+  {   -0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, // 578
+  {   -0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, // 579
+  {   -0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, // 580
+  {   -0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, // 581
+  {   -0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, // 582
+  {   -0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, // 583
+  {    0.5720614028176843,    0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, // 584
+  {    0.5720614028176843,    0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, // 585
+  {    0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, // 586
+  {    0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, // 587
+  {   -0.5720614028176843,    0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, // 588
+  {   -0.5720614028176843,    0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, // 589
+  {   -0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, // 590
+  {   -0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, // 591
+  {    0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, // 592
+  {    0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, // 593
+  {    0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, // 594
+  {    0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, // 595
+  {   -0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, // 596
+  {   -0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, // 597
+  {   -0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, // 598
+  {   -0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, // 599
 };
 int edgeK120[1200][2] = { // Vertex pairs defining each edge, in edge order
   {    0,  328 }, //   0
@@ -9761,8 +9798,8 @@ int faceToVertK120[720][5] = { // Vertices for each face, in face order
   {  212,  294,  214,  270,  268 }, // 718
   {  213,  295,  215,  271,  269 }, // 719
 };
-////////// The Edge Length of K120 is     0.270091
-////////// The face Radius of K120 is     0.229753
+////////// The Edge Length of K120 is     0.2700907567377264
+////////// The face Radius of K120 is     0.2297529205473613
 int cellK120[120][12] = { // Faces bordering each cell, in cell order
   {    0,    1,    3,  151,  624,  145,  602,  147,  153,  150,  144,  600 }, //   0
   {    0,    2,    4,  163,  629,  157,  605,  159,  165,  162,  156,  603 }, //   1
@@ -10851,127 +10888,127 @@ int cellToVertK120[120][20] = { // Vertices on each cell, in cell order
   {  200,  202,  204,  206,  208,  210,  212,  214,  264,  266,  268,  270,  280,  282,  284,  286,  288,  290,  292,  294 }, // 118
   {  201,  203,  205,  207,  209,  211,  213,  215,  265,  267,  269,  271,  281,  283,  285,  287,  289,  291,  293,  295 }, // 119
 };
-float cellNormalK120[120][4] = { // Normals of cells, in cell order
-  {    0.809017f,    0.500000f,    0.309017f,    0.000000f }, //   0
-  {    0.809017f,    0.500000f,   -0.309017f,    0.000000f }, //   1
-  {    0.500000f,    0.809017f,    0.000000f,    0.309017f }, //   2
-  {    0.500000f,    0.809017f,    0.000000f,   -0.309017f }, //   3
-  {    0.809017f,   -0.500000f,    0.309017f,    0.000000f }, //   4
-  {    0.809017f,   -0.500000f,   -0.309017f,    0.000000f }, //   5
-  {    0.500000f,   -0.809017f,    0.000000f,    0.309017f }, //   6
-  {    0.500000f,   -0.809017f,    0.000000f,   -0.309017f }, //   7
-  {   -0.809017f,    0.500000f,    0.309017f,    0.000000f }, //   8
-  {   -0.809017f,    0.500000f,   -0.309017f,    0.000000f }, //   9
-  {   -0.500000f,    0.809017f,    0.000000f,    0.309017f }, //  10
-  {   -0.500000f,    0.809017f,    0.000000f,   -0.309017f }, //  11
-  {   -0.809017f,   -0.500000f,    0.309017f,    0.000000f }, //  12
-  {   -0.809017f,   -0.500000f,   -0.309017f,    0.000000f }, //  13
-  {   -0.500000f,   -0.809017f,    0.000000f,    0.309017f }, //  14
-  {   -0.500000f,   -0.809017f,    0.000000f,   -0.309017f }, //  15
-  {    0.809017f,    0.000000f,    0.500000f,    0.309017f }, //  16
-  {    0.809017f,    0.000000f,    0.500000f,   -0.309017f }, //  17
-  {    0.500000f,    0.309017f,    0.809017f,    0.000000f }, //  18
-  {    0.500000f,   -0.309017f,    0.809017f,    0.000000f }, //  19
-  {    0.809017f,    0.000000f,   -0.500000f,    0.309017f }, //  20
-  {    0.809017f,    0.000000f,   -0.500000f,   -0.309017f }, //  21
-  {    0.500000f,    0.309017f,   -0.809017f,    0.000000f }, //  22
-  {    0.500000f,   -0.309017f,   -0.809017f,    0.000000f }, //  23
-  {   -0.809017f,    0.000000f,    0.500000f,    0.309017f }, //  24
-  {   -0.809017f,    0.000000f,    0.500000f,   -0.309017f }, //  25
-  {   -0.500000f,    0.309017f,    0.809017f,    0.000000f }, //  26
-  {   -0.500000f,   -0.309017f,    0.809017f,    0.000000f }, //  27
-  {   -0.809017f,    0.000000f,   -0.500000f,    0.309017f }, //  28
-  {   -0.809017f,    0.000000f,   -0.500000f,   -0.309017f }, //  29
-  {   -0.500000f,    0.309017f,   -0.809017f,    0.000000f }, //  30
-  {   -0.500000f,   -0.309017f,   -0.809017f,    0.000000f }, //  31
-  {    0.809017f,    0.309017f,    0.000000f,    0.500000f }, //  32
-  {    0.809017f,   -0.309017f,    0.000000f,    0.500000f }, //  33
-  {    0.500000f,    0.000000f,    0.309017f,    0.809017f }, //  34
-  {    0.500000f,    0.000000f,   -0.309017f,    0.809017f }, //  35
-  {    0.809017f,    0.309017f,    0.000000f,   -0.500000f }, //  36
-  {    0.809017f,   -0.309017f,    0.000000f,   -0.500000f }, //  37
-  {    0.500000f,    0.000000f,    0.309017f,   -0.809017f }, //  38
-  {    0.500000f,    0.000000f,   -0.309017f,   -0.809017f }, //  39
-  {   -0.809017f,    0.309017f,    0.000000f,    0.500000f }, //  40
-  {   -0.809017f,   -0.309017f,    0.000000f,    0.500000f }, //  41
-  {   -0.500000f,    0.000000f,    0.309017f,    0.809017f }, //  42
-  {   -0.500000f,    0.000000f,   -0.309017f,    0.809017f }, //  43
-  {   -0.809017f,    0.309017f,    0.000000f,   -0.500000f }, //  44
-  {   -0.809017f,   -0.309017f,    0.000000f,   -0.500000f }, //  45
-  {   -0.500000f,    0.000000f,    0.309017f,   -0.809017f }, //  46
-  {   -0.500000f,    0.000000f,   -0.309017f,   -0.809017f }, //  47
-  {    0.000000f,    0.500000f,    0.809017f,    0.309017f }, //  48
-  {    0.000000f,    0.500000f,    0.809017f,   -0.309017f }, //  49
-  {    0.309017f,    0.809017f,    0.500000f,    0.000000f }, //  50
-  {   -0.309017f,    0.809017f,    0.500000f,    0.000000f }, //  51
-  {    0.000000f,    0.500000f,   -0.809017f,    0.309017f }, //  52
-  {    0.000000f,    0.500000f,   -0.809017f,   -0.309017f }, //  53
-  {    0.309017f,    0.809017f,   -0.500000f,    0.000000f }, //  54
-  {   -0.309017f,    0.809017f,   -0.500000f,    0.000000f }, //  55
-  {    0.000000f,   -0.500000f,    0.809017f,    0.309017f }, //  56
-  {    0.000000f,   -0.500000f,    0.809017f,   -0.309017f }, //  57
-  {    0.309017f,   -0.809017f,    0.500000f,    0.000000f }, //  58
-  {   -0.309017f,   -0.809017f,    0.500000f,    0.000000f }, //  59
-  {    0.000000f,   -0.500000f,   -0.809017f,    0.309017f }, //  60
-  {    0.000000f,   -0.500000f,   -0.809017f,   -0.309017f }, //  61
-  {    0.309017f,   -0.809017f,   -0.500000f,    0.000000f }, //  62
-  {   -0.309017f,   -0.809017f,   -0.500000f,    0.000000f }, //  63
-  {    0.000000f,    0.809017f,    0.309017f,    0.500000f }, //  64
-  {    0.000000f,    0.809017f,   -0.309017f,    0.500000f }, //  65
-  {    0.309017f,    0.500000f,    0.000000f,    0.809017f }, //  66
-  {   -0.309017f,    0.500000f,    0.000000f,    0.809017f }, //  67
-  {    0.000000f,    0.809017f,    0.309017f,   -0.500000f }, //  68
-  {    0.000000f,    0.809017f,   -0.309017f,   -0.500000f }, //  69
-  {    0.309017f,    0.500000f,    0.000000f,   -0.809017f }, //  70
-  {   -0.309017f,    0.500000f,    0.000000f,   -0.809017f }, //  71
-  {    0.000000f,   -0.809017f,    0.309017f,    0.500000f }, //  72
-  {    0.000000f,   -0.809017f,   -0.309017f,    0.500000f }, //  73
-  {    0.309017f,   -0.500000f,    0.000000f,    0.809017f }, //  74
-  {   -0.309017f,   -0.500000f,    0.000000f,    0.809017f }, //  75
-  {    0.000000f,   -0.809017f,    0.309017f,   -0.500000f }, //  76
-  {    0.000000f,   -0.809017f,   -0.309017f,   -0.500000f }, //  77
-  {    0.309017f,   -0.500000f,    0.000000f,   -0.809017f }, //  78
-  {   -0.309017f,   -0.500000f,    0.000000f,   -0.809017f }, //  79
-  {    0.000000f,    0.309017f,    0.500000f,    0.809017f }, //  80
-  {    0.000000f,   -0.309017f,    0.500000f,    0.809017f }, //  81
-  {    0.309017f,    0.000000f,    0.809017f,    0.500000f }, //  82
-  {   -0.309017f,    0.000000f,    0.809017f,    0.500000f }, //  83
-  {    0.000000f,    0.309017f,    0.500000f,   -0.809017f }, //  84
-  {    0.000000f,   -0.309017f,    0.500000f,   -0.809017f }, //  85
-  {    0.309017f,    0.000000f,    0.809017f,   -0.500000f }, //  86
-  {   -0.309017f,    0.000000f,    0.809017f,   -0.500000f }, //  87
-  {    0.000000f,    0.309017f,   -0.500000f,    0.809017f }, //  88
-  {    0.000000f,   -0.309017f,   -0.500000f,    0.809017f }, //  89
-  {    0.309017f,    0.000000f,   -0.809017f,    0.500000f }, //  90
-  {   -0.309017f,    0.000000f,   -0.809017f,    0.500000f }, //  91
-  {    0.000000f,    0.309017f,   -0.500000f,   -0.809017f }, //  92
-  {    0.000000f,   -0.309017f,   -0.500000f,   -0.809017f }, //  93
-  {    0.309017f,    0.000000f,   -0.809017f,   -0.500000f }, //  94
-  {   -0.309017f,    0.000000f,   -0.809017f,   -0.500000f }, //  95
-  {    0.500000f,    0.500000f,    0.500000f,    0.500000f }, //  96
-  {    0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //  97
-  {    0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //  98
-  {    0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //  99
-  {    0.500000f,   -0.500000f,    0.500000f,    0.500000f }, // 100
-  {    0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, // 101
-  {    0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, // 102
-  {    0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, // 103
-  {   -0.500000f,    0.500000f,    0.500000f,    0.500000f }, // 104
-  {   -0.500000f,    0.500000f,    0.500000f,   -0.500000f }, // 105
-  {   -0.500000f,    0.500000f,   -0.500000f,    0.500000f }, // 106
-  {   -0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, // 107
-  {   -0.500000f,   -0.500000f,    0.500000f,    0.500000f }, // 108
-  {   -0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, // 109
-  {   -0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, // 110
-  {   -0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, // 111
-  {    1.000000f,    0.000000f,    0.000000f,    0.000000f }, // 112
-  {   -1.000000f,    0.000000f,    0.000000f,    0.000000f }, // 113
-  {    0.000000f,    1.000000f,    0.000000f,    0.000000f }, // 114
-  {    0.000000f,   -1.000000f,    0.000000f,    0.000000f }, // 115
-  {    0.000000f,    0.000000f,    1.000000f,    0.000000f }, // 116
-  {    0.000000f,    0.000000f,   -1.000000f,    0.000000f }, // 117
-  {    0.000000f,    0.000000f,    0.000000f,    1.000000f }, // 118
-  {    0.000000f,    0.000000f,    0.000000f,   -1.000000f }, // 119
+double cellNormalK120[120][4] = { // Normals of cells, in cell order
+  {    0.8090169943749475,    0.5000000000000000,    0.3090169943749475,    0.0000000000000000 }, //   0
+  {    0.8090169943749475,    0.5000000000000000,   -0.3090169943749475,    0.0000000000000000 }, //   1
+  {    0.5000000000000000,    0.8090169943749475,    0.0000000000000000,    0.3090169943749475 }, //   2
+  {    0.5000000000000000,    0.8090169943749475,    0.0000000000000000,   -0.3090169943749475 }, //   3
+  {    0.8090169943749475,   -0.5000000000000000,    0.3090169943749475,    0.0000000000000000 }, //   4
+  {    0.8090169943749475,   -0.5000000000000000,   -0.3090169943749475,    0.0000000000000000 }, //   5
+  {    0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,    0.3090169943749475 }, //   6
+  {    0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,   -0.3090169943749475 }, //   7
+  {   -0.8090169943749475,    0.5000000000000000,    0.3090169943749475,    0.0000000000000000 }, //   8
+  {   -0.8090169943749475,    0.5000000000000000,   -0.3090169943749475,    0.0000000000000000 }, //   9
+  {   -0.5000000000000000,    0.8090169943749475,    0.0000000000000000,    0.3090169943749475 }, //  10
+  {   -0.5000000000000000,    0.8090169943749475,    0.0000000000000000,   -0.3090169943749475 }, //  11
+  {   -0.8090169943749475,   -0.5000000000000000,    0.3090169943749475,    0.0000000000000000 }, //  12
+  {   -0.8090169943749475,   -0.5000000000000000,   -0.3090169943749475,    0.0000000000000000 }, //  13
+  {   -0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,    0.3090169943749475 }, //  14
+  {   -0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,   -0.3090169943749475 }, //  15
+  {    0.8090169943749475,    0.0000000000000000,    0.5000000000000000,    0.3090169943749475 }, //  16
+  {    0.8090169943749475,    0.0000000000000000,    0.5000000000000000,   -0.3090169943749475 }, //  17
+  {    0.5000000000000000,    0.3090169943749475,    0.8090169943749475,    0.0000000000000000 }, //  18
+  {    0.5000000000000000,   -0.3090169943749475,    0.8090169943749475,    0.0000000000000000 }, //  19
+  {    0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,    0.3090169943749475 }, //  20
+  {    0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,   -0.3090169943749475 }, //  21
+  {    0.5000000000000000,    0.3090169943749475,   -0.8090169943749475,    0.0000000000000000 }, //  22
+  {    0.5000000000000000,   -0.3090169943749475,   -0.8090169943749475,    0.0000000000000000 }, //  23
+  {   -0.8090169943749475,    0.0000000000000000,    0.5000000000000000,    0.3090169943749475 }, //  24
+  {   -0.8090169943749475,    0.0000000000000000,    0.5000000000000000,   -0.3090169943749475 }, //  25
+  {   -0.5000000000000000,    0.3090169943749475,    0.8090169943749475,    0.0000000000000000 }, //  26
+  {   -0.5000000000000000,   -0.3090169943749475,    0.8090169943749475,    0.0000000000000000 }, //  27
+  {   -0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,    0.3090169943749475 }, //  28
+  {   -0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,   -0.3090169943749475 }, //  29
+  {   -0.5000000000000000,    0.3090169943749475,   -0.8090169943749475,    0.0000000000000000 }, //  30
+  {   -0.5000000000000000,   -0.3090169943749475,   -0.8090169943749475,    0.0000000000000000 }, //  31
+  {    0.8090169943749475,    0.3090169943749475,    0.0000000000000000,    0.5000000000000000 }, //  32
+  {    0.8090169943749475,   -0.3090169943749475,    0.0000000000000000,    0.5000000000000000 }, //  33
+  {    0.5000000000000000,    0.0000000000000000,    0.3090169943749475,    0.8090169943749475 }, //  34
+  {    0.5000000000000000,    0.0000000000000000,   -0.3090169943749475,    0.8090169943749475 }, //  35
+  {    0.8090169943749475,    0.3090169943749475,    0.0000000000000000,   -0.5000000000000000 }, //  36
+  {    0.8090169943749475,   -0.3090169943749475,    0.0000000000000000,   -0.5000000000000000 }, //  37
+  {    0.5000000000000000,    0.0000000000000000,    0.3090169943749475,   -0.8090169943749475 }, //  38
+  {    0.5000000000000000,    0.0000000000000000,   -0.3090169943749475,   -0.8090169943749475 }, //  39
+  {   -0.8090169943749475,    0.3090169943749475,    0.0000000000000000,    0.5000000000000000 }, //  40
+  {   -0.8090169943749475,   -0.3090169943749475,    0.0000000000000000,    0.5000000000000000 }, //  41
+  {   -0.5000000000000000,    0.0000000000000000,    0.3090169943749475,    0.8090169943749475 }, //  42
+  {   -0.5000000000000000,    0.0000000000000000,   -0.3090169943749475,    0.8090169943749475 }, //  43
+  {   -0.8090169943749475,    0.3090169943749475,    0.0000000000000000,   -0.5000000000000000 }, //  44
+  {   -0.8090169943749475,   -0.3090169943749475,    0.0000000000000000,   -0.5000000000000000 }, //  45
+  {   -0.5000000000000000,    0.0000000000000000,    0.3090169943749475,   -0.8090169943749475 }, //  46
+  {   -0.5000000000000000,    0.0000000000000000,   -0.3090169943749475,   -0.8090169943749475 }, //  47
+  {    0.0000000000000000,    0.5000000000000000,    0.8090169943749475,    0.3090169943749475 }, //  48
+  {    0.0000000000000000,    0.5000000000000000,    0.8090169943749475,   -0.3090169943749475 }, //  49
+  {    0.3090169943749475,    0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  50
+  {   -0.3090169943749475,    0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  51
+  {    0.0000000000000000,    0.5000000000000000,   -0.8090169943749475,    0.3090169943749475 }, //  52
+  {    0.0000000000000000,    0.5000000000000000,   -0.8090169943749475,   -0.3090169943749475 }, //  53
+  {    0.3090169943749475,    0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  54
+  {   -0.3090169943749475,    0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  55
+  {    0.0000000000000000,   -0.5000000000000000,    0.8090169943749475,    0.3090169943749475 }, //  56
+  {    0.0000000000000000,   -0.5000000000000000,    0.8090169943749475,   -0.3090169943749475 }, //  57
+  {    0.3090169943749475,   -0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  58
+  {   -0.3090169943749475,   -0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  59
+  {    0.0000000000000000,   -0.5000000000000000,   -0.8090169943749475,    0.3090169943749475 }, //  60
+  {    0.0000000000000000,   -0.5000000000000000,   -0.8090169943749475,   -0.3090169943749475 }, //  61
+  {    0.3090169943749475,   -0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  62
+  {   -0.3090169943749475,   -0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  63
+  {    0.0000000000000000,    0.8090169943749475,    0.3090169943749475,    0.5000000000000000 }, //  64
+  {    0.0000000000000000,    0.8090169943749475,   -0.3090169943749475,    0.5000000000000000 }, //  65
+  {    0.3090169943749475,    0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, //  66
+  {   -0.3090169943749475,    0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, //  67
+  {    0.0000000000000000,    0.8090169943749475,    0.3090169943749475,   -0.5000000000000000 }, //  68
+  {    0.0000000000000000,    0.8090169943749475,   -0.3090169943749475,   -0.5000000000000000 }, //  69
+  {    0.3090169943749475,    0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, //  70
+  {   -0.3090169943749475,    0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, //  71
+  {    0.0000000000000000,   -0.8090169943749475,    0.3090169943749475,    0.5000000000000000 }, //  72
+  {    0.0000000000000000,   -0.8090169943749475,   -0.3090169943749475,    0.5000000000000000 }, //  73
+  {    0.3090169943749475,   -0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, //  74
+  {   -0.3090169943749475,   -0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, //  75
+  {    0.0000000000000000,   -0.8090169943749475,    0.3090169943749475,   -0.5000000000000000 }, //  76
+  {    0.0000000000000000,   -0.8090169943749475,   -0.3090169943749475,   -0.5000000000000000 }, //  77
+  {    0.3090169943749475,   -0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, //  78
+  {   -0.3090169943749475,   -0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, //  79
+  {    0.0000000000000000,    0.3090169943749475,    0.5000000000000000,    0.8090169943749475 }, //  80
+  {    0.0000000000000000,   -0.3090169943749475,    0.5000000000000000,    0.8090169943749475 }, //  81
+  {    0.3090169943749475,    0.0000000000000000,    0.8090169943749475,    0.5000000000000000 }, //  82
+  {   -0.3090169943749475,    0.0000000000000000,    0.8090169943749475,    0.5000000000000000 }, //  83
+  {    0.0000000000000000,    0.3090169943749475,    0.5000000000000000,   -0.8090169943749475 }, //  84
+  {    0.0000000000000000,   -0.3090169943749475,    0.5000000000000000,   -0.8090169943749475 }, //  85
+  {    0.3090169943749475,    0.0000000000000000,    0.8090169943749475,   -0.5000000000000000 }, //  86
+  {   -0.3090169943749475,    0.0000000000000000,    0.8090169943749475,   -0.5000000000000000 }, //  87
+  {    0.0000000000000000,    0.3090169943749475,   -0.5000000000000000,    0.8090169943749475 }, //  88
+  {    0.0000000000000000,   -0.3090169943749475,   -0.5000000000000000,    0.8090169943749475 }, //  89
+  {    0.3090169943749475,    0.0000000000000000,   -0.8090169943749475,    0.5000000000000000 }, //  90
+  {   -0.3090169943749475,    0.0000000000000000,   -0.8090169943749475,    0.5000000000000000 }, //  91
+  {    0.0000000000000000,    0.3090169943749475,   -0.5000000000000000,   -0.8090169943749475 }, //  92
+  {    0.0000000000000000,   -0.3090169943749475,   -0.5000000000000000,   -0.8090169943749475 }, //  93
+  {    0.3090169943749475,    0.0000000000000000,   -0.8090169943749475,   -0.5000000000000000 }, //  94
+  {   -0.3090169943749475,    0.0000000000000000,   -0.8090169943749475,   -0.5000000000000000 }, //  95
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //  96
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  97
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  98
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  99
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, // 100
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, // 101
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, // 102
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, // 103
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, // 104
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, // 105
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, // 106
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, // 107
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, // 108
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, // 109
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, // 110
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, // 111
+  {    1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, // 112
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, // 113
+  {    0.0000000000000000,    1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, // 114
+  {    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, // 115
+  {    0.0000000000000000,    0.0000000000000000,    1.0000000000000000,    0.0000000000000000 }, // 116
+  {    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000 }, // 117
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,    1.0000000000000000 }, // 118
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000 }, // 119
 };
 int cellToOppositeK120[120] = { // The opposite cell, in cell order
      13, //   0
@@ -11095,9 +11132,9 @@ int cellToOppositeK120[120] = { // The opposite cell, in cell order
     119, // 118
     118, // 119
 };
-////////// The Radius of the whole K120 is 1. The radius of each cell is     0.378467
-////////// The Distance from the origin to the centre of each cell of K120 is     0.925615
-////////// The Sphere circumscribing each cell of K120 overlaps the origin by    -0.547148
+////////// The Radius of the whole K120 is 1. The radius of each cell is     0.3784669790335604
+////////// The Distance from the origin to the centre of each cell of K120 is     0.9256147934109580
+////////// The Sphere circumscribing each cell of K120 overlaps the origin by    -0.5471478143773976
 FigInfo infoK120 = {
     4, // numDims;
   600, // numVerts;
@@ -11115,11 +11152,11 @@ FigInfo infoK120 = {
     0, // numCellsPerVert;
     3, // numCellsPerEdge;
     2, // numCellsPerFace;
-   -0.447214f, // dihedralCosine;
-    0.378467f, // cellRadius;
-    0.925615f, // cellCentreRadius;
-    0.973249f, // faceCentreRadius;
-(float *)vertexK120, // The vertex matrix
+   -0.4472135954999579, // dihedralCosine;
+    0.3784669790335604, // cellRadius;
+    0.9256147934109580, // cellCentreRadius;
+    0.9732489894677301, // faceCentreRadius;
+(double *)vertexK120, // The vertex matrix
 (int *)edgeK120, // The edge Matrix
 (int *)vertToEdgeK120, // The Matrix of vertices for each edge
 (int *)faceK120, // The face to edge matrix
@@ -11127,133 +11164,133 @@ FigInfo infoK120 = {
 (int *)0, // Face To Vert (used in 3D)
 (int *)0, // Vertex to face (used in 3D)
 (int *)faceToCellK120, // Face to cell matrix (used in 4D)
-(float *)0, // The normal of a face (used in 3D)
+(double *)0, // The normal of a face (used in 3D)
 (int *)cellK120, // The cell matrix
-(float *)cellNormalK120, // The normal of a 4D cell
-(int *)cellToEdgeK120, // Pointer to the edges per cell (number of cells X edges per cell)
-(int *)cellToOppositeK120, // Pointer to the opposite cell per cell (number of cells X 1, but not for K005)
+(double *)cellNormalK120, // The normal of a 4D cell
+(int *)cellToEdgeK120, // The normal of a 4D cell
+(int *)cellToOppositeK120, // The opposite cell of a 4D cell
 };
-float vertexK600[120][4] = { // Coordinates of vertices, in vertex order
-  {    0.500000f,    0.500000f,    0.500000f,    0.500000f }, //   0
-  {    0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //   1
-  {    0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //   2
-  {    0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //   3
-  {    0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //   4
-  {    0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //   5
-  {    0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //   6
-  {    0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //   7
-  {   -0.500000f,    0.500000f,    0.500000f,    0.500000f }, //   8
-  {   -0.500000f,    0.500000f,    0.500000f,   -0.500000f }, //   9
-  {   -0.500000f,    0.500000f,   -0.500000f,    0.500000f }, //  10
-  {   -0.500000f,    0.500000f,   -0.500000f,   -0.500000f }, //  11
-  {   -0.500000f,   -0.500000f,    0.500000f,    0.500000f }, //  12
-  {   -0.500000f,   -0.500000f,    0.500000f,   -0.500000f }, //  13
-  {   -0.500000f,   -0.500000f,   -0.500000f,    0.500000f }, //  14
-  {   -0.500000f,   -0.500000f,   -0.500000f,   -0.500000f }, //  15
-  {    0.000000f,    0.000000f,    0.000000f,    1.000000f }, //  16
-  {    0.000000f,    0.000000f,    0.000000f,   -1.000000f }, //  17
-  {    0.000000f,    0.000000f,    1.000000f,    0.000000f }, //  18
-  {    0.000000f,    0.000000f,   -1.000000f,    0.000000f }, //  19
-  {    0.000000f,    1.000000f,    0.000000f,    0.000000f }, //  20
-  {    0.000000f,   -1.000000f,    0.000000f,    0.000000f }, //  21
-  {    1.000000f,    0.000000f,    0.000000f,    0.000000f }, //  22
-  {   -1.000000f,    0.000000f,    0.000000f,    0.000000f }, //  23
-  {    0.809017f,    0.500000f,    0.309017f,    0.000000f }, //  24
-  {    0.809017f,    0.500000f,   -0.309017f,    0.000000f }, //  25
-  {    0.809017f,   -0.500000f,    0.309017f,    0.000000f }, //  26
-  {    0.809017f,   -0.500000f,   -0.309017f,    0.000000f }, //  27
-  {   -0.809017f,    0.500000f,    0.309017f,    0.000000f }, //  28
-  {   -0.809017f,    0.500000f,   -0.309017f,    0.000000f }, //  29
-  {   -0.809017f,   -0.500000f,    0.309017f,    0.000000f }, //  30
-  {   -0.809017f,   -0.500000f,   -0.309017f,    0.000000f }, //  31
-  {    0.500000f,    0.309017f,    0.809017f,    0.000000f }, //  32
-  {    0.500000f,    0.309017f,   -0.809017f,    0.000000f }, //  33
-  {    0.500000f,   -0.309017f,    0.809017f,    0.000000f }, //  34
-  {    0.500000f,   -0.309017f,   -0.809017f,    0.000000f }, //  35
-  {   -0.500000f,    0.309017f,    0.809017f,    0.000000f }, //  36
-  {   -0.500000f,    0.309017f,   -0.809017f,    0.000000f }, //  37
-  {   -0.500000f,   -0.309017f,    0.809017f,    0.000000f }, //  38
-  {   -0.500000f,   -0.309017f,   -0.809017f,    0.000000f }, //  39
-  {    0.809017f,    0.309017f,    0.000000f,    0.500000f }, //  40
-  {    0.809017f,    0.309017f,    0.000000f,   -0.500000f }, //  41
-  {    0.809017f,   -0.309017f,    0.000000f,    0.500000f }, //  42
-  {    0.809017f,   -0.309017f,    0.000000f,   -0.500000f }, //  43
-  {   -0.809017f,    0.309017f,    0.000000f,    0.500000f }, //  44
-  {   -0.809017f,    0.309017f,    0.000000f,   -0.500000f }, //  45
-  {   -0.809017f,   -0.309017f,    0.000000f,    0.500000f }, //  46
-  {   -0.809017f,   -0.309017f,    0.000000f,   -0.500000f }, //  47
-  {    0.809017f,    0.000000f,    0.500000f,    0.309017f }, //  48
-  {    0.809017f,    0.000000f,    0.500000f,   -0.309017f }, //  49
-  {    0.809017f,    0.000000f,   -0.500000f,    0.309017f }, //  50
-  {    0.809017f,    0.000000f,   -0.500000f,   -0.309017f }, //  51
-  {   -0.809017f,    0.000000f,    0.500000f,    0.309017f }, //  52
-  {   -0.809017f,    0.000000f,    0.500000f,   -0.309017f }, //  53
-  {   -0.809017f,    0.000000f,   -0.500000f,    0.309017f }, //  54
-  {   -0.809017f,    0.000000f,   -0.500000f,   -0.309017f }, //  55
-  {    0.309017f,    0.809017f,    0.500000f,    0.000000f }, //  56
-  {    0.309017f,    0.809017f,   -0.500000f,    0.000000f }, //  57
-  {    0.309017f,   -0.809017f,    0.500000f,    0.000000f }, //  58
-  {    0.309017f,   -0.809017f,   -0.500000f,    0.000000f }, //  59
-  {   -0.309017f,    0.809017f,    0.500000f,    0.000000f }, //  60
-  {   -0.309017f,    0.809017f,   -0.500000f,    0.000000f }, //  61
-  {   -0.309017f,   -0.809017f,    0.500000f,    0.000000f }, //  62
-  {   -0.309017f,   -0.809017f,   -0.500000f,    0.000000f }, //  63
-  {    0.500000f,    0.809017f,    0.000000f,    0.309017f }, //  64
-  {    0.500000f,    0.809017f,    0.000000f,   -0.309017f }, //  65
-  {    0.500000f,   -0.809017f,    0.000000f,    0.309017f }, //  66
-  {    0.500000f,   -0.809017f,    0.000000f,   -0.309017f }, //  67
-  {   -0.500000f,    0.809017f,    0.000000f,    0.309017f }, //  68
-  {   -0.500000f,    0.809017f,    0.000000f,   -0.309017f }, //  69
-  {   -0.500000f,   -0.809017f,    0.000000f,    0.309017f }, //  70
-  {   -0.500000f,   -0.809017f,    0.000000f,   -0.309017f }, //  71
-  {    0.000000f,    0.309017f,    0.500000f,    0.809017f }, //  72
-  {    0.000000f,    0.309017f,    0.500000f,   -0.809017f }, //  73
-  {    0.000000f,    0.309017f,   -0.500000f,    0.809017f }, //  74
-  {    0.000000f,    0.309017f,   -0.500000f,   -0.809017f }, //  75
-  {    0.000000f,   -0.309017f,    0.500000f,    0.809017f }, //  76
-  {    0.000000f,   -0.309017f,    0.500000f,   -0.809017f }, //  77
-  {    0.000000f,   -0.309017f,   -0.500000f,    0.809017f }, //  78
-  {    0.000000f,   -0.309017f,   -0.500000f,   -0.809017f }, //  79
-  {    0.000000f,    0.809017f,    0.309017f,    0.500000f }, //  80
-  {    0.000000f,    0.809017f,    0.309017f,   -0.500000f }, //  81
-  {    0.000000f,    0.809017f,   -0.309017f,    0.500000f }, //  82
-  {    0.000000f,    0.809017f,   -0.309017f,   -0.500000f }, //  83
-  {    0.000000f,   -0.809017f,    0.309017f,    0.500000f }, //  84
-  {    0.000000f,   -0.809017f,    0.309017f,   -0.500000f }, //  85
-  {    0.000000f,   -0.809017f,   -0.309017f,    0.500000f }, //  86
-  {    0.000000f,   -0.809017f,   -0.309017f,   -0.500000f }, //  87
-  {    0.500000f,    0.000000f,    0.309017f,    0.809017f }, //  88
-  {    0.500000f,    0.000000f,    0.309017f,   -0.809017f }, //  89
-  {    0.500000f,    0.000000f,   -0.309017f,    0.809017f }, //  90
-  {    0.500000f,    0.000000f,   -0.309017f,   -0.809017f }, //  91
-  {   -0.500000f,    0.000000f,    0.309017f,    0.809017f }, //  92
-  {   -0.500000f,    0.000000f,    0.309017f,   -0.809017f }, //  93
-  {   -0.500000f,    0.000000f,   -0.309017f,    0.809017f }, //  94
-  {   -0.500000f,    0.000000f,   -0.309017f,   -0.809017f }, //  95
-  {    0.309017f,    0.500000f,    0.000000f,    0.809017f }, //  96
-  {    0.309017f,    0.500000f,    0.000000f,   -0.809017f }, //  97
-  {    0.309017f,   -0.500000f,    0.000000f,    0.809017f }, //  98
-  {    0.309017f,   -0.500000f,    0.000000f,   -0.809017f }, //  99
-  {   -0.309017f,    0.500000f,    0.000000f,    0.809017f }, // 100
-  {   -0.309017f,    0.500000f,    0.000000f,   -0.809017f }, // 101
-  {   -0.309017f,   -0.500000f,    0.000000f,    0.809017f }, // 102
-  {   -0.309017f,   -0.500000f,    0.000000f,   -0.809017f }, // 103
-  {    0.000000f,    0.500000f,    0.809017f,    0.309017f }, // 104
-  {    0.000000f,    0.500000f,    0.809017f,   -0.309017f }, // 105
-  {    0.000000f,    0.500000f,   -0.809017f,    0.309017f }, // 106
-  {    0.000000f,    0.500000f,   -0.809017f,   -0.309017f }, // 107
-  {    0.000000f,   -0.500000f,    0.809017f,    0.309017f }, // 108
-  {    0.000000f,   -0.500000f,    0.809017f,   -0.309017f }, // 109
-  {    0.000000f,   -0.500000f,   -0.809017f,    0.309017f }, // 110
-  {    0.000000f,   -0.500000f,   -0.809017f,   -0.309017f }, // 111
-  {    0.309017f,    0.000000f,    0.809017f,    0.500000f }, // 112
-  {    0.309017f,    0.000000f,    0.809017f,   -0.500000f }, // 113
-  {    0.309017f,    0.000000f,   -0.809017f,    0.500000f }, // 114
-  {    0.309017f,    0.000000f,   -0.809017f,   -0.500000f }, // 115
-  {   -0.309017f,    0.000000f,    0.809017f,    0.500000f }, // 116
-  {   -0.309017f,    0.000000f,    0.809017f,   -0.500000f }, // 117
-  {   -0.309017f,    0.000000f,   -0.809017f,    0.500000f }, // 118
-  {   -0.309017f,    0.000000f,   -0.809017f,   -0.500000f }, // 119
+double vertexK600[120][4] = { // Coordinates of vertices, in vertex order
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   0
+  {    0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   1
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   2
+  {    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //   3
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   4
+  {    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   5
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //   6
+  {    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //   7
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //   8
+  {   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //   9
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  10
+  {   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  11
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,    0.5000000000000000 }, //  12
+  {   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000,   -0.5000000000000000 }, //  13
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,    0.5000000000000000 }, //  14
+  {   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000,   -0.5000000000000000 }, //  15
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,    1.0000000000000000 }, //  16
+  {    0.0000000000000000,    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000 }, //  17
+  {    0.0000000000000000,    0.0000000000000000,    1.0000000000000000,    0.0000000000000000 }, //  18
+  {    0.0000000000000000,    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000 }, //  19
+  {    0.0000000000000000,    1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //  20
+  {    0.0000000000000000,   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //  21
+  {    1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //  22
+  {   -1.0000000000000000,    0.0000000000000000,    0.0000000000000000,    0.0000000000000000 }, //  23
+  {    0.8090169943749475,    0.5000000000000000,    0.3090169943749474,    0.0000000000000000 }, //  24
+  {    0.8090169943749475,    0.5000000000000000,   -0.3090169943749474,    0.0000000000000000 }, //  25
+  {    0.8090169943749475,   -0.5000000000000000,    0.3090169943749474,    0.0000000000000000 }, //  26
+  {    0.8090169943749475,   -0.5000000000000000,   -0.3090169943749474,    0.0000000000000000 }, //  27
+  {   -0.8090169943749475,    0.5000000000000000,    0.3090169943749474,    0.0000000000000000 }, //  28
+  {   -0.8090169943749475,    0.5000000000000000,   -0.3090169943749474,    0.0000000000000000 }, //  29
+  {   -0.8090169943749475,   -0.5000000000000000,    0.3090169943749474,    0.0000000000000000 }, //  30
+  {   -0.8090169943749475,   -0.5000000000000000,   -0.3090169943749474,    0.0000000000000000 }, //  31
+  {    0.5000000000000000,    0.3090169943749474,    0.8090169943749475,    0.0000000000000000 }, //  32
+  {    0.5000000000000000,    0.3090169943749474,   -0.8090169943749475,    0.0000000000000000 }, //  33
+  {    0.5000000000000000,   -0.3090169943749474,    0.8090169943749475,    0.0000000000000000 }, //  34
+  {    0.5000000000000000,   -0.3090169943749474,   -0.8090169943749475,    0.0000000000000000 }, //  35
+  {   -0.5000000000000000,    0.3090169943749474,    0.8090169943749475,    0.0000000000000000 }, //  36
+  {   -0.5000000000000000,    0.3090169943749474,   -0.8090169943749475,    0.0000000000000000 }, //  37
+  {   -0.5000000000000000,   -0.3090169943749474,    0.8090169943749475,    0.0000000000000000 }, //  38
+  {   -0.5000000000000000,   -0.3090169943749474,   -0.8090169943749475,    0.0000000000000000 }, //  39
+  {    0.8090169943749475,    0.3090169943749474,    0.0000000000000000,    0.5000000000000000 }, //  40
+  {    0.8090169943749475,    0.3090169943749474,    0.0000000000000000,   -0.5000000000000000 }, //  41
+  {    0.8090169943749475,   -0.3090169943749474,    0.0000000000000000,    0.5000000000000000 }, //  42
+  {    0.8090169943749475,   -0.3090169943749474,    0.0000000000000000,   -0.5000000000000000 }, //  43
+  {   -0.8090169943749475,    0.3090169943749474,    0.0000000000000000,    0.5000000000000000 }, //  44
+  {   -0.8090169943749475,    0.3090169943749474,    0.0000000000000000,   -0.5000000000000000 }, //  45
+  {   -0.8090169943749475,   -0.3090169943749474,    0.0000000000000000,    0.5000000000000000 }, //  46
+  {   -0.8090169943749475,   -0.3090169943749474,    0.0000000000000000,   -0.5000000000000000 }, //  47
+  {    0.8090169943749475,    0.0000000000000000,    0.5000000000000000,    0.3090169943749474 }, //  48
+  {    0.8090169943749475,    0.0000000000000000,    0.5000000000000000,   -0.3090169943749474 }, //  49
+  {    0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,    0.3090169943749474 }, //  50
+  {    0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,   -0.3090169943749474 }, //  51
+  {   -0.8090169943749475,    0.0000000000000000,    0.5000000000000000,    0.3090169943749474 }, //  52
+  {   -0.8090169943749475,    0.0000000000000000,    0.5000000000000000,   -0.3090169943749474 }, //  53
+  {   -0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,    0.3090169943749474 }, //  54
+  {   -0.8090169943749475,    0.0000000000000000,   -0.5000000000000000,   -0.3090169943749474 }, //  55
+  {    0.3090169943749474,    0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  56
+  {    0.3090169943749474,    0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  57
+  {    0.3090169943749474,   -0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  58
+  {    0.3090169943749474,   -0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  59
+  {   -0.3090169943749474,    0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  60
+  {   -0.3090169943749474,    0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  61
+  {   -0.3090169943749474,   -0.8090169943749475,    0.5000000000000000,    0.0000000000000000 }, //  62
+  {   -0.3090169943749474,   -0.8090169943749475,   -0.5000000000000000,    0.0000000000000000 }, //  63
+  {    0.5000000000000000,    0.8090169943749475,    0.0000000000000000,    0.3090169943749474 }, //  64
+  {    0.5000000000000000,    0.8090169943749475,    0.0000000000000000,   -0.3090169943749474 }, //  65
+  {    0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,    0.3090169943749474 }, //  66
+  {    0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,   -0.3090169943749474 }, //  67
+  {   -0.5000000000000000,    0.8090169943749475,    0.0000000000000000,    0.3090169943749474 }, //  68
+  {   -0.5000000000000000,    0.8090169943749475,    0.0000000000000000,   -0.3090169943749474 }, //  69
+  {   -0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,    0.3090169943749474 }, //  70
+  {   -0.5000000000000000,   -0.8090169943749475,    0.0000000000000000,   -0.3090169943749474 }, //  71
+  {    0.0000000000000000,    0.3090169943749474,    0.5000000000000000,    0.8090169943749475 }, //  72
+  {    0.0000000000000000,    0.3090169943749474,    0.5000000000000000,   -0.8090169943749475 }, //  73
+  {    0.0000000000000000,    0.3090169943749474,   -0.5000000000000000,    0.8090169943749475 }, //  74
+  {    0.0000000000000000,    0.3090169943749474,   -0.5000000000000000,   -0.8090169943749475 }, //  75
+  {    0.0000000000000000,   -0.3090169943749474,    0.5000000000000000,    0.8090169943749475 }, //  76
+  {    0.0000000000000000,   -0.3090169943749474,    0.5000000000000000,   -0.8090169943749475 }, //  77
+  {    0.0000000000000000,   -0.3090169943749474,   -0.5000000000000000,    0.8090169943749475 }, //  78
+  {    0.0000000000000000,   -0.3090169943749474,   -0.5000000000000000,   -0.8090169943749475 }, //  79
+  {    0.0000000000000000,    0.8090169943749475,    0.3090169943749474,    0.5000000000000000 }, //  80
+  {    0.0000000000000000,    0.8090169943749475,    0.3090169943749474,   -0.5000000000000000 }, //  81
+  {    0.0000000000000000,    0.8090169943749475,   -0.3090169943749474,    0.5000000000000000 }, //  82
+  {    0.0000000000000000,    0.8090169943749475,   -0.3090169943749474,   -0.5000000000000000 }, //  83
+  {    0.0000000000000000,   -0.8090169943749475,    0.3090169943749474,    0.5000000000000000 }, //  84
+  {    0.0000000000000000,   -0.8090169943749475,    0.3090169943749474,   -0.5000000000000000 }, //  85
+  {    0.0000000000000000,   -0.8090169943749475,   -0.3090169943749474,    0.5000000000000000 }, //  86
+  {    0.0000000000000000,   -0.8090169943749475,   -0.3090169943749474,   -0.5000000000000000 }, //  87
+  {    0.5000000000000000,    0.0000000000000000,    0.3090169943749474,    0.8090169943749475 }, //  88
+  {    0.5000000000000000,    0.0000000000000000,    0.3090169943749474,   -0.8090169943749475 }, //  89
+  {    0.5000000000000000,    0.0000000000000000,   -0.3090169943749474,    0.8090169943749475 }, //  90
+  {    0.5000000000000000,    0.0000000000000000,   -0.3090169943749474,   -0.8090169943749475 }, //  91
+  {   -0.5000000000000000,    0.0000000000000000,    0.3090169943749474,    0.8090169943749475 }, //  92
+  {   -0.5000000000000000,    0.0000000000000000,    0.3090169943749474,   -0.8090169943749475 }, //  93
+  {   -0.5000000000000000,    0.0000000000000000,   -0.3090169943749474,    0.8090169943749475 }, //  94
+  {   -0.5000000000000000,    0.0000000000000000,   -0.3090169943749474,   -0.8090169943749475 }, //  95
+  {    0.3090169943749474,    0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, //  96
+  {    0.3090169943749474,    0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, //  97
+  {    0.3090169943749474,   -0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, //  98
+  {    0.3090169943749474,   -0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, //  99
+  {   -0.3090169943749474,    0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, // 100
+  {   -0.3090169943749474,    0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, // 101
+  {   -0.3090169943749474,   -0.5000000000000000,    0.0000000000000000,    0.8090169943749475 }, // 102
+  {   -0.3090169943749474,   -0.5000000000000000,    0.0000000000000000,   -0.8090169943749475 }, // 103
+  {    0.0000000000000000,    0.5000000000000000,    0.8090169943749475,    0.3090169943749474 }, // 104
+  {    0.0000000000000000,    0.5000000000000000,    0.8090169943749475,   -0.3090169943749474 }, // 105
+  {    0.0000000000000000,    0.5000000000000000,   -0.8090169943749475,    0.3090169943749474 }, // 106
+  {    0.0000000000000000,    0.5000000000000000,   -0.8090169943749475,   -0.3090169943749474 }, // 107
+  {    0.0000000000000000,   -0.5000000000000000,    0.8090169943749475,    0.3090169943749474 }, // 108
+  {    0.0000000000000000,   -0.5000000000000000,    0.8090169943749475,   -0.3090169943749474 }, // 109
+  {    0.0000000000000000,   -0.5000000000000000,   -0.8090169943749475,    0.3090169943749474 }, // 110
+  {    0.0000000000000000,   -0.5000000000000000,   -0.8090169943749475,   -0.3090169943749474 }, // 111
+  {    0.3090169943749474,    0.0000000000000000,    0.8090169943749475,    0.5000000000000000 }, // 112
+  {    0.3090169943749474,    0.0000000000000000,    0.8090169943749475,   -0.5000000000000000 }, // 113
+  {    0.3090169943749474,    0.0000000000000000,   -0.8090169943749475,    0.5000000000000000 }, // 114
+  {    0.3090169943749474,    0.0000000000000000,   -0.8090169943749475,   -0.5000000000000000 }, // 115
+  {   -0.3090169943749474,    0.0000000000000000,    0.8090169943749475,    0.5000000000000000 }, // 116
+  {   -0.3090169943749474,    0.0000000000000000,    0.8090169943749475,   -0.5000000000000000 }, // 117
+  {   -0.3090169943749474,    0.0000000000000000,   -0.8090169943749475,    0.5000000000000000 }, // 118
+  {   -0.3090169943749474,    0.0000000000000000,   -0.8090169943749475,   -0.5000000000000000 }, // 119
 };
 int edgeK600[720][2] = { // Vertex pairs defining each edge, in edge order
   {    0,   24 }, //   0
@@ -17149,8 +17186,8 @@ int faceToVertK600[1200][3] = { // Vertices for each face, in face order
   {  110,  118,  114 }, //1198
   {  111,  119,  115 }, //1199
 };
-////////// The Edge Length of K600 is     0.618034
-////////// The face Radius of K600 is     0.356822
+////////// The Edge Length of K600 is     0.6180339887498949
+////////// The face Radius of K600 is     0.3568220897730900
 int cellK600[600][4] = { // Faces bordering each cell, in cell order
   {    0,    2,    5,  724 }, //   0
   {    0,    3,    6,  726 }, //   1
@@ -20159,607 +20196,607 @@ int cellToVertK600[600][4] = { // Vertices on each cell, in cell order
   {   84,   86,   98,  102 }, // 598
   {   85,   87,   99,  103 }, // 599
 };
-float cellNormalK600[600][4] = { // Normals of cells, in cell order
-  {    0.707107f,    0.353553f,    0.572061f,    0.218508f }, //   0
-  {    0.572061f,    0.572061f,    0.572061f,    0.135045f }, //   1
-  {    0.790569f,    0.353553f,    0.353553f,    0.353553f }, //   2
-  {    0.707107f,    0.572061f,    0.218508f,    0.353553f }, //   3
-  {    0.572061f,    0.707107f,    0.353553f,    0.218508f }, //   4
-  {    0.572061f,    0.218508f,    0.707107f,    0.353553f }, //   5
-  {    0.353553f,    0.572061f,    0.707107f,    0.218508f }, //   6
-  {    0.353553f,    0.353553f,    0.790569f,    0.353553f }, //   7
-  {    0.707107f,    0.218508f,    0.353553f,    0.572061f }, //   8
-  {    0.572061f,    0.572061f,    0.135045f,    0.572061f }, //   9
-  {    0.572061f,    0.353553f,    0.218508f,    0.707107f }, //  10
-  {    0.572061f,    0.135045f,    0.572061f,    0.572061f }, //  11
-  {    0.353553f,    0.790569f,    0.353553f,    0.353553f }, //  12
-  {    0.218508f,    0.707107f,    0.572061f,    0.353553f }, //  13
-  {    0.353553f,    0.707107f,    0.218508f,    0.572061f }, //  14
-  {    0.218508f,    0.572061f,    0.353553f,    0.707107f }, //  15
-  {    0.135045f,    0.572061f,    0.572061f,    0.572061f }, //  16
-  {    0.353553f,    0.353553f,    0.353553f,    0.790569f }, //  17
-  {    0.353553f,    0.218508f,    0.572061f,    0.707107f }, //  18
-  {    0.218508f,    0.353553f,    0.707107f,    0.572061f }, //  19
-  {    0.707107f,    0.353553f,    0.572061f,   -0.218508f }, //  20
-  {    0.572061f,    0.572061f,    0.572061f,   -0.135045f }, //  21
-  {    0.790569f,    0.353553f,    0.353553f,   -0.353553f }, //  22
-  {    0.707107f,    0.572061f,    0.218508f,   -0.353553f }, //  23
-  {    0.572061f,    0.707107f,    0.353553f,   -0.218508f }, //  24
-  {    0.572061f,    0.218508f,    0.707107f,   -0.353553f }, //  25
-  {    0.353553f,    0.572061f,    0.707107f,   -0.218508f }, //  26
-  {    0.353553f,    0.353553f,    0.790569f,   -0.353553f }, //  27
-  {    0.707107f,    0.218508f,    0.353553f,   -0.572061f }, //  28
-  {    0.572061f,    0.572061f,    0.135045f,   -0.572061f }, //  29
-  {    0.572061f,    0.353553f,    0.218508f,   -0.707107f }, //  30
-  {    0.572061f,    0.135045f,    0.572061f,   -0.572061f }, //  31
-  {    0.353553f,    0.790569f,    0.353553f,   -0.353553f }, //  32
-  {    0.218508f,    0.707107f,    0.572061f,   -0.353553f }, //  33
-  {    0.353553f,    0.707107f,    0.218508f,   -0.572061f }, //  34
-  {    0.218508f,    0.572061f,    0.353553f,   -0.707107f }, //  35
-  {    0.135045f,    0.572061f,    0.572061f,   -0.572061f }, //  36
-  {    0.353553f,    0.353553f,    0.353553f,   -0.790569f }, //  37
-  {    0.353553f,    0.218508f,    0.572061f,   -0.707107f }, //  38
-  {    0.218508f,    0.353553f,    0.707107f,   -0.572061f }, //  39
-  {    0.707107f,    0.353553f,   -0.572061f,    0.218508f }, //  40
-  {    0.572061f,    0.572061f,   -0.572061f,    0.135045f }, //  41
-  {    0.790569f,    0.353553f,   -0.353553f,    0.353553f }, //  42
-  {    0.707107f,    0.572061f,   -0.218508f,    0.353553f }, //  43
-  {    0.572061f,    0.707107f,   -0.353553f,    0.218508f }, //  44
-  {    0.572061f,    0.218508f,   -0.707107f,    0.353553f }, //  45
-  {    0.353553f,    0.572061f,   -0.707107f,    0.218508f }, //  46
-  {    0.353553f,    0.353553f,   -0.790569f,    0.353553f }, //  47
-  {    0.707107f,    0.218508f,   -0.353553f,    0.572061f }, //  48
-  {    0.572061f,    0.572061f,   -0.135045f,    0.572061f }, //  49
-  {    0.572061f,    0.353553f,   -0.218508f,    0.707107f }, //  50
-  {    0.572061f,    0.135045f,   -0.572061f,    0.572061f }, //  51
-  {    0.353553f,    0.790569f,   -0.353553f,    0.353553f }, //  52
-  {    0.218508f,    0.707107f,   -0.572061f,    0.353553f }, //  53
-  {    0.353553f,    0.707107f,   -0.218508f,    0.572061f }, //  54
-  {    0.218508f,    0.572061f,   -0.353553f,    0.707107f }, //  55
-  {    0.135045f,    0.572061f,   -0.572061f,    0.572061f }, //  56
-  {    0.353553f,    0.353553f,   -0.353553f,    0.790569f }, //  57
-  {    0.353553f,    0.218508f,   -0.572061f,    0.707107f }, //  58
-  {    0.218508f,    0.353553f,   -0.707107f,    0.572061f }, //  59
-  {    0.707107f,    0.353553f,   -0.572061f,   -0.218508f }, //  60
-  {    0.572061f,    0.572061f,   -0.572061f,   -0.135045f }, //  61
-  {    0.790569f,    0.353553f,   -0.353553f,   -0.353553f }, //  62
-  {    0.707107f,    0.572061f,   -0.218508f,   -0.353553f }, //  63
-  {    0.572061f,    0.707107f,   -0.353553f,   -0.218508f }, //  64
-  {    0.572061f,    0.218508f,   -0.707107f,   -0.353553f }, //  65
-  {    0.353553f,    0.572061f,   -0.707107f,   -0.218508f }, //  66
-  {    0.353553f,    0.353553f,   -0.790569f,   -0.353553f }, //  67
-  {    0.707107f,    0.218508f,   -0.353553f,   -0.572061f }, //  68
-  {    0.572061f,    0.572061f,   -0.135045f,   -0.572061f }, //  69
-  {    0.572061f,    0.353553f,   -0.218508f,   -0.707107f }, //  70
-  {    0.572061f,    0.135045f,   -0.572061f,   -0.572061f }, //  71
-  {    0.353553f,    0.790569f,   -0.353553f,   -0.353553f }, //  72
-  {    0.218508f,    0.707107f,   -0.572061f,   -0.353553f }, //  73
-  {    0.353553f,    0.707107f,   -0.218508f,   -0.572061f }, //  74
-  {    0.218508f,    0.572061f,   -0.353553f,   -0.707107f }, //  75
-  {    0.135045f,    0.572061f,   -0.572061f,   -0.572061f }, //  76
-  {    0.353553f,    0.353553f,   -0.353553f,   -0.790569f }, //  77
-  {    0.353553f,    0.218508f,   -0.572061f,   -0.707107f }, //  78
-  {    0.218508f,    0.353553f,   -0.707107f,   -0.572061f }, //  79
-  {    0.707107f,   -0.353553f,    0.572061f,    0.218508f }, //  80
-  {    0.572061f,   -0.572061f,    0.572061f,    0.135045f }, //  81
-  {    0.790569f,   -0.353553f,    0.353553f,    0.353553f }, //  82
-  {    0.707107f,   -0.572061f,    0.218508f,    0.353553f }, //  83
-  {    0.572061f,   -0.707107f,    0.353553f,    0.218508f }, //  84
-  {    0.572061f,   -0.218508f,    0.707107f,    0.353553f }, //  85
-  {    0.353553f,   -0.572061f,    0.707107f,    0.218508f }, //  86
-  {    0.353553f,   -0.353553f,    0.790569f,    0.353553f }, //  87
-  {    0.707107f,   -0.218508f,    0.353553f,    0.572061f }, //  88
-  {    0.572061f,   -0.572061f,    0.135045f,    0.572061f }, //  89
-  {    0.572061f,   -0.353553f,    0.218508f,    0.707107f }, //  90
-  {    0.572061f,   -0.135045f,    0.572061f,    0.572061f }, //  91
-  {    0.353553f,   -0.790569f,    0.353553f,    0.353553f }, //  92
-  {    0.218508f,   -0.707107f,    0.572061f,    0.353553f }, //  93
-  {    0.353553f,   -0.707107f,    0.218508f,    0.572061f }, //  94
-  {    0.218508f,   -0.572061f,    0.353553f,    0.707107f }, //  95
-  {    0.135045f,   -0.572061f,    0.572061f,    0.572061f }, //  96
-  {    0.353553f,   -0.353553f,    0.353553f,    0.790569f }, //  97
-  {    0.353553f,   -0.218508f,    0.572061f,    0.707107f }, //  98
-  {    0.218508f,   -0.353553f,    0.707107f,    0.572061f }, //  99
-  {    0.707107f,   -0.353553f,    0.572061f,   -0.218508f }, // 100
-  {    0.572061f,   -0.572061f,    0.572061f,   -0.135045f }, // 101
-  {    0.790569f,   -0.353553f,    0.353553f,   -0.353553f }, // 102
-  {    0.707107f,   -0.572061f,    0.218508f,   -0.353553f }, // 103
-  {    0.572061f,   -0.707107f,    0.353553f,   -0.218508f }, // 104
-  {    0.572061f,   -0.218508f,    0.707107f,   -0.353553f }, // 105
-  {    0.353553f,   -0.572061f,    0.707107f,   -0.218508f }, // 106
-  {    0.353553f,   -0.353553f,    0.790569f,   -0.353553f }, // 107
-  {    0.707107f,   -0.218508f,    0.353553f,   -0.572061f }, // 108
-  {    0.572061f,   -0.572061f,    0.135045f,   -0.572061f }, // 109
-  {    0.572061f,   -0.353553f,    0.218508f,   -0.707107f }, // 110
-  {    0.572061f,   -0.135045f,    0.572061f,   -0.572061f }, // 111
-  {    0.353553f,   -0.790569f,    0.353553f,   -0.353553f }, // 112
-  {    0.218508f,   -0.707107f,    0.572061f,   -0.353553f }, // 113
-  {    0.353553f,   -0.707107f,    0.218508f,   -0.572061f }, // 114
-  {    0.218508f,   -0.572061f,    0.353553f,   -0.707107f }, // 115
-  {    0.135045f,   -0.572061f,    0.572061f,   -0.572061f }, // 116
-  {    0.353553f,   -0.353553f,    0.353553f,   -0.790569f }, // 117
-  {    0.353553f,   -0.218508f,    0.572061f,   -0.707107f }, // 118
-  {    0.218508f,   -0.353553f,    0.707107f,   -0.572061f }, // 119
-  {    0.707107f,   -0.353553f,   -0.572061f,    0.218508f }, // 120
-  {    0.572061f,   -0.572061f,   -0.572061f,    0.135045f }, // 121
-  {    0.790569f,   -0.353553f,   -0.353553f,    0.353553f }, // 122
-  {    0.707107f,   -0.572061f,   -0.218508f,    0.353553f }, // 123
-  {    0.572061f,   -0.707107f,   -0.353553f,    0.218508f }, // 124
-  {    0.572061f,   -0.218508f,   -0.707107f,    0.353553f }, // 125
-  {    0.353553f,   -0.572061f,   -0.707107f,    0.218508f }, // 126
-  {    0.353553f,   -0.353553f,   -0.790569f,    0.353553f }, // 127
-  {    0.707107f,   -0.218508f,   -0.353553f,    0.572061f }, // 128
-  {    0.572061f,   -0.572061f,   -0.135045f,    0.572061f }, // 129
-  {    0.572061f,   -0.353553f,   -0.218508f,    0.707107f }, // 130
-  {    0.572061f,   -0.135045f,   -0.572061f,    0.572061f }, // 131
-  {    0.353553f,   -0.790569f,   -0.353553f,    0.353553f }, // 132
-  {    0.218508f,   -0.707107f,   -0.572061f,    0.353553f }, // 133
-  {    0.353553f,   -0.707107f,   -0.218508f,    0.572061f }, // 134
-  {    0.218508f,   -0.572061f,   -0.353553f,    0.707107f }, // 135
-  {    0.135045f,   -0.572061f,   -0.572061f,    0.572061f }, // 136
-  {    0.353553f,   -0.353553f,   -0.353553f,    0.790569f }, // 137
-  {    0.353553f,   -0.218508f,   -0.572061f,    0.707107f }, // 138
-  {    0.218508f,   -0.353553f,   -0.707107f,    0.572061f }, // 139
-  {    0.707107f,   -0.353553f,   -0.572061f,   -0.218508f }, // 140
-  {    0.572061f,   -0.572061f,   -0.572061f,   -0.135045f }, // 141
-  {    0.790569f,   -0.353553f,   -0.353553f,   -0.353553f }, // 142
-  {    0.707107f,   -0.572061f,   -0.218508f,   -0.353553f }, // 143
-  {    0.572061f,   -0.707107f,   -0.353553f,   -0.218508f }, // 144
-  {    0.572061f,   -0.218508f,   -0.707107f,   -0.353553f }, // 145
-  {    0.353553f,   -0.572061f,   -0.707107f,   -0.218508f }, // 146
-  {    0.353553f,   -0.353553f,   -0.790569f,   -0.353553f }, // 147
-  {    0.707107f,   -0.218508f,   -0.353553f,   -0.572061f }, // 148
-  {    0.572061f,   -0.572061f,   -0.135045f,   -0.572061f }, // 149
-  {    0.572061f,   -0.353553f,   -0.218508f,   -0.707107f }, // 150
-  {    0.572061f,   -0.135045f,   -0.572061f,   -0.572061f }, // 151
-  {    0.353553f,   -0.790569f,   -0.353553f,   -0.353553f }, // 152
-  {    0.218508f,   -0.707107f,   -0.572061f,   -0.353553f }, // 153
-  {    0.353553f,   -0.707107f,   -0.218508f,   -0.572061f }, // 154
-  {    0.218508f,   -0.572061f,   -0.353553f,   -0.707107f }, // 155
-  {    0.135045f,   -0.572061f,   -0.572061f,   -0.572061f }, // 156
-  {    0.353553f,   -0.353553f,   -0.353553f,   -0.790569f }, // 157
-  {    0.353553f,   -0.218508f,   -0.572061f,   -0.707107f }, // 158
-  {    0.218508f,   -0.353553f,   -0.707107f,   -0.572061f }, // 159
-  {   -0.707107f,    0.353553f,    0.572061f,    0.218508f }, // 160
-  {   -0.572061f,    0.572061f,    0.572061f,    0.135045f }, // 161
-  {   -0.790569f,    0.353553f,    0.353553f,    0.353553f }, // 162
-  {   -0.707107f,    0.572061f,    0.218508f,    0.353553f }, // 163
-  {   -0.572061f,    0.707107f,    0.353553f,    0.218508f }, // 164
-  {   -0.572061f,    0.218508f,    0.707107f,    0.353553f }, // 165
-  {   -0.353553f,    0.572061f,    0.707107f,    0.218508f }, // 166
-  {   -0.353553f,    0.353553f,    0.790569f,    0.353553f }, // 167
-  {   -0.707107f,    0.218508f,    0.353553f,    0.572061f }, // 168
-  {   -0.572061f,    0.572061f,    0.135045f,    0.572061f }, // 169
-  {   -0.572061f,    0.353553f,    0.218508f,    0.707107f }, // 170
-  {   -0.572061f,    0.135045f,    0.572061f,    0.572061f }, // 171
-  {   -0.353553f,    0.790569f,    0.353553f,    0.353553f }, // 172
-  {   -0.218508f,    0.707107f,    0.572061f,    0.353553f }, // 173
-  {   -0.353553f,    0.707107f,    0.218508f,    0.572061f }, // 174
-  {   -0.218508f,    0.572061f,    0.353553f,    0.707107f }, // 175
-  {   -0.135045f,    0.572061f,    0.572061f,    0.572061f }, // 176
-  {   -0.353553f,    0.353553f,    0.353553f,    0.790569f }, // 177
-  {   -0.353553f,    0.218508f,    0.572061f,    0.707107f }, // 178
-  {   -0.218508f,    0.353553f,    0.707107f,    0.572061f }, // 179
-  {   -0.707107f,    0.353553f,    0.572061f,   -0.218508f }, // 180
-  {   -0.572061f,    0.572061f,    0.572061f,   -0.135045f }, // 181
-  {   -0.790569f,    0.353553f,    0.353553f,   -0.353553f }, // 182
-  {   -0.707107f,    0.572061f,    0.218508f,   -0.353553f }, // 183
-  {   -0.572061f,    0.707107f,    0.353553f,   -0.218508f }, // 184
-  {   -0.572061f,    0.218508f,    0.707107f,   -0.353553f }, // 185
-  {   -0.353553f,    0.572061f,    0.707107f,   -0.218508f }, // 186
-  {   -0.353553f,    0.353553f,    0.790569f,   -0.353553f }, // 187
-  {   -0.707107f,    0.218508f,    0.353553f,   -0.572061f }, // 188
-  {   -0.572061f,    0.572061f,    0.135045f,   -0.572061f }, // 189
-  {   -0.572061f,    0.353553f,    0.218508f,   -0.707107f }, // 190
-  {   -0.572061f,    0.135045f,    0.572061f,   -0.572061f }, // 191
-  {   -0.353553f,    0.790569f,    0.353553f,   -0.353553f }, // 192
-  {   -0.218508f,    0.707107f,    0.572061f,   -0.353553f }, // 193
-  {   -0.353553f,    0.707107f,    0.218508f,   -0.572061f }, // 194
-  {   -0.218508f,    0.572061f,    0.353553f,   -0.707107f }, // 195
-  {   -0.135045f,    0.572061f,    0.572061f,   -0.572061f }, // 196
-  {   -0.353553f,    0.353553f,    0.353553f,   -0.790569f }, // 197
-  {   -0.353553f,    0.218508f,    0.572061f,   -0.707107f }, // 198
-  {   -0.218508f,    0.353553f,    0.707107f,   -0.572061f }, // 199
-  {   -0.707107f,    0.353553f,   -0.572061f,    0.218508f }, // 200
-  {   -0.572061f,    0.572061f,   -0.572061f,    0.135045f }, // 201
-  {   -0.790569f,    0.353553f,   -0.353553f,    0.353553f }, // 202
-  {   -0.707107f,    0.572061f,   -0.218508f,    0.353553f }, // 203
-  {   -0.572061f,    0.707107f,   -0.353553f,    0.218508f }, // 204
-  {   -0.572061f,    0.218508f,   -0.707107f,    0.353553f }, // 205
-  {   -0.353553f,    0.572061f,   -0.707107f,    0.218508f }, // 206
-  {   -0.353553f,    0.353553f,   -0.790569f,    0.353553f }, // 207
-  {   -0.707107f,    0.218508f,   -0.353553f,    0.572061f }, // 208
-  {   -0.572061f,    0.572061f,   -0.135045f,    0.572061f }, // 209
-  {   -0.572061f,    0.353553f,   -0.218508f,    0.707107f }, // 210
-  {   -0.572061f,    0.135045f,   -0.572061f,    0.572061f }, // 211
-  {   -0.353553f,    0.790569f,   -0.353553f,    0.353553f }, // 212
-  {   -0.218508f,    0.707107f,   -0.572061f,    0.353553f }, // 213
-  {   -0.353553f,    0.707107f,   -0.218508f,    0.572061f }, // 214
-  {   -0.218508f,    0.572061f,   -0.353553f,    0.707107f }, // 215
-  {   -0.135045f,    0.572061f,   -0.572061f,    0.572061f }, // 216
-  {   -0.353553f,    0.353553f,   -0.353553f,    0.790569f }, // 217
-  {   -0.353553f,    0.218508f,   -0.572061f,    0.707107f }, // 218
-  {   -0.218508f,    0.353553f,   -0.707107f,    0.572061f }, // 219
-  {   -0.707107f,    0.353553f,   -0.572061f,   -0.218508f }, // 220
-  {   -0.572061f,    0.572061f,   -0.572061f,   -0.135045f }, // 221
-  {   -0.790569f,    0.353553f,   -0.353553f,   -0.353553f }, // 222
-  {   -0.707107f,    0.572061f,   -0.218508f,   -0.353553f }, // 223
-  {   -0.572061f,    0.707107f,   -0.353553f,   -0.218508f }, // 224
-  {   -0.572061f,    0.218508f,   -0.707107f,   -0.353553f }, // 225
-  {   -0.353553f,    0.572061f,   -0.707107f,   -0.218508f }, // 226
-  {   -0.353553f,    0.353553f,   -0.790569f,   -0.353553f }, // 227
-  {   -0.707107f,    0.218508f,   -0.353553f,   -0.572061f }, // 228
-  {   -0.572061f,    0.572061f,   -0.135045f,   -0.572061f }, // 229
-  {   -0.572061f,    0.353553f,   -0.218508f,   -0.707107f }, // 230
-  {   -0.572061f,    0.135045f,   -0.572061f,   -0.572061f }, // 231
-  {   -0.353553f,    0.790569f,   -0.353553f,   -0.353553f }, // 232
-  {   -0.218508f,    0.707107f,   -0.572061f,   -0.353553f }, // 233
-  {   -0.353553f,    0.707107f,   -0.218508f,   -0.572061f }, // 234
-  {   -0.218508f,    0.572061f,   -0.353553f,   -0.707107f }, // 235
-  {   -0.135045f,    0.572061f,   -0.572061f,   -0.572061f }, // 236
-  {   -0.353553f,    0.353553f,   -0.353553f,   -0.790569f }, // 237
-  {   -0.353553f,    0.218508f,   -0.572061f,   -0.707107f }, // 238
-  {   -0.218508f,    0.353553f,   -0.707107f,   -0.572061f }, // 239
-  {   -0.707107f,   -0.353553f,    0.572061f,    0.218508f }, // 240
-  {   -0.572061f,   -0.572061f,    0.572061f,    0.135045f }, // 241
-  {   -0.790569f,   -0.353553f,    0.353553f,    0.353553f }, // 242
-  {   -0.707107f,   -0.572061f,    0.218508f,    0.353553f }, // 243
-  {   -0.572061f,   -0.707107f,    0.353553f,    0.218508f }, // 244
-  {   -0.572061f,   -0.218508f,    0.707107f,    0.353553f }, // 245
-  {   -0.353553f,   -0.572061f,    0.707107f,    0.218508f }, // 246
-  {   -0.353553f,   -0.353553f,    0.790569f,    0.353553f }, // 247
-  {   -0.707107f,   -0.218508f,    0.353553f,    0.572061f }, // 248
-  {   -0.572061f,   -0.572061f,    0.135045f,    0.572061f }, // 249
-  {   -0.572061f,   -0.353553f,    0.218508f,    0.707107f }, // 250
-  {   -0.572061f,   -0.135045f,    0.572061f,    0.572061f }, // 251
-  {   -0.353553f,   -0.790569f,    0.353553f,    0.353553f }, // 252
-  {   -0.218508f,   -0.707107f,    0.572061f,    0.353553f }, // 253
-  {   -0.353553f,   -0.707107f,    0.218508f,    0.572061f }, // 254
-  {   -0.218508f,   -0.572061f,    0.353553f,    0.707107f }, // 255
-  {   -0.135045f,   -0.572061f,    0.572061f,    0.572061f }, // 256
-  {   -0.353553f,   -0.353553f,    0.353553f,    0.790569f }, // 257
-  {   -0.353553f,   -0.218508f,    0.572061f,    0.707107f }, // 258
-  {   -0.218508f,   -0.353553f,    0.707107f,    0.572061f }, // 259
-  {   -0.707107f,   -0.353553f,    0.572061f,   -0.218508f }, // 260
-  {   -0.572061f,   -0.572061f,    0.572061f,   -0.135045f }, // 261
-  {   -0.790569f,   -0.353553f,    0.353553f,   -0.353553f }, // 262
-  {   -0.707107f,   -0.572061f,    0.218508f,   -0.353553f }, // 263
-  {   -0.572061f,   -0.707107f,    0.353553f,   -0.218508f }, // 264
-  {   -0.572061f,   -0.218508f,    0.707107f,   -0.353553f }, // 265
-  {   -0.353553f,   -0.572061f,    0.707107f,   -0.218508f }, // 266
-  {   -0.353553f,   -0.353553f,    0.790569f,   -0.353553f }, // 267
-  {   -0.707107f,   -0.218508f,    0.353553f,   -0.572061f }, // 268
-  {   -0.572061f,   -0.572061f,    0.135045f,   -0.572061f }, // 269
-  {   -0.572061f,   -0.353553f,    0.218508f,   -0.707107f }, // 270
-  {   -0.572061f,   -0.135045f,    0.572061f,   -0.572061f }, // 271
-  {   -0.353553f,   -0.790569f,    0.353553f,   -0.353553f }, // 272
-  {   -0.218508f,   -0.707107f,    0.572061f,   -0.353553f }, // 273
-  {   -0.353553f,   -0.707107f,    0.218508f,   -0.572061f }, // 274
-  {   -0.218508f,   -0.572061f,    0.353553f,   -0.707107f }, // 275
-  {   -0.135045f,   -0.572061f,    0.572061f,   -0.572061f }, // 276
-  {   -0.353553f,   -0.353553f,    0.353553f,   -0.790569f }, // 277
-  {   -0.353553f,   -0.218508f,    0.572061f,   -0.707107f }, // 278
-  {   -0.218508f,   -0.353553f,    0.707107f,   -0.572061f }, // 279
-  {   -0.707107f,   -0.353553f,   -0.572061f,    0.218508f }, // 280
-  {   -0.572061f,   -0.572061f,   -0.572061f,    0.135045f }, // 281
-  {   -0.790569f,   -0.353553f,   -0.353553f,    0.353553f }, // 282
-  {   -0.707107f,   -0.572061f,   -0.218508f,    0.353553f }, // 283
-  {   -0.572061f,   -0.707107f,   -0.353553f,    0.218508f }, // 284
-  {   -0.572061f,   -0.218508f,   -0.707107f,    0.353553f }, // 285
-  {   -0.353553f,   -0.572061f,   -0.707107f,    0.218508f }, // 286
-  {   -0.353553f,   -0.353553f,   -0.790569f,    0.353553f }, // 287
-  {   -0.707107f,   -0.218508f,   -0.353553f,    0.572061f }, // 288
-  {   -0.572061f,   -0.572061f,   -0.135045f,    0.572061f }, // 289
-  {   -0.572061f,   -0.353553f,   -0.218508f,    0.707107f }, // 290
-  {   -0.572061f,   -0.135045f,   -0.572061f,    0.572061f }, // 291
-  {   -0.353553f,   -0.790569f,   -0.353553f,    0.353553f }, // 292
-  {   -0.218508f,   -0.707107f,   -0.572061f,    0.353553f }, // 293
-  {   -0.353553f,   -0.707107f,   -0.218508f,    0.572061f }, // 294
-  {   -0.218508f,   -0.572061f,   -0.353553f,    0.707107f }, // 295
-  {   -0.135045f,   -0.572061f,   -0.572061f,    0.572061f }, // 296
-  {   -0.353553f,   -0.353553f,   -0.353553f,    0.790569f }, // 297
-  {   -0.353553f,   -0.218508f,   -0.572061f,    0.707107f }, // 298
-  {   -0.218508f,   -0.353553f,   -0.707107f,    0.572061f }, // 299
-  {   -0.707107f,   -0.353553f,   -0.572061f,   -0.218508f }, // 300
-  {   -0.572061f,   -0.572061f,   -0.572061f,   -0.135045f }, // 301
-  {   -0.790569f,   -0.353553f,   -0.353553f,   -0.353553f }, // 302
-  {   -0.707107f,   -0.572061f,   -0.218508f,   -0.353553f }, // 303
-  {   -0.572061f,   -0.707107f,   -0.353553f,   -0.218508f }, // 304
-  {   -0.572061f,   -0.218508f,   -0.707107f,   -0.353553f }, // 305
-  {   -0.353553f,   -0.572061f,   -0.707107f,   -0.218508f }, // 306
-  {   -0.353553f,   -0.353553f,   -0.790569f,   -0.353553f }, // 307
-  {   -0.707107f,   -0.218508f,   -0.353553f,   -0.572061f }, // 308
-  {   -0.572061f,   -0.572061f,   -0.135045f,   -0.572061f }, // 309
-  {   -0.572061f,   -0.353553f,   -0.218508f,   -0.707107f }, // 310
-  {   -0.572061f,   -0.135045f,   -0.572061f,   -0.572061f }, // 311
-  {   -0.353553f,   -0.790569f,   -0.353553f,   -0.353553f }, // 312
-  {   -0.218508f,   -0.707107f,   -0.572061f,   -0.353553f }, // 313
-  {   -0.353553f,   -0.707107f,   -0.218508f,   -0.572061f }, // 314
-  {   -0.218508f,   -0.572061f,   -0.353553f,   -0.707107f }, // 315
-  {   -0.135045f,   -0.572061f,   -0.572061f,   -0.572061f }, // 316
-  {   -0.353553f,   -0.353553f,   -0.353553f,   -0.790569f }, // 317
-  {   -0.353553f,   -0.218508f,   -0.572061f,   -0.707107f }, // 318
-  {   -0.218508f,   -0.353553f,   -0.707107f,   -0.572061f }, // 319
-  {    0.135045f,    0.000000f,    0.353553f,    0.925615f }, // 320
-  {   -0.135045f,    0.000000f,    0.353553f,    0.925615f }, // 321
-  {    0.218508f,    0.218508f,    0.218508f,    0.925615f }, // 322
-  {   -0.218508f,    0.218508f,    0.218508f,    0.925615f }, // 323
-  {    0.000000f,    0.353553f,    0.135045f,    0.925615f }, // 324
-  {    0.135045f,    0.000000f,   -0.353553f,    0.925615f }, // 325
-  {   -0.135045f,    0.000000f,   -0.353553f,    0.925615f }, // 326
-  {    0.218508f,    0.218508f,   -0.218508f,    0.925615f }, // 327
-  {   -0.218508f,    0.218508f,   -0.218508f,    0.925615f }, // 328
-  {    0.000000f,    0.353553f,   -0.135045f,    0.925615f }, // 329
-  {    0.218508f,   -0.218508f,    0.218508f,    0.925615f }, // 330
-  {   -0.218508f,   -0.218508f,    0.218508f,    0.925615f }, // 331
-  {    0.000000f,   -0.353553f,    0.135045f,    0.925615f }, // 332
-  {    0.218508f,   -0.218508f,   -0.218508f,    0.925615f }, // 333
-  {   -0.218508f,   -0.218508f,   -0.218508f,    0.925615f }, // 334
-  {    0.000000f,   -0.353553f,   -0.135045f,    0.925615f }, // 335
-  {    0.353553f,    0.135045f,    0.000000f,    0.925615f }, // 336
-  {    0.353553f,   -0.135045f,    0.000000f,    0.925615f }, // 337
-  {   -0.353553f,    0.135045f,    0.000000f,    0.925615f }, // 338
-  {   -0.353553f,   -0.135045f,    0.000000f,    0.925615f }, // 339
-  {    0.135045f,    0.000000f,    0.353553f,   -0.925615f }, // 340
-  {   -0.135045f,    0.000000f,    0.353553f,   -0.925615f }, // 341
-  {    0.218508f,    0.218508f,    0.218508f,   -0.925615f }, // 342
-  {   -0.218508f,    0.218508f,    0.218508f,   -0.925615f }, // 343
-  {    0.000000f,    0.353553f,    0.135045f,   -0.925615f }, // 344
-  {    0.135045f,    0.000000f,   -0.353553f,   -0.925615f }, // 345
-  {   -0.135045f,    0.000000f,   -0.353553f,   -0.925615f }, // 346
-  {    0.218508f,    0.218508f,   -0.218508f,   -0.925615f }, // 347
-  {   -0.218508f,    0.218508f,   -0.218508f,   -0.925615f }, // 348
-  {    0.000000f,    0.353553f,   -0.135045f,   -0.925615f }, // 349
-  {    0.218508f,   -0.218508f,    0.218508f,   -0.925615f }, // 350
-  {   -0.218508f,   -0.218508f,    0.218508f,   -0.925615f }, // 351
-  {    0.000000f,   -0.353553f,    0.135045f,   -0.925615f }, // 352
-  {    0.218508f,   -0.218508f,   -0.218508f,   -0.925615f }, // 353
-  {   -0.218508f,   -0.218508f,   -0.218508f,   -0.925615f }, // 354
-  {    0.000000f,   -0.353553f,   -0.135045f,   -0.925615f }, // 355
-  {    0.353553f,    0.135045f,    0.000000f,   -0.925615f }, // 356
-  {    0.353553f,   -0.135045f,    0.000000f,   -0.925615f }, // 357
-  {   -0.353553f,    0.135045f,    0.000000f,   -0.925615f }, // 358
-  {   -0.353553f,   -0.135045f,    0.000000f,   -0.925615f }, // 359
-  {    0.353553f,    0.000000f,    0.925615f,    0.135045f }, // 360
-  {    0.353553f,    0.000000f,    0.925615f,   -0.135045f }, // 361
-  {    0.135045f,    0.353553f,    0.925615f,    0.000000f }, // 362
-  {    0.218508f,    0.218508f,    0.925615f,    0.218508f }, // 363
-  {    0.218508f,    0.218508f,    0.925615f,   -0.218508f }, // 364
-  {    0.135045f,   -0.353553f,    0.925615f,    0.000000f }, // 365
-  {    0.218508f,   -0.218508f,    0.925615f,    0.218508f }, // 366
-  {    0.218508f,   -0.218508f,    0.925615f,   -0.218508f }, // 367
-  {   -0.353553f,    0.000000f,    0.925615f,    0.135045f }, // 368
-  {   -0.353553f,    0.000000f,    0.925615f,   -0.135045f }, // 369
-  {   -0.135045f,    0.353553f,    0.925615f,    0.000000f }, // 370
-  {   -0.218508f,    0.218508f,    0.925615f,    0.218508f }, // 371
-  {   -0.218508f,    0.218508f,    0.925615f,   -0.218508f }, // 372
-  {   -0.135045f,   -0.353553f,    0.925615f,    0.000000f }, // 373
-  {   -0.218508f,   -0.218508f,    0.925615f,    0.218508f }, // 374
-  {   -0.218508f,   -0.218508f,    0.925615f,   -0.218508f }, // 375
-  {    0.000000f,    0.135045f,    0.925615f,    0.353553f }, // 376
-  {    0.000000f,    0.135045f,    0.925615f,   -0.353553f }, // 377
-  {    0.000000f,   -0.135045f,    0.925615f,    0.353553f }, // 378
-  {    0.000000f,   -0.135045f,    0.925615f,   -0.353553f }, // 379
-  {    0.353553f,    0.000000f,   -0.925615f,    0.135045f }, // 380
-  {    0.353553f,    0.000000f,   -0.925615f,   -0.135045f }, // 381
-  {    0.135045f,    0.353553f,   -0.925615f,    0.000000f }, // 382
-  {    0.218508f,    0.218508f,   -0.925615f,    0.218508f }, // 383
-  {    0.218508f,    0.218508f,   -0.925615f,   -0.218508f }, // 384
-  {    0.135045f,   -0.353553f,   -0.925615f,    0.000000f }, // 385
-  {    0.218508f,   -0.218508f,   -0.925615f,    0.218508f }, // 386
-  {    0.218508f,   -0.218508f,   -0.925615f,   -0.218508f }, // 387
-  {   -0.353553f,    0.000000f,   -0.925615f,    0.135045f }, // 388
-  {   -0.353553f,    0.000000f,   -0.925615f,   -0.135045f }, // 389
-  {   -0.135045f,    0.353553f,   -0.925615f,    0.000000f }, // 390
-  {   -0.218508f,    0.218508f,   -0.925615f,    0.218508f }, // 391
-  {   -0.218508f,    0.218508f,   -0.925615f,   -0.218508f }, // 392
-  {   -0.135045f,   -0.353553f,   -0.925615f,    0.000000f }, // 393
-  {   -0.218508f,   -0.218508f,   -0.925615f,    0.218508f }, // 394
-  {   -0.218508f,   -0.218508f,   -0.925615f,   -0.218508f }, // 395
-  {    0.000000f,    0.135045f,   -0.925615f,    0.353553f }, // 396
-  {    0.000000f,    0.135045f,   -0.925615f,   -0.353553f }, // 397
-  {    0.000000f,   -0.135045f,   -0.925615f,    0.353553f }, // 398
-  {    0.000000f,   -0.135045f,   -0.925615f,   -0.353553f }, // 399
-  {    0.000000f,    0.925615f,    0.353553f,    0.135045f }, // 400
-  {    0.000000f,    0.925615f,    0.353553f,   -0.135045f }, // 401
-  {    0.353553f,    0.925615f,    0.135045f,    0.000000f }, // 402
-  {    0.218508f,    0.925615f,    0.218508f,    0.218508f }, // 403
-  {    0.218508f,    0.925615f,    0.218508f,   -0.218508f }, // 404
-  {    0.000000f,    0.925615f,   -0.353553f,    0.135045f }, // 405
-  {    0.000000f,    0.925615f,   -0.353553f,   -0.135045f }, // 406
-  {    0.353553f,    0.925615f,   -0.135045f,    0.000000f }, // 407
-  {    0.218508f,    0.925615f,   -0.218508f,    0.218508f }, // 408
-  {    0.218508f,    0.925615f,   -0.218508f,   -0.218508f }, // 409
-  {   -0.353553f,    0.925615f,    0.135045f,    0.000000f }, // 410
-  {   -0.218508f,    0.925615f,    0.218508f,    0.218508f }, // 411
-  {   -0.218508f,    0.925615f,    0.218508f,   -0.218508f }, // 412
-  {   -0.353553f,    0.925615f,   -0.135045f,    0.000000f }, // 413
-  {   -0.218508f,    0.925615f,   -0.218508f,    0.218508f }, // 414
-  {   -0.218508f,    0.925615f,   -0.218508f,   -0.218508f }, // 415
-  {    0.135045f,    0.925615f,    0.000000f,    0.353553f }, // 416
-  {    0.135045f,    0.925615f,    0.000000f,   -0.353553f }, // 417
-  {   -0.135045f,    0.925615f,    0.000000f,    0.353553f }, // 418
-  {   -0.135045f,    0.925615f,    0.000000f,   -0.353553f }, // 419
-  {    0.000000f,   -0.925615f,    0.353553f,    0.135045f }, // 420
-  {    0.000000f,   -0.925615f,    0.353553f,   -0.135045f }, // 421
-  {    0.353553f,   -0.925615f,    0.135045f,    0.000000f }, // 422
-  {    0.218508f,   -0.925615f,    0.218508f,    0.218508f }, // 423
-  {    0.218508f,   -0.925615f,    0.218508f,   -0.218508f }, // 424
-  {    0.000000f,   -0.925615f,   -0.353553f,    0.135045f }, // 425
-  {    0.000000f,   -0.925615f,   -0.353553f,   -0.135045f }, // 426
-  {    0.353553f,   -0.925615f,   -0.135045f,    0.000000f }, // 427
-  {    0.218508f,   -0.925615f,   -0.218508f,    0.218508f }, // 428
-  {    0.218508f,   -0.925615f,   -0.218508f,   -0.218508f }, // 429
-  {   -0.353553f,   -0.925615f,    0.135045f,    0.000000f }, // 430
-  {   -0.218508f,   -0.925615f,    0.218508f,    0.218508f }, // 431
-  {   -0.218508f,   -0.925615f,    0.218508f,   -0.218508f }, // 432
-  {   -0.353553f,   -0.925615f,   -0.135045f,    0.000000f }, // 433
-  {   -0.218508f,   -0.925615f,   -0.218508f,    0.218508f }, // 434
-  {   -0.218508f,   -0.925615f,   -0.218508f,   -0.218508f }, // 435
-  {    0.135045f,   -0.925615f,    0.000000f,    0.353553f }, // 436
-  {    0.135045f,   -0.925615f,    0.000000f,   -0.353553f }, // 437
-  {   -0.135045f,   -0.925615f,    0.000000f,    0.353553f }, // 438
-  {   -0.135045f,   -0.925615f,    0.000000f,   -0.353553f }, // 439
-  {    0.925615f,    0.353553f,    0.000000f,    0.135045f }, // 440
-  {    0.925615f,    0.353553f,    0.000000f,   -0.135045f }, // 441
-  {    0.925615f,    0.218508f,    0.218508f,    0.218508f }, // 442
-  {    0.925615f,    0.218508f,    0.218508f,   -0.218508f }, // 443
-  {    0.925615f,    0.135045f,    0.353553f,    0.000000f }, // 444
-  {    0.925615f,    0.218508f,   -0.218508f,    0.218508f }, // 445
-  {    0.925615f,    0.218508f,   -0.218508f,   -0.218508f }, // 446
-  {    0.925615f,    0.135045f,   -0.353553f,    0.000000f }, // 447
-  {    0.925615f,   -0.353553f,    0.000000f,    0.135045f }, // 448
-  {    0.925615f,   -0.353553f,    0.000000f,   -0.135045f }, // 449
-  {    0.925615f,   -0.218508f,    0.218508f,    0.218508f }, // 450
-  {    0.925615f,   -0.218508f,    0.218508f,   -0.218508f }, // 451
-  {    0.925615f,   -0.135045f,    0.353553f,    0.000000f }, // 452
-  {    0.925615f,   -0.218508f,   -0.218508f,    0.218508f }, // 453
-  {    0.925615f,   -0.218508f,   -0.218508f,   -0.218508f }, // 454
-  {    0.925615f,   -0.135045f,   -0.353553f,    0.000000f }, // 455
-  {    0.925615f,    0.000000f,    0.135045f,    0.353553f }, // 456
-  {    0.925615f,    0.000000f,   -0.135045f,    0.353553f }, // 457
-  {    0.925615f,    0.000000f,    0.135045f,   -0.353553f }, // 458
-  {    0.925615f,    0.000000f,   -0.135045f,   -0.353553f }, // 459
-  {   -0.925615f,    0.353553f,    0.000000f,    0.135045f }, // 460
-  {   -0.925615f,    0.353553f,    0.000000f,   -0.135045f }, // 461
-  {   -0.925615f,    0.218508f,    0.218508f,    0.218508f }, // 462
-  {   -0.925615f,    0.218508f,    0.218508f,   -0.218508f }, // 463
-  {   -0.925615f,    0.135045f,    0.353553f,    0.000000f }, // 464
-  {   -0.925615f,    0.218508f,   -0.218508f,    0.218508f }, // 465
-  {   -0.925615f,    0.218508f,   -0.218508f,   -0.218508f }, // 466
-  {   -0.925615f,    0.135045f,   -0.353553f,    0.000000f }, // 467
-  {   -0.925615f,   -0.353553f,    0.000000f,    0.135045f }, // 468
-  {   -0.925615f,   -0.353553f,    0.000000f,   -0.135045f }, // 469
-  {   -0.925615f,   -0.218508f,    0.218508f,    0.218508f }, // 470
-  {   -0.925615f,   -0.218508f,    0.218508f,   -0.218508f }, // 471
-  {   -0.925615f,   -0.135045f,    0.353553f,    0.000000f }, // 472
-  {   -0.925615f,   -0.218508f,   -0.218508f,    0.218508f }, // 473
-  {   -0.925615f,   -0.218508f,   -0.218508f,   -0.218508f }, // 474
-  {   -0.925615f,   -0.135045f,   -0.353553f,    0.000000f }, // 475
-  {   -0.925615f,    0.000000f,    0.135045f,    0.353553f }, // 476
-  {   -0.925615f,    0.000000f,   -0.135045f,    0.353553f }, // 477
-  {   -0.925615f,    0.000000f,    0.135045f,   -0.353553f }, // 478
-  {   -0.925615f,    0.000000f,   -0.135045f,   -0.353553f }, // 479
-  {    0.790569f,    0.572061f,    0.000000f,    0.218508f }, // 480
-  {    0.790569f,    0.572061f,    0.000000f,   -0.218508f }, // 481
-  {    0.707107f,    0.707107f,    0.000000f,    0.000000f }, // 482
-  {    0.790569f,    0.218508f,    0.572061f,    0.000000f }, // 483
-  {    0.572061f,    0.790569f,    0.218508f,    0.000000f }, // 484
-  {    0.790569f,    0.218508f,   -0.572061f,    0.000000f }, // 485
-  {    0.572061f,    0.790569f,   -0.218508f,    0.000000f }, // 486
-  {    0.790569f,   -0.572061f,    0.000000f,    0.218508f }, // 487
-  {    0.790569f,   -0.572061f,    0.000000f,   -0.218508f }, // 488
-  {    0.707107f,   -0.707107f,    0.000000f,    0.000000f }, // 489
-  {    0.790569f,   -0.218508f,    0.572061f,    0.000000f }, // 490
-  {    0.572061f,   -0.790569f,    0.218508f,    0.000000f }, // 491
-  {    0.790569f,   -0.218508f,   -0.572061f,    0.000000f }, // 492
-  {    0.572061f,   -0.790569f,   -0.218508f,    0.000000f }, // 493
-  {   -0.790569f,    0.572061f,    0.000000f,    0.218508f }, // 494
-  {   -0.790569f,    0.572061f,    0.000000f,   -0.218508f }, // 495
-  {   -0.707107f,    0.707107f,    0.000000f,    0.000000f }, // 496
-  {   -0.790569f,    0.218508f,    0.572061f,    0.000000f }, // 497
-  {   -0.572061f,    0.790569f,    0.218508f,    0.000000f }, // 498
-  {   -0.790569f,    0.218508f,   -0.572061f,    0.000000f }, // 499
-  {   -0.572061f,    0.790569f,   -0.218508f,    0.000000f }, // 500
-  {   -0.790569f,   -0.572061f,    0.000000f,    0.218508f }, // 501
-  {   -0.790569f,   -0.572061f,    0.000000f,   -0.218508f }, // 502
-  {   -0.707107f,   -0.707107f,    0.000000f,    0.000000f }, // 503
-  {   -0.790569f,   -0.218508f,    0.572061f,    0.000000f }, // 504
-  {   -0.572061f,   -0.790569f,    0.218508f,    0.000000f }, // 505
-  {   -0.790569f,   -0.218508f,   -0.572061f,    0.000000f }, // 506
-  {   -0.572061f,   -0.790569f,   -0.218508f,    0.000000f }, // 507
-  {    0.707107f,    0.000000f,    0.707107f,    0.000000f }, // 508
-  {    0.572061f,    0.000000f,    0.790569f,    0.218508f }, // 509
-  {    0.572061f,    0.000000f,    0.790569f,   -0.218508f }, // 510
-  {    0.218508f,    0.572061f,    0.790569f,    0.000000f }, // 511
-  {    0.707107f,    0.000000f,   -0.707107f,    0.000000f }, // 512
-  {    0.572061f,    0.000000f,   -0.790569f,    0.218508f }, // 513
-  {    0.572061f,    0.000000f,   -0.790569f,   -0.218508f }, // 514
-  {    0.218508f,    0.572061f,   -0.790569f,    0.000000f }, // 515
-  {    0.218508f,   -0.572061f,    0.790569f,    0.000000f }, // 516
-  {    0.218508f,   -0.572061f,   -0.790569f,    0.000000f }, // 517
-  {   -0.707107f,    0.000000f,    0.707107f,    0.000000f }, // 518
-  {   -0.572061f,    0.000000f,    0.790569f,    0.218508f }, // 519
-  {   -0.572061f,    0.000000f,    0.790569f,   -0.218508f }, // 520
-  {   -0.218508f,    0.572061f,    0.790569f,    0.000000f }, // 521
-  {   -0.707107f,    0.000000f,   -0.707107f,    0.000000f }, // 522
-  {   -0.572061f,    0.000000f,   -0.790569f,    0.218508f }, // 523
-  {   -0.572061f,    0.000000f,   -0.790569f,   -0.218508f }, // 524
-  {   -0.218508f,    0.572061f,   -0.790569f,    0.000000f }, // 525
-  {   -0.218508f,   -0.572061f,    0.790569f,    0.000000f }, // 526
-  {   -0.218508f,   -0.572061f,   -0.790569f,    0.000000f }, // 527
-  {    0.790569f,    0.000000f,    0.218508f,    0.572061f }, // 528
-  {    0.790569f,    0.000000f,   -0.218508f,    0.572061f }, // 529
-  {    0.707107f,    0.000000f,    0.000000f,    0.707107f }, // 530
-  {    0.572061f,    0.218508f,    0.000000f,    0.790569f }, // 531
-  {    0.790569f,    0.000000f,    0.218508f,   -0.572061f }, // 532
-  {    0.790569f,    0.000000f,   -0.218508f,   -0.572061f }, // 533
-  {    0.707107f,    0.000000f,    0.000000f,   -0.707107f }, // 534
-  {    0.572061f,    0.218508f,    0.000000f,   -0.790569f }, // 535
-  {    0.572061f,   -0.218508f,    0.000000f,    0.790569f }, // 536
-  {    0.572061f,   -0.218508f,    0.000000f,   -0.790569f }, // 537
-  {   -0.790569f,    0.000000f,    0.218508f,    0.572061f }, // 538
-  {   -0.790569f,    0.000000f,   -0.218508f,    0.572061f }, // 539
-  {   -0.707107f,    0.000000f,    0.000000f,    0.707107f }, // 540
-  {   -0.572061f,    0.218508f,    0.000000f,    0.790569f }, // 541
-  {   -0.790569f,    0.000000f,    0.218508f,   -0.572061f }, // 542
-  {   -0.790569f,    0.000000f,   -0.218508f,   -0.572061f }, // 543
-  {   -0.707107f,    0.000000f,    0.000000f,   -0.707107f }, // 544
-  {   -0.572061f,    0.218508f,    0.000000f,   -0.790569f }, // 545
-  {   -0.572061f,   -0.218508f,    0.000000f,    0.790569f }, // 546
-  {   -0.572061f,   -0.218508f,    0.000000f,   -0.790569f }, // 547
-  {    0.000000f,    0.790569f,    0.572061f,    0.218508f }, // 548
-  {    0.000000f,    0.790569f,    0.572061f,   -0.218508f }, // 549
-  {    0.000000f,    0.707107f,    0.707107f,    0.000000f }, // 550
-  {    0.000000f,    0.790569f,   -0.572061f,    0.218508f }, // 551
-  {    0.000000f,    0.790569f,   -0.572061f,   -0.218508f }, // 552
-  {    0.000000f,    0.707107f,   -0.707107f,    0.000000f }, // 553
-  {    0.000000f,   -0.790569f,    0.572061f,    0.218508f }, // 554
-  {    0.000000f,   -0.790569f,    0.572061f,   -0.218508f }, // 555
-  {    0.000000f,   -0.707107f,    0.707107f,    0.000000f }, // 556
-  {    0.000000f,   -0.790569f,   -0.572061f,    0.218508f }, // 557
-  {    0.000000f,   -0.790569f,   -0.572061f,   -0.218508f }, // 558
-  {    0.000000f,   -0.707107f,   -0.707107f,    0.000000f }, // 559
-  {    0.218508f,    0.790569f,    0.000000f,    0.572061f }, // 560
-  {    0.218508f,    0.790569f,    0.000000f,   -0.572061f }, // 561
-  {    0.218508f,   -0.790569f,    0.000000f,    0.572061f }, // 562
-  {    0.218508f,   -0.790569f,    0.000000f,   -0.572061f }, // 563
-  {   -0.218508f,    0.790569f,    0.000000f,    0.572061f }, // 564
-  {   -0.218508f,    0.790569f,    0.000000f,   -0.572061f }, // 565
-  {   -0.218508f,   -0.790569f,    0.000000f,    0.572061f }, // 566
-  {   -0.218508f,   -0.790569f,    0.000000f,   -0.572061f }, // 567
-  {    0.218508f,    0.000000f,    0.572061f,    0.790569f }, // 568
-  {   -0.218508f,    0.000000f,    0.572061f,    0.790569f }, // 569
-  {    0.000000f,    0.000000f,    0.707107f,    0.707107f }, // 570
-  {    0.000000f,    0.572061f,    0.218508f,    0.790569f }, // 571
-  {    0.000000f,    0.218508f,    0.790569f,    0.572061f }, // 572
-  {    0.218508f,    0.000000f,    0.572061f,   -0.790569f }, // 573
-  {   -0.218508f,    0.000000f,    0.572061f,   -0.790569f }, // 574
-  {    0.000000f,    0.000000f,    0.707107f,   -0.707107f }, // 575
-  {    0.000000f,    0.572061f,    0.218508f,   -0.790569f }, // 576
-  {    0.000000f,    0.218508f,    0.790569f,   -0.572061f }, // 577
-  {    0.218508f,    0.000000f,   -0.572061f,    0.790569f }, // 578
-  {   -0.218508f,    0.000000f,   -0.572061f,    0.790569f }, // 579
-  {    0.000000f,    0.000000f,   -0.707107f,    0.707107f }, // 580
-  {    0.000000f,    0.572061f,   -0.218508f,    0.790569f }, // 581
-  {    0.000000f,    0.218508f,   -0.790569f,    0.572061f }, // 582
-  {    0.218508f,    0.000000f,   -0.572061f,   -0.790569f }, // 583
-  {   -0.218508f,    0.000000f,   -0.572061f,   -0.790569f }, // 584
-  {    0.000000f,    0.000000f,   -0.707107f,   -0.707107f }, // 585
-  {    0.000000f,    0.572061f,   -0.218508f,   -0.790569f }, // 586
-  {    0.000000f,    0.218508f,   -0.790569f,   -0.572061f }, // 587
-  {    0.000000f,   -0.572061f,    0.218508f,    0.790569f }, // 588
-  {    0.000000f,   -0.218508f,    0.790569f,    0.572061f }, // 589
-  {    0.000000f,   -0.572061f,    0.218508f,   -0.790569f }, // 590
-  {    0.000000f,   -0.218508f,    0.790569f,   -0.572061f }, // 591
-  {    0.000000f,   -0.572061f,   -0.218508f,    0.790569f }, // 592
-  {    0.000000f,   -0.218508f,   -0.790569f,    0.572061f }, // 593
-  {    0.000000f,   -0.572061f,   -0.218508f,   -0.790569f }, // 594
-  {    0.000000f,   -0.218508f,   -0.790569f,   -0.572061f }, // 595
-  {    0.000000f,    0.707107f,    0.000000f,    0.707107f }, // 596
-  {    0.000000f,    0.707107f,    0.000000f,   -0.707107f }, // 597
-  {    0.000000f,   -0.707107f,    0.000000f,    0.707107f }, // 598
-  {    0.000000f,   -0.707107f,    0.000000f,   -0.707107f }, // 599
+double cellNormalK600[600][4] = { // Normals of cells, in cell order
+  {    0.7071067811865475,    0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, //   0
+  {    0.5720614028176843,    0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, //   1
+  {    0.7905694150420949,    0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, //   2
+  {    0.7071067811865475,    0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, //   3
+  {    0.5720614028176843,    0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, //   4
+  {    0.5720614028176843,    0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, //   5
+  {    0.3535533905932737,    0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, //   6
+  {    0.3535533905932737,    0.3535533905932737,    0.7905694150420949,    0.3535533905932737 }, //   7
+  {    0.7071067811865475,    0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, //   8
+  {    0.5720614028176843,    0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, //   9
+  {    0.5720614028176843,    0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, //  10
+  {    0.5720614028176843,    0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, //  11
+  {    0.3535533905932737,    0.7905694150420949,    0.3535533905932737,    0.3535533905932737 }, //  12
+  {    0.2185080122244105,    0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, //  13
+  {    0.3535533905932737,    0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, //  14
+  {    0.2185080122244105,    0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, //  15
+  {    0.1350453783688632,    0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, //  16
+  {    0.3535533905932737,    0.3535533905932737,    0.3535533905932737,    0.7905694150420949 }, //  17
+  {    0.3535533905932737,    0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, //  18
+  {    0.2185080122244105,    0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, //  19
+  {    0.7071067811865475,    0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, //  20
+  {    0.5720614028176843,    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, //  21
+  {    0.7905694150420949,    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, //  22
+  {    0.7071067811865475,    0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, //  23
+  {    0.5720614028176843,    0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, //  24
+  {    0.5720614028176843,    0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, //  25
+  {    0.3535533905932737,    0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, //  26
+  {    0.3535533905932737,    0.3535533905932737,    0.7905694150420949,   -0.3535533905932737 }, //  27
+  {    0.7071067811865475,    0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, //  28
+  {    0.5720614028176843,    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, //  29
+  {    0.5720614028176843,    0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, //  30
+  {    0.5720614028176843,    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, //  31
+  {    0.3535533905932737,    0.7905694150420949,    0.3535533905932737,   -0.3535533905932737 }, //  32
+  {    0.2185080122244105,    0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, //  33
+  {    0.3535533905932737,    0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, //  34
+  {    0.2185080122244105,    0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, //  35
+  {    0.1350453783688632,    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, //  36
+  {    0.3535533905932737,    0.3535533905932737,    0.3535533905932737,   -0.7905694150420949 }, //  37
+  {    0.3535533905932737,    0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, //  38
+  {    0.2185080122244105,    0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, //  39
+  {    0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, //  40
+  {    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, //  41
+  {    0.7905694150420949,    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, //  42
+  {    0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, //  43
+  {    0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, //  44
+  {    0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, //  45
+  {    0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, //  46
+  {    0.3535533905932737,    0.3535533905932737,   -0.7905694150420949,    0.3535533905932737 }, //  47
+  {    0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, //  48
+  {    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, //  49
+  {    0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, //  50
+  {    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, //  51
+  {    0.3535533905932737,    0.7905694150420949,   -0.3535533905932737,    0.3535533905932737 }, //  52
+  {    0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, //  53
+  {    0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, //  54
+  {    0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, //  55
+  {    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, //  56
+  {    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,    0.7905694150420949 }, //  57
+  {    0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, //  58
+  {    0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, //  59
+  {    0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, //  60
+  {    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, //  61
+  {    0.7905694150420949,    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, //  62
+  {    0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, //  63
+  {    0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, //  64
+  {    0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, //  65
+  {    0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, //  66
+  {    0.3535533905932737,    0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737 }, //  67
+  {    0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, //  68
+  {    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, //  69
+  {    0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, //  70
+  {    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, //  71
+  {    0.3535533905932737,    0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737 }, //  72
+  {    0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, //  73
+  {    0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, //  74
+  {    0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, //  75
+  {    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, //  76
+  {    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949 }, //  77
+  {    0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, //  78
+  {    0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, //  79
+  {    0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, //  80
+  {    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, //  81
+  {    0.7905694150420949,   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, //  82
+  {    0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, //  83
+  {    0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, //  84
+  {    0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, //  85
+  {    0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, //  86
+  {    0.3535533905932737,   -0.3535533905932737,    0.7905694150420949,    0.3535533905932737 }, //  87
+  {    0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, //  88
+  {    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, //  89
+  {    0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, //  90
+  {    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, //  91
+  {    0.3535533905932737,   -0.7905694150420949,    0.3535533905932737,    0.3535533905932737 }, //  92
+  {    0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, //  93
+  {    0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, //  94
+  {    0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, //  95
+  {    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, //  96
+  {    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,    0.7905694150420949 }, //  97
+  {    0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, //  98
+  {    0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, //  99
+  {    0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, // 100
+  {    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, // 101
+  {    0.7905694150420949,   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, // 102
+  {    0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, // 103
+  {    0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, // 104
+  {    0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, // 105
+  {    0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, // 106
+  {    0.3535533905932737,   -0.3535533905932737,    0.7905694150420949,   -0.3535533905932737 }, // 107
+  {    0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, // 108
+  {    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, // 109
+  {    0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, // 110
+  {    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, // 111
+  {    0.3535533905932737,   -0.7905694150420949,    0.3535533905932737,   -0.3535533905932737 }, // 112
+  {    0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, // 113
+  {    0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, // 114
+  {    0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, // 115
+  {    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, // 116
+  {    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420949 }, // 117
+  {    0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, // 118
+  {    0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, // 119
+  {    0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, // 120
+  {    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, // 121
+  {    0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, // 122
+  {    0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, // 123
+  {    0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, // 124
+  {    0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, // 125
+  {    0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, // 126
+  {    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949,    0.3535533905932737 }, // 127
+  {    0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, // 128
+  {    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, // 129
+  {    0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, // 130
+  {    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, // 131
+  {    0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737,    0.3535533905932737 }, // 132
+  {    0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, // 133
+  {    0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, // 134
+  {    0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, // 135
+  {    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, // 136
+  {    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420949 }, // 137
+  {    0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, // 138
+  {    0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, // 139
+  {    0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, // 140
+  {    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, // 141
+  {    0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, // 142
+  {    0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, // 143
+  {    0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, // 144
+  {    0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, // 145
+  {    0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, // 146
+  {    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737 }, // 147
+  {    0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, // 148
+  {    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, // 149
+  {    0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, // 150
+  {    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, // 151
+  {    0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737 }, // 152
+  {    0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, // 153
+  {    0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, // 154
+  {    0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, // 155
+  {    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, // 156
+  {    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949 }, // 157
+  {    0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, // 158
+  {    0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, // 159
+  {   -0.7071067811865475,    0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, // 160
+  {   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, // 161
+  {   -0.7905694150420949,    0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, // 162
+  {   -0.7071067811865475,    0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, // 163
+  {   -0.5720614028176843,    0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, // 164
+  {   -0.5720614028176843,    0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, // 165
+  {   -0.3535533905932737,    0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, // 166
+  {   -0.3535533905932737,    0.3535533905932737,    0.7905694150420949,    0.3535533905932737 }, // 167
+  {   -0.7071067811865475,    0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, // 168
+  {   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, // 169
+  {   -0.5720614028176843,    0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, // 170
+  {   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, // 171
+  {   -0.3535533905932737,    0.7905694150420949,    0.3535533905932737,    0.3535533905932737 }, // 172
+  {   -0.2185080122244105,    0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, // 173
+  {   -0.3535533905932737,    0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, // 174
+  {   -0.2185080122244105,    0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, // 175
+  {   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, // 176
+  {   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737,    0.7905694150420949 }, // 177
+  {   -0.3535533905932737,    0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, // 178
+  {   -0.2185080122244105,    0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, // 179
+  {   -0.7071067811865475,    0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, // 180
+  {   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, // 181
+  {   -0.7905694150420949,    0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, // 182
+  {   -0.7071067811865475,    0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, // 183
+  {   -0.5720614028176843,    0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, // 184
+  {   -0.5720614028176843,    0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, // 185
+  {   -0.3535533905932737,    0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, // 186
+  {   -0.3535533905932737,    0.3535533905932737,    0.7905694150420949,   -0.3535533905932737 }, // 187
+  {   -0.7071067811865475,    0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, // 188
+  {   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, // 189
+  {   -0.5720614028176843,    0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, // 190
+  {   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, // 191
+  {   -0.3535533905932737,    0.7905694150420949,    0.3535533905932737,   -0.3535533905932737 }, // 192
+  {   -0.2185080122244105,    0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, // 193
+  {   -0.3535533905932737,    0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, // 194
+  {   -0.2185080122244105,    0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, // 195
+  {   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, // 196
+  {   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737,   -0.7905694150420949 }, // 197
+  {   -0.3535533905932737,    0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, // 198
+  {   -0.2185080122244105,    0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, // 199
+  {   -0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, // 200
+  {   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, // 201
+  {   -0.7905694150420949,    0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, // 202
+  {   -0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, // 203
+  {   -0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, // 204
+  {   -0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, // 205
+  {   -0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, // 206
+  {   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420949,    0.3535533905932737 }, // 207
+  {   -0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, // 208
+  {   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, // 209
+  {   -0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, // 210
+  {   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, // 211
+  {   -0.3535533905932737,    0.7905694150420949,   -0.3535533905932737,    0.3535533905932737 }, // 212
+  {   -0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, // 213
+  {   -0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, // 214
+  {   -0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, // 215
+  {   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, // 216
+  {   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,    0.7905694150420949 }, // 217
+  {   -0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, // 218
+  {   -0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, // 219
+  {   -0.7071067811865475,    0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, // 220
+  {   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, // 221
+  {   -0.7905694150420949,    0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, // 222
+  {   -0.7071067811865475,    0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, // 223
+  {   -0.5720614028176843,    0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, // 224
+  {   -0.5720614028176843,    0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, // 225
+  {   -0.3535533905932737,    0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, // 226
+  {   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737 }, // 227
+  {   -0.7071067811865475,    0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, // 228
+  {   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, // 229
+  {   -0.5720614028176843,    0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, // 230
+  {   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, // 231
+  {   -0.3535533905932737,    0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737 }, // 232
+  {   -0.2185080122244105,    0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, // 233
+  {   -0.3535533905932737,    0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, // 234
+  {   -0.2185080122244105,    0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, // 235
+  {   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, // 236
+  {   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949 }, // 237
+  {   -0.3535533905932737,    0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, // 238
+  {   -0.2185080122244105,    0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, // 239
+  {   -0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,    0.2185080122244105 }, // 240
+  {   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,    0.1350453783688632 }, // 241
+  {   -0.7905694150420949,   -0.3535533905932737,    0.3535533905932737,    0.3535533905932737 }, // 242
+  {   -0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,    0.3535533905932737 }, // 243
+  {   -0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,    0.2185080122244105 }, // 244
+  {   -0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,    0.3535533905932737 }, // 245
+  {   -0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,    0.2185080122244105 }, // 246
+  {   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420949,    0.3535533905932737 }, // 247
+  {   -0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,    0.5720614028176843 }, // 248
+  {   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,    0.5720614028176843 }, // 249
+  {   -0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,    0.7071067811865475 }, // 250
+  {   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,    0.5720614028176843 }, // 251
+  {   -0.3535533905932737,   -0.7905694150420949,    0.3535533905932737,    0.3535533905932737 }, // 252
+  {   -0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,    0.3535533905932737 }, // 253
+  {   -0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,    0.5720614028176843 }, // 254
+  {   -0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,    0.7071067811865475 }, // 255
+  {   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,    0.5720614028176843 }, // 256
+  {   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,    0.7905694150420949 }, // 257
+  {   -0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,    0.7071067811865475 }, // 258
+  {   -0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,    0.5720614028176843 }, // 259
+  {   -0.7071067811865475,   -0.3535533905932737,    0.5720614028176843,   -0.2185080122244105 }, // 260
+  {   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843,   -0.1350453783688632 }, // 261
+  {   -0.7905694150420949,   -0.3535533905932737,    0.3535533905932737,   -0.3535533905932737 }, // 262
+  {   -0.7071067811865475,   -0.5720614028176843,    0.2185080122244105,   -0.3535533905932737 }, // 263
+  {   -0.5720614028176843,   -0.7071067811865475,    0.3535533905932737,   -0.2185080122244105 }, // 264
+  {   -0.5720614028176843,   -0.2185080122244105,    0.7071067811865475,   -0.3535533905932737 }, // 265
+  {   -0.3535533905932737,   -0.5720614028176843,    0.7071067811865475,   -0.2185080122244105 }, // 266
+  {   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420949,   -0.3535533905932737 }, // 267
+  {   -0.7071067811865475,   -0.2185080122244105,    0.3535533905932737,   -0.5720614028176843 }, // 268
+  {   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632,   -0.5720614028176843 }, // 269
+  {   -0.5720614028176843,   -0.3535533905932737,    0.2185080122244105,   -0.7071067811865475 }, // 270
+  {   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843,   -0.5720614028176843 }, // 271
+  {   -0.3535533905932737,   -0.7905694150420949,    0.3535533905932737,   -0.3535533905932737 }, // 272
+  {   -0.2185080122244105,   -0.7071067811865475,    0.5720614028176843,   -0.3535533905932737 }, // 273
+  {   -0.3535533905932737,   -0.7071067811865475,    0.2185080122244105,   -0.5720614028176843 }, // 274
+  {   -0.2185080122244105,   -0.5720614028176843,    0.3535533905932737,   -0.7071067811865475 }, // 275
+  {   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843,   -0.5720614028176843 }, // 276
+  {   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737,   -0.7905694150420949 }, // 277
+  {   -0.3535533905932737,   -0.2185080122244105,    0.5720614028176843,   -0.7071067811865475 }, // 278
+  {   -0.2185080122244105,   -0.3535533905932737,    0.7071067811865475,   -0.5720614028176843 }, // 279
+  {   -0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,    0.2185080122244105 }, // 280
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,    0.1350453783688632 }, // 281
+  {   -0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737,    0.3535533905932737 }, // 282
+  {   -0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,    0.3535533905932737 }, // 283
+  {   -0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,    0.2185080122244105 }, // 284
+  {   -0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,    0.3535533905932737 }, // 285
+  {   -0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,    0.2185080122244105 }, // 286
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949,    0.3535533905932737 }, // 287
+  {   -0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,    0.5720614028176843 }, // 288
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,    0.5720614028176843 }, // 289
+  {   -0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,    0.7071067811865475 }, // 290
+  {   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,    0.5720614028176843 }, // 291
+  {   -0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737,    0.3535533905932737 }, // 292
+  {   -0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,    0.3535533905932737 }, // 293
+  {   -0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,    0.5720614028176843 }, // 294
+  {   -0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,    0.7071067811865475 }, // 295
+  {   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,    0.5720614028176843 }, // 296
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,    0.7905694150420949 }, // 297
+  {   -0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,    0.7071067811865475 }, // 298
+  {   -0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,    0.5720614028176843 }, // 299
+  {   -0.7071067811865475,   -0.3535533905932737,   -0.5720614028176843,   -0.2185080122244105 }, // 300
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632 }, // 301
+  {   -0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737 }, // 302
+  {   -0.7071067811865475,   -0.5720614028176843,   -0.2185080122244105,   -0.3535533905932737 }, // 303
+  {   -0.5720614028176843,   -0.7071067811865475,   -0.3535533905932737,   -0.2185080122244105 }, // 304
+  {   -0.5720614028176843,   -0.2185080122244105,   -0.7071067811865475,   -0.3535533905932737 }, // 305
+  {   -0.3535533905932737,   -0.5720614028176843,   -0.7071067811865475,   -0.2185080122244105 }, // 306
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737 }, // 307
+  {   -0.7071067811865475,   -0.2185080122244105,   -0.3535533905932737,   -0.5720614028176843 }, // 308
+  {   -0.5720614028176843,   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843 }, // 309
+  {   -0.5720614028176843,   -0.3535533905932737,   -0.2185080122244105,   -0.7071067811865475 }, // 310
+  {   -0.5720614028176843,   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843 }, // 311
+  {   -0.3535533905932737,   -0.7905694150420949,   -0.3535533905932737,   -0.3535533905932737 }, // 312
+  {   -0.2185080122244105,   -0.7071067811865475,   -0.5720614028176843,   -0.3535533905932737 }, // 313
+  {   -0.3535533905932737,   -0.7071067811865475,   -0.2185080122244105,   -0.5720614028176843 }, // 314
+  {   -0.2185080122244105,   -0.5720614028176843,   -0.3535533905932737,   -0.7071067811865475 }, // 315
+  {   -0.1350453783688632,   -0.5720614028176843,   -0.5720614028176843,   -0.5720614028176843 }, // 316
+  {   -0.3535533905932737,   -0.3535533905932737,   -0.3535533905932737,   -0.7905694150420949 }, // 317
+  {   -0.3535533905932737,   -0.2185080122244105,   -0.5720614028176843,   -0.7071067811865475 }, // 318
+  {   -0.2185080122244105,   -0.3535533905932737,   -0.7071067811865475,   -0.5720614028176843 }, // 319
+  {    0.1350453783688632,    0.0000000000000000,    0.3535533905932737,    0.9256147934109581 }, // 320
+  {   -0.1350453783688632,    0.0000000000000000,    0.3535533905932737,    0.9256147934109581 }, // 321
+  {    0.2185080122244105,    0.2185080122244105,    0.2185080122244105,    0.9256147934109581 }, // 322
+  {   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105,    0.9256147934109581 }, // 323
+  {    0.0000000000000000,    0.3535533905932737,    0.1350453783688632,    0.9256147934109581 }, // 324
+  {    0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,    0.9256147934109581 }, // 325
+  {   -0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,    0.9256147934109581 }, // 326
+  {    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,    0.9256147934109581 }, // 327
+  {   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,    0.9256147934109581 }, // 328
+  {    0.0000000000000000,    0.3535533905932737,   -0.1350453783688632,    0.9256147934109581 }, // 329
+  {    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,    0.9256147934109581 }, // 330
+  {   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,    0.9256147934109581 }, // 331
+  {    0.0000000000000000,   -0.3535533905932737,    0.1350453783688632,    0.9256147934109581 }, // 332
+  {    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109581 }, // 333
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109581 }, // 334
+  {    0.0000000000000000,   -0.3535533905932737,   -0.1350453783688632,    0.9256147934109581 }, // 335
+  {    0.3535533905932737,    0.1350453783688632,    0.0000000000000000,    0.9256147934109581 }, // 336
+  {    0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,    0.9256147934109581 }, // 337
+  {   -0.3535533905932737,    0.1350453783688632,    0.0000000000000000,    0.9256147934109581 }, // 338
+  {   -0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,    0.9256147934109581 }, // 339
+  {    0.1350453783688632,    0.0000000000000000,    0.3535533905932737,   -0.9256147934109581 }, // 340
+  {   -0.1350453783688632,    0.0000000000000000,    0.3535533905932737,   -0.9256147934109581 }, // 341
+  {    0.2185080122244105,    0.2185080122244105,    0.2185080122244105,   -0.9256147934109581 }, // 342
+  {   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105,   -0.9256147934109581 }, // 343
+  {    0.0000000000000000,    0.3535533905932737,    0.1350453783688632,   -0.9256147934109581 }, // 344
+  {    0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,   -0.9256147934109581 }, // 345
+  {   -0.1350453783688632,    0.0000000000000000,   -0.3535533905932737,   -0.9256147934109581 }, // 346
+  {    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581 }, // 347
+  {   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581 }, // 348
+  {    0.0000000000000000,    0.3535533905932737,   -0.1350453783688632,   -0.9256147934109581 }, // 349
+  {    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109581 }, // 350
+  {   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109581 }, // 351
+  {    0.0000000000000000,   -0.3535533905932737,    0.1350453783688632,   -0.9256147934109581 }, // 352
+  {    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581 }, // 353
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581 }, // 354
+  {    0.0000000000000000,   -0.3535533905932737,   -0.1350453783688632,   -0.9256147934109581 }, // 355
+  {    0.3535533905932737,    0.1350453783688632,    0.0000000000000000,   -0.9256147934109581 }, // 356
+  {    0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,   -0.9256147934109581 }, // 357
+  {   -0.3535533905932737,    0.1350453783688632,    0.0000000000000000,   -0.9256147934109581 }, // 358
+  {   -0.3535533905932737,   -0.1350453783688632,    0.0000000000000000,   -0.9256147934109581 }, // 359
+  {    0.3535533905932737,    0.0000000000000000,    0.9256147934109581,    0.1350453783688632 }, // 360
+  {    0.3535533905932737,    0.0000000000000000,    0.9256147934109581,   -0.1350453783688632 }, // 361
+  {    0.1350453783688632,    0.3535533905932737,    0.9256147934109581,    0.0000000000000000 }, // 362
+  {    0.2185080122244105,    0.2185080122244105,    0.9256147934109581,    0.2185080122244105 }, // 363
+  {    0.2185080122244105,    0.2185080122244105,    0.9256147934109581,   -0.2185080122244105 }, // 364
+  {    0.1350453783688632,   -0.3535533905932737,    0.9256147934109581,    0.0000000000000000 }, // 365
+  {    0.2185080122244105,   -0.2185080122244105,    0.9256147934109581,    0.2185080122244105 }, // 366
+  {    0.2185080122244105,   -0.2185080122244105,    0.9256147934109581,   -0.2185080122244105 }, // 367
+  {   -0.3535533905932737,    0.0000000000000000,    0.9256147934109581,    0.1350453783688632 }, // 368
+  {   -0.3535533905932737,    0.0000000000000000,    0.9256147934109581,   -0.1350453783688632 }, // 369
+  {   -0.1350453783688632,    0.3535533905932737,    0.9256147934109581,    0.0000000000000000 }, // 370
+  {   -0.2185080122244105,    0.2185080122244105,    0.9256147934109581,    0.2185080122244105 }, // 371
+  {   -0.2185080122244105,    0.2185080122244105,    0.9256147934109581,   -0.2185080122244105 }, // 372
+  {   -0.1350453783688632,   -0.3535533905932737,    0.9256147934109581,    0.0000000000000000 }, // 373
+  {   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109581,    0.2185080122244105 }, // 374
+  {   -0.2185080122244105,   -0.2185080122244105,    0.9256147934109581,   -0.2185080122244105 }, // 375
+  {    0.0000000000000000,    0.1350453783688632,    0.9256147934109581,    0.3535533905932737 }, // 376
+  {    0.0000000000000000,    0.1350453783688632,    0.9256147934109581,   -0.3535533905932737 }, // 377
+  {    0.0000000000000000,   -0.1350453783688632,    0.9256147934109581,    0.3535533905932737 }, // 378
+  {    0.0000000000000000,   -0.1350453783688632,    0.9256147934109581,   -0.3535533905932737 }, // 379
+  {    0.3535533905932737,    0.0000000000000000,   -0.9256147934109581,    0.1350453783688632 }, // 380
+  {    0.3535533905932737,    0.0000000000000000,   -0.9256147934109581,   -0.1350453783688632 }, // 381
+  {    0.1350453783688632,    0.3535533905932737,   -0.9256147934109581,    0.0000000000000000 }, // 382
+  {    0.2185080122244105,    0.2185080122244105,   -0.9256147934109581,    0.2185080122244105 }, // 383
+  {    0.2185080122244105,    0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105 }, // 384
+  {    0.1350453783688632,   -0.3535533905932737,   -0.9256147934109581,    0.0000000000000000 }, // 385
+  {    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581,    0.2185080122244105 }, // 386
+  {    0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105 }, // 387
+  {   -0.3535533905932737,    0.0000000000000000,   -0.9256147934109581,    0.1350453783688632 }, // 388
+  {   -0.3535533905932737,    0.0000000000000000,   -0.9256147934109581,   -0.1350453783688632 }, // 389
+  {   -0.1350453783688632,    0.3535533905932737,   -0.9256147934109581,    0.0000000000000000 }, // 390
+  {   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109581,    0.2185080122244105 }, // 391
+  {   -0.2185080122244105,    0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105 }, // 392
+  {   -0.1350453783688632,   -0.3535533905932737,   -0.9256147934109581,    0.0000000000000000 }, // 393
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581,    0.2185080122244105 }, // 394
+  {   -0.2185080122244105,   -0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105 }, // 395
+  {    0.0000000000000000,    0.1350453783688632,   -0.9256147934109581,    0.3535533905932737 }, // 396
+  {    0.0000000000000000,    0.1350453783688632,   -0.9256147934109581,   -0.3535533905932737 }, // 397
+  {    0.0000000000000000,   -0.1350453783688632,   -0.9256147934109581,    0.3535533905932737 }, // 398
+  {    0.0000000000000000,   -0.1350453783688632,   -0.9256147934109581,   -0.3535533905932737 }, // 399
+  {    0.0000000000000000,    0.9256147934109581,    0.3535533905932737,    0.1350453783688632 }, // 400
+  {    0.0000000000000000,    0.9256147934109581,    0.3535533905932737,   -0.1350453783688632 }, // 401
+  {    0.3535533905932737,    0.9256147934109581,    0.1350453783688632,    0.0000000000000000 }, // 402
+  {    0.2185080122244105,    0.9256147934109581,    0.2185080122244105,    0.2185080122244105 }, // 403
+  {    0.2185080122244105,    0.9256147934109581,    0.2185080122244105,   -0.2185080122244105 }, // 404
+  {    0.0000000000000000,    0.9256147934109581,   -0.3535533905932737,    0.1350453783688632 }, // 405
+  {    0.0000000000000000,    0.9256147934109581,   -0.3535533905932737,   -0.1350453783688632 }, // 406
+  {    0.3535533905932737,    0.9256147934109581,   -0.1350453783688632,    0.0000000000000000 }, // 407
+  {    0.2185080122244105,    0.9256147934109581,   -0.2185080122244105,    0.2185080122244105 }, // 408
+  {    0.2185080122244105,    0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105 }, // 409
+  {   -0.3535533905932737,    0.9256147934109581,    0.1350453783688632,    0.0000000000000000 }, // 410
+  {   -0.2185080122244105,    0.9256147934109581,    0.2185080122244105,    0.2185080122244105 }, // 411
+  {   -0.2185080122244105,    0.9256147934109581,    0.2185080122244105,   -0.2185080122244105 }, // 412
+  {   -0.3535533905932737,    0.9256147934109581,   -0.1350453783688632,    0.0000000000000000 }, // 413
+  {   -0.2185080122244105,    0.9256147934109581,   -0.2185080122244105,    0.2185080122244105 }, // 414
+  {   -0.2185080122244105,    0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105 }, // 415
+  {    0.1350453783688632,    0.9256147934109581,    0.0000000000000000,    0.3535533905932737 }, // 416
+  {    0.1350453783688632,    0.9256147934109581,    0.0000000000000000,   -0.3535533905932737 }, // 417
+  {   -0.1350453783688632,    0.9256147934109581,    0.0000000000000000,    0.3535533905932737 }, // 418
+  {   -0.1350453783688632,    0.9256147934109581,    0.0000000000000000,   -0.3535533905932737 }, // 419
+  {    0.0000000000000000,   -0.9256147934109581,    0.3535533905932737,    0.1350453783688632 }, // 420
+  {    0.0000000000000000,   -0.9256147934109581,    0.3535533905932737,   -0.1350453783688632 }, // 421
+  {    0.3535533905932737,   -0.9256147934109581,    0.1350453783688632,    0.0000000000000000 }, // 422
+  {    0.2185080122244105,   -0.9256147934109581,    0.2185080122244105,    0.2185080122244105 }, // 423
+  {    0.2185080122244105,   -0.9256147934109581,    0.2185080122244105,   -0.2185080122244105 }, // 424
+  {    0.0000000000000000,   -0.9256147934109581,   -0.3535533905932737,    0.1350453783688632 }, // 425
+  {    0.0000000000000000,   -0.9256147934109581,   -0.3535533905932737,   -0.1350453783688632 }, // 426
+  {    0.3535533905932737,   -0.9256147934109581,   -0.1350453783688632,    0.0000000000000000 }, // 427
+  {    0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105,    0.2185080122244105 }, // 428
+  {    0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105 }, // 429
+  {   -0.3535533905932737,   -0.9256147934109581,    0.1350453783688632,    0.0000000000000000 }, // 430
+  {   -0.2185080122244105,   -0.9256147934109581,    0.2185080122244105,    0.2185080122244105 }, // 431
+  {   -0.2185080122244105,   -0.9256147934109581,    0.2185080122244105,   -0.2185080122244105 }, // 432
+  {   -0.3535533905932737,   -0.9256147934109581,   -0.1350453783688632,    0.0000000000000000 }, // 433
+  {   -0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105,    0.2185080122244105 }, // 434
+  {   -0.2185080122244105,   -0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105 }, // 435
+  {    0.1350453783688632,   -0.9256147934109581,    0.0000000000000000,    0.3535533905932737 }, // 436
+  {    0.1350453783688632,   -0.9256147934109581,    0.0000000000000000,   -0.3535533905932737 }, // 437
+  {   -0.1350453783688632,   -0.9256147934109581,    0.0000000000000000,    0.3535533905932737 }, // 438
+  {   -0.1350453783688632,   -0.9256147934109581,    0.0000000000000000,   -0.3535533905932737 }, // 439
+  {    0.9256147934109581,    0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 440
+  {    0.9256147934109581,    0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 441
+  {    0.9256147934109581,    0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 442
+  {    0.9256147934109581,    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 443
+  {    0.9256147934109581,    0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 444
+  {    0.9256147934109581,    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 445
+  {    0.9256147934109581,    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 446
+  {    0.9256147934109581,    0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 447
+  {    0.9256147934109581,   -0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 448
+  {    0.9256147934109581,   -0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 449
+  {    0.9256147934109581,   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 450
+  {    0.9256147934109581,   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 451
+  {    0.9256147934109581,   -0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 452
+  {    0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 453
+  {    0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 454
+  {    0.9256147934109581,   -0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 455
+  {    0.9256147934109581,    0.0000000000000000,    0.1350453783688632,    0.3535533905932737 }, // 456
+  {    0.9256147934109581,    0.0000000000000000,   -0.1350453783688632,    0.3535533905932737 }, // 457
+  {    0.9256147934109581,    0.0000000000000000,    0.1350453783688632,   -0.3535533905932737 }, // 458
+  {    0.9256147934109581,    0.0000000000000000,   -0.1350453783688632,   -0.3535533905932737 }, // 459
+  {   -0.9256147934109581,    0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 460
+  {   -0.9256147934109581,    0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 461
+  {   -0.9256147934109581,    0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 462
+  {   -0.9256147934109581,    0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 463
+  {   -0.9256147934109581,    0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 464
+  {   -0.9256147934109581,    0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 465
+  {   -0.9256147934109581,    0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 466
+  {   -0.9256147934109581,    0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 467
+  {   -0.9256147934109581,   -0.3535533905932737,    0.0000000000000000,    0.1350453783688632 }, // 468
+  {   -0.9256147934109581,   -0.3535533905932737,    0.0000000000000000,   -0.1350453783688632 }, // 469
+  {   -0.9256147934109581,   -0.2185080122244105,    0.2185080122244105,    0.2185080122244105 }, // 470
+  {   -0.9256147934109581,   -0.2185080122244105,    0.2185080122244105,   -0.2185080122244105 }, // 471
+  {   -0.9256147934109581,   -0.1350453783688632,    0.3535533905932737,    0.0000000000000000 }, // 472
+  {   -0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105,    0.2185080122244105 }, // 473
+  {   -0.9256147934109581,   -0.2185080122244105,   -0.2185080122244105,   -0.2185080122244105 }, // 474
+  {   -0.9256147934109581,   -0.1350453783688632,   -0.3535533905932737,    0.0000000000000000 }, // 475
+  {   -0.9256147934109581,    0.0000000000000000,    0.1350453783688632,    0.3535533905932737 }, // 476
+  {   -0.9256147934109581,    0.0000000000000000,   -0.1350453783688632,    0.3535533905932737 }, // 477
+  {   -0.9256147934109581,    0.0000000000000000,    0.1350453783688632,   -0.3535533905932737 }, // 478
+  {   -0.9256147934109581,    0.0000000000000000,   -0.1350453783688632,   -0.3535533905932737 }, // 479
+  {    0.7905694150420949,    0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 480
+  {    0.7905694150420949,    0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 481
+  {    0.7071067811865475,    0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, // 482
+  {    0.7905694150420949,    0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 483
+  {    0.5720614028176843,    0.7905694150420949,    0.2185080122244105,    0.0000000000000000 }, // 484
+  {    0.7905694150420949,    0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 485
+  {    0.5720614028176843,    0.7905694150420949,   -0.2185080122244105,    0.0000000000000000 }, // 486
+  {    0.7905694150420949,   -0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 487
+  {    0.7905694150420949,   -0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 488
+  {    0.7071067811865475,   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, // 489
+  {    0.7905694150420949,   -0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 490
+  {    0.5720614028176843,   -0.7905694150420949,    0.2185080122244105,    0.0000000000000000 }, // 491
+  {    0.7905694150420949,   -0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 492
+  {    0.5720614028176843,   -0.7905694150420949,   -0.2185080122244105,    0.0000000000000000 }, // 493
+  {   -0.7905694150420949,    0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 494
+  {   -0.7905694150420949,    0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 495
+  {   -0.7071067811865475,    0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, // 496
+  {   -0.7905694150420949,    0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 497
+  {   -0.5720614028176843,    0.7905694150420949,    0.2185080122244105,    0.0000000000000000 }, // 498
+  {   -0.7905694150420949,    0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 499
+  {   -0.5720614028176843,    0.7905694150420949,   -0.2185080122244105,    0.0000000000000000 }, // 500
+  {   -0.7905694150420949,   -0.5720614028176843,    0.0000000000000000,    0.2185080122244105 }, // 501
+  {   -0.7905694150420949,   -0.5720614028176843,    0.0000000000000000,   -0.2185080122244105 }, // 502
+  {   -0.7071067811865475,   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000 }, // 503
+  {   -0.7905694150420949,   -0.2185080122244105,    0.5720614028176843,    0.0000000000000000 }, // 504
+  {   -0.5720614028176843,   -0.7905694150420949,    0.2185080122244105,    0.0000000000000000 }, // 505
+  {   -0.7905694150420949,   -0.2185080122244105,   -0.5720614028176843,    0.0000000000000000 }, // 506
+  {   -0.5720614028176843,   -0.7905694150420949,   -0.2185080122244105,    0.0000000000000000 }, // 507
+  {    0.7071067811865475,    0.0000000000000000,    0.7071067811865475,    0.0000000000000000 }, // 508
+  {    0.5720614028176843,    0.0000000000000000,    0.7905694150420949,    0.2185080122244105 }, // 509
+  {    0.5720614028176843,    0.0000000000000000,    0.7905694150420949,   -0.2185080122244105 }, // 510
+  {    0.2185080122244105,    0.5720614028176843,    0.7905694150420949,    0.0000000000000000 }, // 511
+  {    0.7071067811865475,    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000 }, // 512
+  {    0.5720614028176843,    0.0000000000000000,   -0.7905694150420949,    0.2185080122244105 }, // 513
+  {    0.5720614028176843,    0.0000000000000000,   -0.7905694150420949,   -0.2185080122244105 }, // 514
+  {    0.2185080122244105,    0.5720614028176843,   -0.7905694150420949,    0.0000000000000000 }, // 515
+  {    0.2185080122244105,   -0.5720614028176843,    0.7905694150420949,    0.0000000000000000 }, // 516
+  {    0.2185080122244105,   -0.5720614028176843,   -0.7905694150420949,    0.0000000000000000 }, // 517
+  {   -0.7071067811865475,    0.0000000000000000,    0.7071067811865475,    0.0000000000000000 }, // 518
+  {   -0.5720614028176843,    0.0000000000000000,    0.7905694150420949,    0.2185080122244105 }, // 519
+  {   -0.5720614028176843,    0.0000000000000000,    0.7905694150420949,   -0.2185080122244105 }, // 520
+  {   -0.2185080122244105,    0.5720614028176843,    0.7905694150420949,    0.0000000000000000 }, // 521
+  {   -0.7071067811865475,    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000 }, // 522
+  {   -0.5720614028176843,    0.0000000000000000,   -0.7905694150420949,    0.2185080122244105 }, // 523
+  {   -0.5720614028176843,    0.0000000000000000,   -0.7905694150420949,   -0.2185080122244105 }, // 524
+  {   -0.2185080122244105,    0.5720614028176843,   -0.7905694150420949,    0.0000000000000000 }, // 525
+  {   -0.2185080122244105,   -0.5720614028176843,    0.7905694150420949,    0.0000000000000000 }, // 526
+  {   -0.2185080122244105,   -0.5720614028176843,   -0.7905694150420949,    0.0000000000000000 }, // 527
+  {    0.7905694150420949,    0.0000000000000000,    0.2185080122244105,    0.5720614028176843 }, // 528
+  {    0.7905694150420949,    0.0000000000000000,   -0.2185080122244105,    0.5720614028176843 }, // 529
+  {    0.7071067811865475,    0.0000000000000000,    0.0000000000000000,    0.7071067811865475 }, // 530
+  {    0.5720614028176843,    0.2185080122244105,    0.0000000000000000,    0.7905694150420949 }, // 531
+  {    0.7905694150420949,    0.0000000000000000,    0.2185080122244105,   -0.5720614028176843 }, // 532
+  {    0.7905694150420949,    0.0000000000000000,   -0.2185080122244105,   -0.5720614028176843 }, // 533
+  {    0.7071067811865475,    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475 }, // 534
+  {    0.5720614028176843,    0.2185080122244105,    0.0000000000000000,   -0.7905694150420949 }, // 535
+  {    0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,    0.7905694150420949 }, // 536
+  {    0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,   -0.7905694150420949 }, // 537
+  {   -0.7905694150420949,    0.0000000000000000,    0.2185080122244105,    0.5720614028176843 }, // 538
+  {   -0.7905694150420949,    0.0000000000000000,   -0.2185080122244105,    0.5720614028176843 }, // 539
+  {   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000,    0.7071067811865475 }, // 540
+  {   -0.5720614028176843,    0.2185080122244105,    0.0000000000000000,    0.7905694150420949 }, // 541
+  {   -0.7905694150420949,    0.0000000000000000,    0.2185080122244105,   -0.5720614028176843 }, // 542
+  {   -0.7905694150420949,    0.0000000000000000,   -0.2185080122244105,   -0.5720614028176843 }, // 543
+  {   -0.7071067811865475,    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475 }, // 544
+  {   -0.5720614028176843,    0.2185080122244105,    0.0000000000000000,   -0.7905694150420949 }, // 545
+  {   -0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,    0.7905694150420949 }, // 546
+  {   -0.5720614028176843,   -0.2185080122244105,    0.0000000000000000,   -0.7905694150420949 }, // 547
+  {    0.0000000000000000,    0.7905694150420949,    0.5720614028176843,    0.2185080122244105 }, // 548
+  {    0.0000000000000000,    0.7905694150420949,    0.5720614028176843,   -0.2185080122244105 }, // 549
+  {    0.0000000000000000,    0.7071067811865475,    0.7071067811865475,    0.0000000000000000 }, // 550
+  {    0.0000000000000000,    0.7905694150420949,   -0.5720614028176843,    0.2185080122244105 }, // 551
+  {    0.0000000000000000,    0.7905694150420949,   -0.5720614028176843,   -0.2185080122244105 }, // 552
+  {    0.0000000000000000,    0.7071067811865475,   -0.7071067811865475,    0.0000000000000000 }, // 553
+  {    0.0000000000000000,   -0.7905694150420949,    0.5720614028176843,    0.2185080122244105 }, // 554
+  {    0.0000000000000000,   -0.7905694150420949,    0.5720614028176843,   -0.2185080122244105 }, // 555
+  {    0.0000000000000000,   -0.7071067811865475,    0.7071067811865475,    0.0000000000000000 }, // 556
+  {    0.0000000000000000,   -0.7905694150420949,   -0.5720614028176843,    0.2185080122244105 }, // 557
+  {    0.0000000000000000,   -0.7905694150420949,   -0.5720614028176843,   -0.2185080122244105 }, // 558
+  {    0.0000000000000000,   -0.7071067811865475,   -0.7071067811865475,    0.0000000000000000 }, // 559
+  {    0.2185080122244105,    0.7905694150420949,    0.0000000000000000,    0.5720614028176843 }, // 560
+  {    0.2185080122244105,    0.7905694150420949,    0.0000000000000000,   -0.5720614028176843 }, // 561
+  {    0.2185080122244105,   -0.7905694150420949,    0.0000000000000000,    0.5720614028176843 }, // 562
+  {    0.2185080122244105,   -0.7905694150420949,    0.0000000000000000,   -0.5720614028176843 }, // 563
+  {   -0.2185080122244105,    0.7905694150420949,    0.0000000000000000,    0.5720614028176843 }, // 564
+  {   -0.2185080122244105,    0.7905694150420949,    0.0000000000000000,   -0.5720614028176843 }, // 565
+  {   -0.2185080122244105,   -0.7905694150420949,    0.0000000000000000,    0.5720614028176843 }, // 566
+  {   -0.2185080122244105,   -0.7905694150420949,    0.0000000000000000,   -0.5720614028176843 }, // 567
+  {    0.2185080122244105,    0.0000000000000000,    0.5720614028176843,    0.7905694150420949 }, // 568
+  {   -0.2185080122244105,    0.0000000000000000,    0.5720614028176843,    0.7905694150420949 }, // 569
+  {    0.0000000000000000,    0.0000000000000000,    0.7071067811865475,    0.7071067811865475 }, // 570
+  {    0.0000000000000000,    0.5720614028176843,    0.2185080122244105,    0.7905694150420949 }, // 571
+  {    0.0000000000000000,    0.2185080122244105,    0.7905694150420949,    0.5720614028176843 }, // 572
+  {    0.2185080122244105,    0.0000000000000000,    0.5720614028176843,   -0.7905694150420949 }, // 573
+  {   -0.2185080122244105,    0.0000000000000000,    0.5720614028176843,   -0.7905694150420949 }, // 574
+  {    0.0000000000000000,    0.0000000000000000,    0.7071067811865475,   -0.7071067811865475 }, // 575
+  {    0.0000000000000000,    0.5720614028176843,    0.2185080122244105,   -0.7905694150420949 }, // 576
+  {    0.0000000000000000,    0.2185080122244105,    0.7905694150420949,   -0.5720614028176843 }, // 577
+  {    0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,    0.7905694150420949 }, // 578
+  {   -0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,    0.7905694150420949 }, // 579
+  {    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475,    0.7071067811865475 }, // 580
+  {    0.0000000000000000,    0.5720614028176843,   -0.2185080122244105,    0.7905694150420949 }, // 581
+  {    0.0000000000000000,    0.2185080122244105,   -0.7905694150420949,    0.5720614028176843 }, // 582
+  {    0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,   -0.7905694150420949 }, // 583
+  {   -0.2185080122244105,    0.0000000000000000,   -0.5720614028176843,   -0.7905694150420949 }, // 584
+  {    0.0000000000000000,    0.0000000000000000,   -0.7071067811865475,   -0.7071067811865475 }, // 585
+  {    0.0000000000000000,    0.5720614028176843,   -0.2185080122244105,   -0.7905694150420949 }, // 586
+  {    0.0000000000000000,    0.2185080122244105,   -0.7905694150420949,   -0.5720614028176843 }, // 587
+  {    0.0000000000000000,   -0.5720614028176843,    0.2185080122244105,    0.7905694150420949 }, // 588
+  {    0.0000000000000000,   -0.2185080122244105,    0.7905694150420949,    0.5720614028176843 }, // 589
+  {    0.0000000000000000,   -0.5720614028176843,    0.2185080122244105,   -0.7905694150420949 }, // 590
+  {    0.0000000000000000,   -0.2185080122244105,    0.7905694150420949,   -0.5720614028176843 }, // 591
+  {    0.0000000000000000,   -0.5720614028176843,   -0.2185080122244105,    0.7905694150420949 }, // 592
+  {    0.0000000000000000,   -0.2185080122244105,   -0.7905694150420949,    0.5720614028176843 }, // 593
+  {    0.0000000000000000,   -0.5720614028176843,   -0.2185080122244105,   -0.7905694150420949 }, // 594
+  {    0.0000000000000000,   -0.2185080122244105,   -0.7905694150420949,   -0.5720614028176843 }, // 595
+  {    0.0000000000000000,    0.7071067811865475,    0.0000000000000000,    0.7071067811865475 }, // 596
+  {    0.0000000000000000,    0.7071067811865475,    0.0000000000000000,   -0.7071067811865475 }, // 597
+  {    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000,    0.7071067811865475 }, // 598
+  {    0.0000000000000000,   -0.7071067811865475,    0.0000000000000000,   -0.7071067811865475 }, // 599
 };
 int cellToOppositeK600[600] = { // The opposite cell, in cell order
     300, //   0
@@ -21363,9 +21400,9 @@ int cellToOppositeK600[600] = { // The opposite cell, in cell order
     597, // 598
     596, // 599
 };
-////////// The Radius of the whole K600 is 1. The radius of each cell is     0.378467
-////////// The Distance from the origin to the centre of each cell of K600 is     0.925615
-////////// The Sphere circumscribing each cell of K600 overlaps the origin by    -0.547148
+////////// The Radius of the whole K600 is 1. The radius of each cell is     0.3784669790335604
+////////// The Distance from the origin to the centre of each cell of K600 is     0.9256147934109581
+////////// The Sphere circumscribing each cell of K600 overlaps the origin by    -0.5471478143773977
 FigInfo infoK600 = {
     4, // numDims;
   120, // numVerts;
@@ -21383,11 +21420,11 @@ FigInfo infoK600 = {
     0, // numCellsPerVert;
     5, // numCellsPerEdge;
     2, // numCellsPerFace;
-    0.333333f, // dihedralCosine;
-    0.378467f, // cellRadius;
-    0.925615f, // cellCentreRadius;
-    0.934172f, // faceCentreRadius;
-(float *)vertexK600, // The vertex matrix
+    0.3333333333333333, // dihedralCosine;
+    0.3784669790335604, // cellRadius;
+    0.9256147934109581, // cellCentreRadius;
+    0.9341723589627158, // faceCentreRadius;
+(double *)vertexK600, // The vertex matrix
 (int *)edgeK600, // The edge Matrix
 (int *)vertToEdgeK600, // The Matrix of vertices for each edge
 (int *)faceK600, // The face to edge matrix
@@ -21395,12 +21432,22 @@ FigInfo infoK600 = {
 (int *)0, // Face To Vert (used in 3D)
 (int *)0, // Vertex to face (used in 3D)
 (int *)faceToCellK600, // Face to cell matrix (used in 4D)
-(float *)0, // The normal of a face (used in 3D)
+(double *)0, // The normal of a face (used in 3D)
 (int *)cellK600, // The cell matrix
-(float *)cellNormalK600, // The normal of a 4D cell
-(int *)cellToEdgeK600, // Pointer to the edges per cell (number of cells X edges per cell)
-(int *)cellToOppositeK600, // Pointer to the opposite cell per cell (number of cells X 1, but not for K005)
+(double *)cellNormalK600, // The normal of a 4D cell
+(int *)cellToEdgeK600, // The normal of a 4D cell
+(int *)cellToOppositeK600, // The opposite cell of a 4D cell
 };
+
+
+//---------------------------------------------------------------------------------
+
+
+
+
+
+///////////////////////////////////////+++++++++++++++ figdata
+// old
 ///////////////////////////////////////--------------- figdata
 
 
@@ -22052,16 +22099,16 @@ static int left_mouse, middle_mouse, right_mouse; // These are set true/false (G
 /*
  * Local function prototypes (not defined in trackball.h)
  */
-static void my_project_to_sphere2(struct trackballInfo *tbi, float *xyz);
-void rotManyVec(int count, float *vec, float *rot, float *finalquat);
-void createQuatFor3DRotation(float *axis, float angle, float *quat);
+static void my_project_to_sphere2(struct trackballInfo *tbi, double *xyz);
+void rotManyVec(int count, double *vec, double *rot, double *finalquat);
+void createQuatFor3DRotation(double *axis, double angle, double *quat);
 //float correctAngle(float oldAngle);
 double correctAngle(double oldAngle);
-void projectOnePoint4Dto3D(float *v4D, float *v3D, float dPersp);
-void projectOnePoint4Dto3DStereo2(float *v4D, float *v3DLeft, float *v3DRight, float dPersp, float eyex);
+void projectOnePoint4Dto3D(double *v4D, double *v3D, double dPersp);
+void projectOnePoint4Dto3DStereo2(double *v4D, double *v3DLeft, double *v3DRight, double dPersp, double eyex);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-vzero3(float *v)
+vzero3(double *v)
 {
     v[0] = 0.0;
     v[1] = 0.0;
@@ -22069,7 +22116,7 @@ vzero3(float *v)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-vsub3(const float *src1, const float *src2, float *dst)
+vsub3(const double *src1, const double *src2, double *dst)
 {
     dst[0] = src1[0] - src2[0];
     dst[1] = src1[1] - src2[1];
@@ -22077,18 +22124,18 @@ vsub3(const float *src1, const float *src2, float *dst)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-vcopy3(const float *v1, float *v2)
+vcopy3(const double *v1, double *v2)
 {
     v2[0] = v1[0]; v2[1] = v1[1]; v2[2] = v1[2];
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-vcopy4(const float *v1, float *v2)
+vcopy4(const double *v1, double *v2)
 {
     v2[0] = v1[0]; v2[1] = v1[1]; v2[2] = v1[2]; v2[3] = v1[3];
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void vcopy3Many(const float *v1, float *v2, int kount)
+void vcopy3Many(const double *v1, double *v2, int kount)
 {
 	register int i=0;
 	while (kount-- > 0) {
@@ -22099,24 +22146,24 @@ void vcopy3Many(const float *v1, float *v2, int kount)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
-vcross(const float *v1, const float *v2, float *cross)
+vcross(const double *v1, const double *v2, double *cross)
 {
     cross[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
     cross[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
     cross[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float
-vlength3(const float *v)
+double
+vlength3(const double *v)
 {
     return sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float vlengthdiff3(const float *v1, const float *v2)
+double vlengthdiff3(const double *v1, const double *v2)
 {
-	float diff;
-	float cumulativeDiffSq;
+	double diff;
+	double cumulativeDiffSq;
 
 	diff = v2[0] - v1[0];
 	cumulativeDiffSq = diff*diff;
@@ -22127,29 +22174,29 @@ float vlengthdiff3(const float *v1, const float *v2)
 	return sqrt(cumulativeDiffSq);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float
-vdot3(const float *v1, const float *v2)
+double
+vdot3(const double *v1, const double *v2)
 {
     return (v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float
-vdot4(const float *v1, const float *v2)
+double
+vdot4(const double *v1, const double *v2)
 {
     return (v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2] + v1[3]*v2[3]);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void vcentretriangle3(float *v1, float *v2, float *v3, float *result)
+void vcentretriangle3(double *v1, double *v2, double *v3, double *result)
 {
 	result[0] = (v1[0] + v2[0] + v3[0])/3.0;
 	result[1] = (v1[1] + v2[1] + v3[1])/3.0;
 	result[2] = (v1[2] + v2[2] + v3[2])/3.0;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float angleFromCosSin(float xcos, float xsin)
+double angleFromCosSin(double xcos, double xsin)
 {	// Given the cosine and sine of an angle,
 	// return an angle in the range  -pi < x <= pi
-	float angc;
+	double angc;
 
 	angc = acos(xcos); // acos returned range is 0 to Pi
 
@@ -22179,7 +22226,7 @@ float angleFromCosSin(float xcos, float xsin)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int vangle3D(float *v, float angle,  float *rej, float *result, int restrctd)
+int vangle3D(double *v, double angle,  double *rej, double *result, int restrctd)
 {
 	// Generate a unit 3D vector that is at a given angle to a given 3D vector v
 	// Assumes v is a unit vector
@@ -22190,11 +22237,11 @@ int vangle3D(float *v, float angle,  float *rej, float *result, int restrctd)
 	//
 	// If restricted is set to 1. then only an angle in the range -pi/2 to pi/2 is set
 	//
-	float lengthp, lengthr;
-	float vec[3];
-	float proj[3];
-	float cosangle,sinangle;
-	float dotp, absdotp;
+	double lengthp, lengthr;
+	double vec[3];
+	double proj[3];
+	double cosangle,sinangle;
+	double dotp, absdotp;
 	int itwasnegative;
 
 	// First, generate a random unit vector in 3D space
@@ -22244,9 +22291,9 @@ int vangle3D(float *v, float angle,  float *rej, float *result, int restrctd)
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-int myNormaliseVector3D(float *v) { //normalises in place
+int myNormaliseVector3D(double *v) { //normalises in place
 	// Return zero if the normalised vector is too short (i.e. 
-	float vlength;
+	double vlength;
 	char txt[50];
 	vlength = sqrt(v[0]*v[0] +v[1]*v[1] +v[2]*v[2]);
 	if (fabs(vlength) <= 0.0001) {
@@ -22260,9 +22307,9 @@ int myNormaliseVector3D(float *v) { //normalises in place
 	return 1;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-int myNormaliseVector4D(float *v) { //normalises in place
+int myNormaliseVector4D(double *v) { //normalises in place
 	// Return zero if the normalised vector is too short 
-	float vlength;
+	double vlength;
 	char txt[50];
 	vlength = sqrt(v[0]*v[0] +v[1]*v[1] +v[2]*v[2] +v[3]*v[3]);
 	if (fabs(vlength) <= 0.0001) {
@@ -22277,9 +22324,9 @@ int myNormaliseVector4D(float *v) { //normalises in place
 	return 1;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float myNormaliseRotor(struct Rotor4D *v) { //normalises in place
+double myNormaliseRotor(struct Rotor4D *v) { //normalises in place
 	// Return zero if the normalised vector is too short 
-	float vl,vlen;
+	double vl,vlen;
 
 	vlen = sqrt(
 		v->scalar*v->scalar +
@@ -22308,8 +22355,8 @@ float myNormaliseRotor(struct Rotor4D *v) { //normalises in place
 
 int mytrackball3D(struct trackballInfo *ti, enum StateMouseState *mouseState)
 {
-	float dotprod=0;
-	float temp; 
+	double dotprod=0;
+	double temp; 
 	char txt[300];
 //	char *ptr = txt;
 //	time_t tmyTime;
@@ -22374,7 +22421,7 @@ int mytrackball3D(struct trackballInfo *ti, enum StateMouseState *mouseState)
 						ti->normalisedPrev[2] = 0.0;
 
 						dotprod = vdot3(ti->normalisedCurr, ti->normalisedPrev);
-						ti->rotangle = correctAngle((float)acos(dotprod));
+						ti->rotangle = correctAngle((double)acos(dotprod));
 						if (ti->rotangle == ti->rotangle) { //may not be a number
 							vcross(ti->normalisedPrev, ti->normalisedCurr, ti->axis);
 							myNormaliseVector3D(ti->axis); // ti->axis is now a normalised rotation axis for the trackball.
@@ -22405,7 +22452,7 @@ int mytrackball3D(struct trackballInfo *ti, enum StateMouseState *mouseState)
 						ti->normalisedPrev[2] = ti->prevxyz[2]/ti->trackballsize;
 
 						dotprod = vdot3(ti->normalisedCurr, ti->normalisedPrev);
-						ti->rotangle = correctAngle((float)acos(dotprod));
+						ti->rotangle = correctAngle((double)acos(dotprod));
 						if (ti->rotangle == ti->rotangle) { //may not be a number
 							vcross(ti->normalisedPrev, ti->normalisedCurr, ti->axis);
 							myNormaliseVector3D(ti->axis); // ti->axis is now a normalised rotation axis for the trackball.
@@ -22457,7 +22504,7 @@ int mytrackball3D(struct trackballInfo *ti, enum StateMouseState *mouseState)
 
 						dotprod = vdot3(ti->normalisedCurr, ti->normalisedPrev);
 
-						ti->rotangle = correctAngle((float)acos(dotprod));
+						ti->rotangle = correctAngle((double)acos(dotprod));
 						if (ti->rotangle == ti->rotangle) { //may not be a number
 							//ptr += sprintf(ptr,"OK ");
 							
@@ -22523,7 +22570,7 @@ int mytrackball3D(struct trackballInfo *ti, enum StateMouseState *mouseState)
 						ti->normalisedPrev[3] = 0.0;
 
 						dotprod = vdot3(ti->normalisedCurr, ti->normalisedPrev);
-						ti->rotangle = correctAngle((float)acos(dotprod));
+						ti->rotangle = correctAngle((double)acos(dotprod));
 
 						if (ti->rotangle == ti->rotangle) { //may not be a number
 							//ptr += sprintf(ptr,"OK "); // Fudge the correct case4D number (as per description above)
@@ -22575,9 +22622,9 @@ int mytrackball3D(struct trackballInfo *ti, enum StateMouseState *mouseState)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void my_project_to_sphere2(struct trackballInfo *tbi, float *xyz)
+static void my_project_to_sphere2(struct trackballInfo *tbi, double *xyz)
 {
-	float d,dsquared;//,tanp,cosp;
+	double d,dsquared;//,tanp,cosp;
 	// xyz is a 3-vector containing the mouse x and y. z is then computed.
 	// x and y are the x,y mouse positions. d is the (horizontal) distance of the mouse from the origin
 	dsquared = xyz[0]*xyz[0] + xyz[1]*xyz[1];
@@ -22591,9 +22638,9 @@ static void my_project_to_sphere2(struct trackballInfo *tbi, float *xyz)
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void
-my_normalize_quat(float *q)
+my_normalize_quat(double *q)
 {
-    float mag;
+    double mag;
 
     mag = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
     q[0] /= mag; q[1] /= mag; q[2] /= mag; q[3] /= mag;
@@ -22622,32 +22669,32 @@ double correctAngle(double oldAngle) {
 	return remainder;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float randomAngle()
+double randomAngle()
 {
 	// Generates a floating point number in the range -pi to + pi
-	float r = (float)rand()/(float)(RAND_MAX);
-	float ang = r*M_TWO_PI - M_PI;
+	double r = (double)rand()/(double)(RAND_MAX);
+	double ang = r*M_TWO_PI - M_PI;
 	return (ang);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float randomAng(float minAng, float maxAng)
+double randomAng(double minAng, double maxAng)
 {
 	// Generates a floating point number in the range minAng to maxAng
-	float r = minAng + ((float)rand()/(float)RAND_MAX)*(maxAng - minAng);
+	double r = minAng + ((double)rand()/(double)RAND_MAX)*(maxAng - minAng);
 	return (r);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void randomVec3D (float * vec) {
+void randomVec3D (double * vec) {
 	// A random 3D unit vector is returned in vec
-	float lngth;
+	double lngth;
 
 	// First generate a random vector whose length is <= 1.0
 	// Each component is in the range -1 to 1
 	do {
-		vec[0] = 1.0 - 2.0*(float)rand()/((float)RAND_MAX);
-		vec[1] = 1.0 - 2.0*(float)rand()/((float)RAND_MAX);
-		vec[2] = 1.0 - 2.0*(float)rand()/((float)RAND_MAX);
+		vec[0] = 1.0 - 2.0*(double)rand()/((double)RAND_MAX);
+		vec[1] = 1.0 - 2.0*(double)rand()/((double)RAND_MAX);
+		vec[2] = 1.0 - 2.0*(double)rand()/((double)RAND_MAX);
 		lngth = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2];
 	} while (lngth > 1.0);
 	// Now normalise the vector
@@ -22657,16 +22704,16 @@ void randomVec3D (float * vec) {
 	vec[2] /= lngth;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void randomVec4D (float * vec) {
+void randomVec4D (double * vec) {
 	// A random 4D unit vector is returned in vec
-	float lngth;
+	double lngth;
 	// First generate a random vector whose length is <= 1.0
 	// Each component is in the range -1 to 1
 	do {
-		vec[0] = 1.0 - 2.0*(float)rand()/((float)RAND_MAX);
-		vec[1] = 1.0 - 2.0*(float)rand()/((float)RAND_MAX);
-		vec[2] = 1.0 - 2.0*(float)rand()/((float)RAND_MAX);
-		vec[3] = 1.0 - 2.0*(float)rand()/((float)RAND_MAX);
+		vec[0] = 1.0 - 2.0*(double)rand()/((double)RAND_MAX);
+		vec[1] = 1.0 - 2.0*(double)rand()/((double)RAND_MAX);
+		vec[2] = 1.0 - 2.0*(double)rand()/((double)RAND_MAX);
+		vec[3] = 1.0 - 2.0*(double)rand()/((double)RAND_MAX);
 		lngth = vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2] + vec[3]*vec[3];
 	} while (lngth > 1.0);
 	// Now normalise the vector
@@ -22677,7 +22724,7 @@ void randomVec4D (float * vec) {
 	vec[3] /= lngth;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void quatMult(float *p, float *q, float *result) {
+void quatMult(double *p, double *q, double *result) {
 	// A simple quaternion multiplication, assuming p and q point to quaternions
 	// Result will contain the result of p*q as a quaternion multiplication
 	// This works for both non-unit and unit quaternions
@@ -22687,7 +22734,7 @@ void quatMult(float *p, float *q, float *result) {
 	result[3] = p[0]*q[3] +p[1]*q[2] -p[2]*q[1] +p[3]*q[0];
 }
 
-void quatMultPQInverse(float *p, float *q, float *result) {
+void quatMultPQInverse(double *p, double *q, double *result) {
 	// A quaternion multiplication, assuming p and q point to UNIT quaternions
 	// Result will contain the result of p*(q inverse) as a quaternion multiplication
 
@@ -22701,12 +22748,12 @@ void quatMultPQInverse(float *p, float *q, float *result) {
 	result[3] =-p[0]*q[3] -p[1]*q[2] +p[2]*q[1] +p[3]*q[0];
 }
 
-float differenceBetweenTwoQuats(float *q1, float *q2, float *qDiff, float *qAxis) {
+double differenceBetweenTwoQuats(double *q1, double *q2, double *qDiff, double *qAxis) {
 	// Calculate the quaternion required to go from q1 to q2, store it in qdiff.
 	// Assumes that q1 and q2 are unit quaternions.
 	// Calculate the axis and angle that correspond to qdiff. Store the axis in qaxis
 	// the angle is returned to the caller.
-	float temp, tempcos, tempsin;
+	double temp, tempcos, tempsin;
 	quatMultPQInverse(q2, q1, qDiff); // Calc the difference quaternion.
 	temp = 1.0/sqrt(qDiff[0]*qDiff[0] + qDiff[1]*qDiff[1] + qDiff[2]*qDiff[2] + qDiff[3]*qDiff[3]); // temp is 1/length
 	qDiff[0] *= temp; qDiff[1] *= temp; qDiff[2] *= temp; qDiff[3] *= temp;
@@ -22738,13 +22785,13 @@ void dumpRotVertsToFile3D(struct Intersection3DInfo *i3D){
 	{if (pFile) fputs(txtout,pFile);}
 }
 
-void dumpQuat(float *q){
+void dumpQuat(double *q){
 	char txtout[90];
 	char *sptr = txtout;
 	sptr += sprintf(sptr,"Q: %9.5f %9.5f %9.5f %9.5f Angle:%8.2f Z=%d\n", q[0],q[1],q[2],q[3],acos(q[0])*M_RADIANS_TO_DEGREES,(q[0] == 1.0));
 	{if (pFile) fputs(txtout,pFile);}
 }
-void dumpOneVector(float *v){
+void dumpOneVector(double *v){
 	char txtout[90];
 	char *sptr = txtout;
 	sptr += sprintf(sptr,"%9.5f %9.5f %9.5f\n", v[0],v[1],v[2]);
@@ -22768,14 +22815,14 @@ void dumpBivector(struct Bivector4D *biv){
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-float dotProdOnePointWithUserNormal3D(float *vert) {
+double dotProdOnePointWithUserNormal3D(double *vert) {
 	return (vert[0]*info3D.userPlaneNormal[0] +vert[1]*info3D.userPlaneNormal[1] +vert[2]*info3D.userPlaneNormal[2]); 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void calcDotProdsOfPointsWithUserNormal3D(struct Intersection3DInfo *i3D) {
 	int vInd, count;
-	float dist;
+	double dist;
 	count = 0;
 	i3D->firstCoincidentVert = -1;
 
@@ -22797,7 +22844,7 @@ void calcDotProdsOfPointsWithUserNormal3D(struct Intersection3DInfo *i3D) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void calcDotProdsOfPointsWithUserNormal4D(struct Intersection4DInfo *i4D) {
 	int vInd, count;
-	float dist;
+	double dist;
 	count = 0;
 
 	// Calc the distance of the rotated verts of the figure and target, from the user plane
@@ -22829,7 +22876,7 @@ void setUserPlaneNormal3D() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void calcEdgeLambda3D(struct Intersection3DInfo *i3D) {
 	int j, vert1Ind, vert2Ind, intersectionIndex, coincidentEdgeIndex;//, coincidentVertexIndex;
-	float dotProd1, dotProd2, dotDiff, lambda;
+	double dotProd1, dotProd2, dotDiff, lambda;
 	char txtout[200];
 	char *sptr;
 
@@ -22876,7 +22923,7 @@ void calcEdgeLambda3D(struct Intersection3DInfo *i3D) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void createCellIntsct(struct Intersection4DInfo *i4D) {
 	int fIntIndex, k, l,j, thisCell, foundACell, foundAFaceReference, fGlobalIndex;
-	float xxx = 0.0;
+	double xxx = 0.0;
 
 	// Get the index of the face in faceIntsct
 	fIntIndex = i4D->iObj.faceIntersectionIndex;
@@ -22934,7 +22981,7 @@ void createCellIntsct(struct Intersection4DInfo *i4D) {
 void createFaceIntsct(struct Intersection4DInfo *i4D) {
 
 	int eIntIndex, k, j, thisFace, foundAFace, foundAnEdgeReference, eGlobalIndex;//, faceIntersectIndex;
-	float xxx = 0.0;
+	double xxx = 0.0;
 
 	/////////////////////////////////////////////
 	// Get the index of the edge in edge edgeIntsct that this call comes from
@@ -23012,7 +23059,7 @@ void createFaceIntsct(struct Intersection4DInfo *i4D) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void calcEdgeLambda4D(struct Intersection4DInfo *i4D, int doStereo) {
 	int j, vert1Ind, vert2Ind, coincidentEdgeIndex; //, edgeInd;//, coincidentVertexIndex;
-	float dotProd1, dotProd2, dotDiff, lambda;
+	double dotProd1, dotProd2, dotDiff, lambda;
 	char txtout[200];
 	char *sptr;
 	struct EdgeIntersection *ei;
@@ -23070,7 +23117,7 @@ void calcEdgeLambda4D(struct Intersection4DInfo *i4D, int doStereo) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 void populateIntersectingEdge(struct Intersection3DInfo *i3D, int iPointIndex, int edgeIndex) {
-	float lambda;
+	double lambda;
 	int vert1Ind, vert2Ind;
 
 	vert1Ind = info3D.fig->edge[2*edgeIndex];
@@ -23320,7 +23367,7 @@ int calcIntersectionFace3D(struct Intersection3DInfo *i3D) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void createQuatFor3DRotation(float *axis, float angle, float *quat)
+void createQuatFor3DRotation(double *axis, double angle, double *quat)
 {// To rotate vectors, use: createQuatFor3DRotation, createColsForRots, calcRotatedVector, rotateManyVectors
 	// Use This Function  !!!!!!!!! ////////////////////////////
 	// The angle you enter as a parameter should be the full angle of rotation
@@ -23328,8 +23375,8 @@ void createQuatFor3DRotation(float *axis, float angle, float *quat)
 	// Axis has 3 components
 	// quat has 4 components.
 	// This is the quaternion that goes on the left side of the double-sided multiplication
-	float ha = angle*0.5;
-	float sa = sin(ha);
+	double ha = angle*0.5;
+	double sa = sin(ha);
 	quat[0] = cos(ha);
 	quat[1] = sa * axis[0];
 	quat[2] = sa * axis[1];
@@ -23337,7 +23384,7 @@ void createQuatFor3DRotation(float *axis, float angle, float *quat)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void createColsForRots(float *v, float *q, float *col)
+void createColsForRots(double *v, double *q, double *col)
 {// A utility for use in quaternion rotation
 
 	// v is the vector to be rotated. It has three components: x,y,z
@@ -23351,7 +23398,7 @@ void createColsForRots(float *v, float *q, float *col)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void calcRotatedVector(float *col, float *q, float *result)
+void calcRotatedVector(double *col, double *q, double *result)
 {
 	// col has 4 components (it is calculated separately using the vector to be rotated)
 	// q is a quaternion and has 4 components
@@ -23407,7 +23454,7 @@ void calcRotatedVector(float *col, float *q, float *result)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void rotateOneVector(float *vector, float angle, float *axis, float *rotatedVector)
+void rotateOneVector(double *vector, double angle, double *axis, double *rotatedVector)
 {
 	// vector points to an array of 3d vectors: vector[n][3]
 	// angle is the angle of rotation (we later divide it by 2 to get the half angle for quaternion rotation)
@@ -23415,8 +23462,8 @@ void rotateOneVector(float *vector, float angle, float *axis, float *rotatedVect
 	// countofvectors is the number of vectors to rotate, taken from the array 'vector'
 	// rotatedvector is where the results go, in the form of an n by 3 array
 
-	float quat[4];
-	float col[4];
+	double quat[4];
+	double col[4];
 
 	createQuatFor3DRotation( axis, angle, quat); // The rotation angle should be the full, not half, angle
 
@@ -23429,13 +23476,13 @@ void rotateOneVector(float *vector, float angle, float *axis, float *rotatedVect
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-void rotManyVec(int count, float *vec, float *rot, float *finalquat) {
+void rotManyVec(int count, double *vec, double *rot, double *finalquat) {
 	// Count is the number of vectors to be rotated
 	// vect points to the vectors to be rotated
 	// rot points to the results (the rotated vectors)
 	// final quat points to the quaternion for rotation (it must be constructed using the half-angle)
 	int i = 0;
-	float col[4];
+	double col[4];
 
 	while (count-- > 0) {
 		createColsForRots(vec+i, finalquat, col);
@@ -23445,7 +23492,7 @@ void rotManyVec(int count, float *vec, float *rot, float *finalquat) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void createQuatFromBasePosnQuatAxisAndAngle(float *axis, float angle, float *newquat) {
+void createQuatFromBasePosnQuatAxisAndAngle(double *axis, double angle, double *newquat) {
 	// Creates a quaternion to achieve the following
 	// 1. Rotate the figure (in the canonical position) to a 'base' position.
 	// It is assumed that info3D.basePositionDemoQuat is a quaternion that already does this.
@@ -23453,7 +23500,7 @@ void createQuatFromBasePosnQuatAxisAndAngle(float *axis, float angle, float *new
 	// This quaternion has to be calculated
 	// 3. The quaternions from steps 1 and 2 are combined to form a new quaternion 'newquat'
 	//
-	float tempquat[4];
+	double tempquat[4];
 
 	// Firstly, create the new quaternion that is needed for step 2.
 	createQuatFor3DRotation(axis, angle, tempquat); // The angle should be the full angle, not the half angle
@@ -23463,7 +23510,7 @@ void createQuatFromBasePosnQuatAxisAndAngle(float *axis, float angle, float *new
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void rotateVectors3D_BAA(float oscAngle)//, int countOfNormals, float *rotatedNormals)
+void rotateVectors3D_BAA(double oscAngle)//, int countOfNormals, float *rotatedNormals)
 {
 	// Use this!
 	// vector points to an array of 3d vectors: vector[n][3]
@@ -23504,7 +23551,7 @@ void rotateVectors3D_BAA(float oscAngle)//, int countOfNormals, float *rotatedNo
 }
 
 
-int signR(float Z) {
+int signR(double Z) {
   if (Z > 0.0) return 1;
   if (Z < 0.0) return -1;
   return 0;
@@ -23754,7 +23801,7 @@ void rotateBivectorByRotor( struct Bivector4D *b, struct Rotor4D *r, struct Bive
 {
 	// Currently unused but maybe keep for reference????
 
-	float temp1,temp2,temp3,temp4,temp5,temp6,temp7,temp8;
+	double temp1,temp2,temp3,temp4,temp5,temp6,temp7,temp8;
 	
 temp1 = (-r->b.e12*b->e12 -r->b.e13*b->e13 -r->b.e14*b->e14 -r->b.e23*b->e23 -r->b.e24*b->e24 -r->b.e34*b->e34);
 temp2 = (r->scalar*b->e12 -r->b.e13*b->e23 -r->b.e14*b->e24 +r->b.e23*b->e13 +r->b.e24*b->e14 -r->e1234*b->e34);
@@ -23774,20 +23821,20 @@ result->e34 = -temp1*r->b.e34 -temp2*r->e1234  +temp3*r->b.e14  -temp4*r->b.e13 
 	
 }
 
-void rotateVectorBySimpleRotor(float *v1, struct Rotor4D *r1, float *result) {
+void rotateVectorBySimpleRotor(double *v1, struct Rotor4D *r1, double *result) {
 // Dont use This function!! It is probably ok but it isn't tested
 //	If you want a function that rotates by a simple rotor, just take the following function "rotateOneVectorByComplexRotor"
 // which is tested,
 // And knock out the references to e1234 (i.e. set e1234 zero)
-float t1 = r1->scalar*v1[0]-r1->b.e12*v1[1]-r1->b.e13*v1[2]-r1->b.e14*v1[3];
-float t2 = r1->scalar*v1[1]+r1->b.e12*v1[0]-r1->b.e23*v1[2]-r1->b.e24*v1[3];
-float t3 = r1->scalar*v1[2]+r1->b.e13*v1[0]+r1->b.e23*v1[1]-r1->b.e34*v1[3];
-float t4 = r1->scalar*v1[3]+r1->b.e14*v1[0]+r1->b.e24*v1[1]+r1->b.e34*v1[2];
+double t1 = r1->scalar*v1[0]-r1->b.e12*v1[1]-r1->b.e13*v1[2]-r1->b.e14*v1[3];
+double t2 = r1->scalar*v1[1]+r1->b.e12*v1[0]-r1->b.e23*v1[2]-r1->b.e24*v1[3];
+double t3 = r1->scalar*v1[2]+r1->b.e13*v1[0]+r1->b.e23*v1[1]-r1->b.e34*v1[3];
+double t4 = r1->scalar*v1[3]+r1->b.e14*v1[0]+r1->b.e24*v1[1]+r1->b.e34*v1[2];
 
-float f1 = -r1->b.e12*v1[2]+r1->b.e13*v1[1]-r1->b.e23*v1[0];
-float f2 = -r1->b.e12*v1[3]+r1->b.e14*v1[1]-r1->b.e24*v1[0];
-float f3 = -r1->b.e13*v1[3]+r1->b.e14*v1[2]-r1->b.e34*v1[0];
-float f4 = -r1->b.e23*v1[3]+r1->b.e24*v1[2]-r1->b.e34*v1[1];
+double f1 = -r1->b.e12*v1[2]+r1->b.e13*v1[1]-r1->b.e23*v1[0];
+double f2 = -r1->b.e12*v1[3]+r1->b.e14*v1[1]-r1->b.e24*v1[0];
+double f3 = -r1->b.e13*v1[3]+r1->b.e14*v1[2]-r1->b.e34*v1[0];
+double f4 = -r1->b.e23*v1[3]+r1->b.e24*v1[2]-r1->b.e34*v1[1];
 
 result[0]=
 	+(t1)*r1->scalar	//t1
@@ -23877,17 +23924,17 @@ result[3]=
 
 }
 
-void rotateOneVectorByComplexRotorMk2(float *v, struct Rotor4D *r1, float *vresult) {
+void rotateOneVectorByComplexRotorMk2(double *v, struct Rotor4D *r1, double *vresult) {
 	// verified 22/2/2016
 
-  float temp1 =  r1->scalar*v[0] -r1->b.e12*v[1] -r1->b.e13*v[2] -r1->b.e14*v[3];
-  float temp2 =  r1->scalar*v[1] +r1->b.e12*v[0] -r1->b.e23*v[2] -r1->b.e24*v[3];
-  float temp3 =  r1->scalar*v[2] +r1->b.e13*v[0] +r1->b.e23*v[1] -r1->b.e34*v[3];
-  float temp4 =  r1->scalar*v[3] +r1->b.e14*v[0] +r1->b.e24*v[1] +r1->b.e34*v[2];
-  float temp5 = -r1->b.e12*v[2]  +r1->b.e13*v[1] -r1->b.e23*v[0] +r1->e1234*v[3];
-  float temp6 = -r1->b.e12*v[3]  +r1->b.e14*v[1] -r1->b.e24*v[0] -r1->e1234*v[2];
-  float temp7 = -r1->b.e13*v[3]  +r1->b.e14*v[2] -r1->b.e34*v[0] +r1->e1234*v[1];
-  float temp8 = -r1->b.e23*v[3]  +r1->b.e24*v[2] -r1->b.e34*v[1] -r1->e1234*v[0];
+  double temp1 =  r1->scalar*v[0] -r1->b.e12*v[1] -r1->b.e13*v[2] -r1->b.e14*v[3];
+  double temp2 =  r1->scalar*v[1] +r1->b.e12*v[0] -r1->b.e23*v[2] -r1->b.e24*v[3];
+  double temp3 =  r1->scalar*v[2] +r1->b.e13*v[0] +r1->b.e23*v[1] -r1->b.e34*v[3];
+  double temp4 =  r1->scalar*v[3] +r1->b.e14*v[0] +r1->b.e24*v[1] +r1->b.e34*v[2];
+  double temp5 = -r1->b.e12*v[2]  +r1->b.e13*v[1] -r1->b.e23*v[0] +r1->e1234*v[3];
+  double temp6 = -r1->b.e12*v[3]  +r1->b.e14*v[1] -r1->b.e24*v[0] -r1->e1234*v[2];
+  double temp7 = -r1->b.e13*v[3]  +r1->b.e14*v[2] -r1->b.e34*v[0] +r1->e1234*v[1];
+  double temp8 = -r1->b.e23*v[3]  +r1->b.e24*v[2] -r1->b.e34*v[1] -r1->e1234*v[0];
 
 
   vresult[0] = temp1*r1->scalar - temp2*r1->b.e12  - temp3*r1->b.e13  - temp4*r1->b.e14  - temp5*r1->b.e23 - temp6*r1->b.e24 - temp7*r1->b.e34 + temp8*r1->e1234;
@@ -23903,7 +23950,7 @@ void rotateOneVectorByComplexRotorMk2(float *v, struct Rotor4D *r1, float *vresu
 //(r1scalar*v[0]-r1be12*v[1]-r1be13*v[2]-r1be14*v[3])*r1be13+(r1scalar*v[1]+r1be12*v[0]-r1be23*v[2]-r1be24*v[3])*r1be23+(r1scalar*v[2]+r1be13*v[0]+r1be23*v[1]-r1be34*v[3])*r1scalar-(r1scalar*v[3]+r1be14*v[0]+r1be24*v[1]+r1be34*v[2])*r1be34-(-r1be12*v[2]+r1be13*v[1]-r1be23*v[0]+r1e1234*v[3])*r1be12+(-r1be12*v[3]+r1be14*v[1]-r1be24*v[0]-r1e1234*v[2])*r1e1234+(-r1be13*v[3]+r1be14*v[2]-r1be34*v[0]+r1e1234*v[1])*r1be14+(-r1be23*v[3]+r1be24*v[2]-r1be34*v[1]-r1e1234*v[0])*r1be24
 //(r1scalar*v[0]-r1be12*v[1]-r1be13*v[2]-r1be14*v[3])*r1be14+(r1scalar*v[1]+r1be12*v[0]-r1be23*v[2]-r1be24*v[3])*r1be24+(r1scalar*v[2]+r1be13*v[0]+r1be23*v[1]-r1be34*v[3])*r1be34+(r1scalar*v[3]+r1be14*v[0]+r1be24*v[1]+r1be34*v[2])*r1scalar-(-r1be12*v[2]+r1be13*v[1]-r1be23*v[0]+r1e1234*v[3])*r1e1234-(-r1be12*v[3]+r1be14*v[1]-r1be24*v[0]-r1e1234*v[2])*r1be12-(-r1be13*v[3]+r1be14*v[2]-r1be34*v[0]+r1e1234*v[1])*r1be13-(-r1be23*v[3]+r1be24*v[2]-r1be34*v[1]-r1e1234*v[0])*r1be23
 
-void rotateManyVectorsByComplexRotor(float *v1, int kount, struct Rotor4D *r1, float *vresult) {
+void rotateManyVectorsByComplexRotor(double *v1, int kount, struct Rotor4D *r1, double *vresult) {
 	// Kount is the number of vertices, where each vertex is an array of four floats
 	// Given a vector v, apply a rotor4D to it to get a result (a rotated vector) in vresult
 	// This calculation is copied from Maple
@@ -23933,7 +23980,7 @@ void gpOfTwoComplexRotors(struct Rotor4D *r1, struct Rotor4D *r2, struct Rotor4D
 	rr->e1234 = r1->scalar*r2->e1234 +r1->b.e12*r2->b.e34  -r1->b.e13*r2->b.e24  +r1->b.e14*r2->b.e23  +r1->b.e23*r2->b.e14  -r1->b.e24*r2->b.e13  +r1->b.e34*r2->b.e12  +r1->e1234*r2->scalar;
 }
 
-void calcBivector4DFromVectors (float *v1, float *v2, struct Bivector4D *biv) {
+void calcBivector4DFromVectors (double *v1, double *v2, struct Bivector4D *biv) {
 	// Note this only works for orthogonal vectors v1 and v2. (ok 22/2/2016)
 	biv->e12  = v1[0]*v2[1]-v1[1]*v2[0];
 	biv->e13  = v1[0]*v2[2]-v1[2]*v2[0];
@@ -23943,8 +23990,8 @@ void calcBivector4DFromVectors (float *v1, float *v2, struct Bivector4D *biv) {
 	biv->e34  = v1[2]*v2[3]-v1[3]*v2[2];
 }
 
-void calcNormalBivector4DFromVectors (float *v1, float *v2, struct Bivector4D *biv) {
-	float rlength;
+void calcNormalBivector4DFromVectors (double *v1, double *v2, struct Bivector4D *biv) {
+	double rlength;
 	calcBivector4DFromVectors(v1,v2,biv);
 
 	rlength =	biv->e12*biv->e12 +
@@ -23964,7 +24011,7 @@ void calcNormalBivector4DFromVectors (float *v1, float *v2, struct Bivector4D *b
 	biv->e34  *= rlength; //= v1[2]*v2[3]-v1[3]*v2[2];
 }
 
-void calcCompRotorFromBivAndTwoAngles (struct Bivector4D *biv1, float angle1, float angle2, struct Rotor4D *rt)
+void calcCompRotorFromBivAndTwoAngles (struct Bivector4D *biv1, double angle1, double angle2, struct Rotor4D *rt)
 {
 	//Calculates a complex rotor from a single bivector and two angles.
 	// The bivector and the first angle is used for the first simple rotor
@@ -23972,13 +24019,13 @@ void calcCompRotorFromBivAndTwoAngles (struct Bivector4D *biv1, float angle1, fl
 	// The first rotor is then multiplied by the second rotor
 
 	// Multiplications obtained from Maple
-	float cosa1 = cos(angle1*0.5);
-	float sina1 = sin(angle1*0.5);
-	float cosa2 = cos(angle2*0.5);
-	float sina2 = sin(angle2*0.5);
-	float sina12 = sina1*sina2;
-	float cosa1sina2 = cosa1*sina2;
-	float cosa2sina1 = cosa2*sina1;
+	double cosa1 = cos(angle1*0.5);
+	double sina1 = sin(angle1*0.5);
+	double cosa2 = cos(angle2*0.5);
+	double sina2 = sin(angle2*0.5);
+	double sina12 = sina1*sina2;
+	double cosa1sina2 = cosa1*sina2;
+	double cosa2sina1 = cosa2*sina1;
 
 	rt->scalar =  cosa1*cosa2 + 2*sina12*(biv1->e12*biv1->e34 - biv1->e13*biv1->e24 + biv1->e14*biv1->e23);
 
@@ -23995,13 +24042,13 @@ void calcCompRotorFromBivAndTwoAngles (struct Bivector4D *biv1, float angle1, fl
 					biv1->e24*biv1->e24 + biv1->e34*biv1->e34  );
 }
 
-void calcRotorFromBivectorAngle(struct Bivector4D * biv, float angleInRadians, struct Rotor4D *rot)
+void calcRotorFromBivectorAngle(struct Bivector4D * biv, double angleInRadians, struct Rotor4D *rot)
 {
-	float angleInRadians2 = angleInRadians*0.5;
+	double angleInRadians2 = angleInRadians*0.5;
 
 	// Calculates a simple rotor from a bivector and an angle
-	float cosA = cos(angleInRadians2);
-	float sinA = sin(angleInRadians2);
+	double cosA = cos(angleInRadians2);
+	double sinA = sin(angleInRadians2);
 
 	rot->scalar = cosA;
 	rot->b.e12 = sinA * biv->e12;
@@ -24035,7 +24082,7 @@ void copyBivector( struct Bivector4D *r1,  struct Bivector4D *r2)
 	r2->e34 = r1->e34;
 }
 
-void calcContrProjRejOfVectorOnBiv( float *vect, struct Bivector4D *biv, float *contr, float *proj, float *rej)
+void calcContrProjRejOfVectorOnBiv( double *vect, struct Bivector4D *biv, double *contr, double *proj, double *rej)
 {
 	// The following is based on calculations by Maple.
 	//float vec[4], outr[4]; //, temp1,temp2, temp3, temp4;
@@ -24059,10 +24106,10 @@ void calcContrProjRejOfVectorOnBiv( float *vect, struct Bivector4D *biv, float *
 	rej[3] = vect[3] - proj[3];
 }
 
-void calcProjectionOfVectorOnBiv( float *vect, struct Bivector4D *biv, float *proj, float *rej)
+void calcProjectionOfVectorOnBiv( double *vect, struct Bivector4D *biv, double *proj, double *rej)
 {
 	// The following is based on calculations by Maple.
-	float temp1, temp2, temp3, temp4;
+	double temp1, temp2, temp3, temp4;
 	
 	temp1 =  vect[0]*biv->e12 - vect[2]*biv->e23 - vect[3]*biv->e24;
 	temp2 =  vect[0]*biv->e13 + vect[1]*biv->e23 - vect[3]*biv->e34;
@@ -24083,9 +24130,9 @@ void calcProjectionOfVectorOnBiv( float *vect, struct Bivector4D *biv, float *pr
 }
 
 void calcNewBivectors( struct Bivector4D *oldBiv, struct Bivector4D *newBiv) {
-	float temp[4];
-	float proj[4];
-	float rej[4];
+	double temp[4];
+	double proj[4];
+	double rej[4];
 
 	// Step 1 create a random 4D vector, unit length, in temp.
 	randomVec4D(temp);
@@ -24097,13 +24144,13 @@ void calcNewBivectors( struct Bivector4D *oldBiv, struct Bivector4D *newBiv) {
 	calcNormalBivector4DFromVectors(proj,rej,newBiv);
 }
 ////////////////////////////////////////////////////////////////////
-void calcNewBivectorForEscape( struct Bivector4D *oldBiv, float cosangle, struct Bivector4D *newBiv) {
-	float temp[4];
-	float tmp2[4];
-	float contr[4];
-	float proj[4];
-	float rej[4];
-	float sina;
+void calcNewBivectorForEscape( struct Bivector4D *oldBiv, double cosangle, struct Bivector4D *newBiv) {
+	double temp[4];
+	double tmp2[4];
+	double contr[4];
+	double proj[4];
+	double rej[4];
+	double sina;
 
 	// Step 1 create a random 4D vector, unit length.
 	randomVec4D(temp);
@@ -24133,7 +24180,7 @@ void randBivector4D(	struct Bivector4D *result)
 {
 	// Generate two random 4d vectors v1 and v2. Create a bivector from these.
 
-	float v1[4],v2[4],dotp;
+	double v1[4],v2[4],dotp;
 
 	randomVec4D(v1); // Produces a normalised random vector  in v1
 
@@ -24145,7 +24192,7 @@ void randBivector4D(	struct Bivector4D *result)
 	calcNormalBivector4DFromVectors(v1, v2, result);
 }
 
-void rotateVectors4D(float oscAng, float oscAngDual) {
+void rotateVectors4D(double oscAng, double oscAngDual) {
 	// first we have to apply the rotor to get from the canonical to the base position
 	// Then from the base position to the current position
 	// So, create the rotor that goes from the base position to the current position
@@ -24171,12 +24218,12 @@ void rotateVectors4D(float oscAng, float oscAngDual) {
 		rotateManyVectorsByComplexRotor(info4D.fig->cellNormal, info4D.fig->numCells, &info4D.compositeRot, info4DTarg.rotatedCellNormals[0]);
 }
 
-void projectOnePoint4Dto3D(float *v4D, float *v3D, float dPersp) {
+void projectOnePoint4Dto3D(double *v4D, double *v3D, double dPersp) {
 	//dPersp is the distance of the projection point from the origin.
 	// if dPersp is >= 100 it is taken to be infinity
 	// if dPersp is <= -100, it is taken to be - infinity.
 	//int i ;
-	float scaleFactor;
+	double scaleFactor;
 
 	if (dPersp >= 100.0 || dPersp <= -100.0 ) {
 		vcopy3(&v4D[0], &v3D[0]);
@@ -24191,7 +24238,7 @@ void projectOnePoint4Dto3D(float *v4D, float *v3D, float dPersp) {
 	}
 }
 
-void projectOnePoint4Dto3DStereo2(float *v4D, float *v3DLeft, float *v3DRight, float dPersp, float eyex3D) {
+void projectOnePoint4Dto3DStereo2(double *v4D, double *v3DLeft, double *v3DRight, double dPersp, double eyex3D) {
 	//dPersp is the distance of the projection point from 4D to 3D, from the origin.
 	// if dPersp is >= 100 it is taken to be infinity
 	// if dPersp is <= -100, it is taken to be - infinity.
@@ -24199,10 +24246,10 @@ void projectOnePoint4Dto3DStereo2(float *v4D, float *v3DLeft, float *v3DRight, f
 	// eyex4D is the displacement of the eye along the x axis (for stereo) when projecting 4D to 3D 
 	//int i ;
 	
-	float scaleFactor4D3D;
+	double scaleFactor4D3D;
 	//int count;
 	//int isOrthogonal;
-	float vtemp[4];
+	double vtemp[4];
 	//float xEye;
 	vtemp[0]=v4D[0];vtemp[1]=v4D[1];vtemp[2]=v4D[2];vtemp[3]=v4D[3];
 
@@ -24228,17 +24275,17 @@ void projectOnePoint4Dto3DStereo2(float *v4D, float *v3DLeft, float *v3DRight, f
 	v3DLeft[0] = (v4D[0] )*scaleFactor4D3D + eyex3D;
 	v3DRight[0] =(v4D[0] )*scaleFactor4D3D - eyex3D;
 }
-void calcFrustum (struct Intersection4DInfoGeneral *info4DG, struct Intersection4DInfo *info4, int isStereo, int numbers, float radiusOf4D) {
+void calcFrustum (struct Intersection4DInfoGeneral *info4DG, struct Intersection4DInfo *info4, int isStereo, int numbers, double radiusOf4D) {
 
-	float max3DXValue;
-	float beta; // Assumed value of 3d angle, see diag 1.
-	float beta4; // Assumed value of 3d angle, see diag 1.
-	float alpha; // Assumed value of 3d angle, see diag 1.
-	float d,dsq; // see diag 1 and 2 
-	float r,rsq; // see diag 1 and 2
-	float cd; // see diag 1
-	float e; // see diag 1
-	float k,ksq; // see diag 2
+	double max3DXValue;
+	double beta; // Assumed value of 3d angle, see diag 1.
+	double beta4; // Assumed value of 3d angle, see diag 1.
+	double alpha; // Assumed value of 3d angle, see diag 1.
+	double d,dsq; // see diag 1 and 2 
+	double r,rsq; // see diag 1 and 2
+	double cd; // see diag 1
+	double e; // see diag 1
+	double k,ksq; // see diag 2
 
 	d = info4DG->projectDist3D2D;
 	dsq = d*d;
@@ -24283,9 +24330,9 @@ void calcFrustum (struct Intersection4DInfoGeneral *info4DG, struct Intersection
 void project4Dto3DStereo2C(struct Intersection4DInfoGeneral *info4DG, struct Intersection4DInfo *info4, int isStereo) {
 	// info4 is separate for the targ and the figure
 	// info4DG is general info for both figures.
-	float scaleFactor4D3D;
+	double scaleFactor4D3D;
 	int count;
-	float tempx,tempy,tempz;
+	double tempx,tempy,tempz;
 	//char txtout[150];
 
 	count = info4DG->fig->numVerts;
@@ -24345,7 +24392,7 @@ enum TextOutputColour{
 	tredgreen,
 	tbluegreen
 };
-void glTextOutput(float x, float y, char *string, TextOutputColour topc);
+void glTextOutput(double x, double y, char *string, TextOutputColour topc);
 
 enum SelectedTabs {
 	tabWelcome,
@@ -24386,7 +24433,7 @@ enum StateDemoMotion { // Note the values are used in calculating the oscillatio
 	demoIsStopped = 0
 };
 StateDemoMotion motionStateOfDemo2D,motionStateOfDemo3D,motionStateOfDemo4D;
-float savedXXTime2D,savedXXTime3D,savedXXTime4D;// User this to preserve a time when the demo is stopped, rather than finding the current time.
+double savedXXTime2D,savedXXTime3D,savedXXTime4D;// User this to preserve a time when the demo is stopped, rather than finding the current time.
 
 enum StateFourot {
 	twoD,
@@ -24445,8 +24492,8 @@ StateMouseState stateMouseState;
 int whichang, whichbiv, whichdisp;
 int prevwhichang, prevwhichbiv, prevwhichdisp;
 int escaping;
-float escapeAngle;
-float xxxtime;
+double escapeAngle;
+double xxxtime;
 
 enum State2DGamePlay {
 	waitingForNew2D,
@@ -24490,9 +24537,9 @@ enum State2DGameDetail {
 State2DGameDetail state2DGameDetail;
 
 struct ColValue {
-	float rCol;   
-	float gCol;
-	float bCol;
+	double rCol;   
+	double gCol;
+	double bCol;
 };
 
 enum FigType {
@@ -24516,8 +24563,8 @@ std::vector<std::complex<double> > evec1;
 std::vector<std::complex<double> > evec2;
 int denom1,denom2;
 
-float ev1[4],ev2[4],ev3[4],ev4[4];
-float dsolv12,dsolv13,dsolv14,dsolv23,dsolv24,dsolv34,lsolv1,lsolv2,lsolv3,lsolv4;
+double ev1[4],ev2[4],ev3[4],ev4[4];
+double dsolv12,dsolv13,dsolv14,dsolv23,dsolv24,dsolv34,lsolv1,lsolv2,lsolv3,lsolv4;
 
 #define KBROTSTART 0.01
 #define KBROTMAX KBROTSTART*10
@@ -24528,35 +24575,35 @@ float dsolv12,dsolv13,dsolv14,dsolv23,dsolv24,dsolv34,lsolv1,lsolv2,lsolv3,lsolv
 #define ESCAPEROTMAX 0.02
 #define ESCAPEROTMIN ESCAPEROTSTART/4
 
-float circlePoints[NUMBEROFLINESINCIRCLE][3];
-float circlePointsGeneric[NUMBEROFLINESINCIRCLE][2];
+double circlePoints[NUMBEROFLINESINCIRCLE][3];
+double circlePointsGeneric[NUMBEROFLINESINCIRCLE][2];
 
-float axisX4D [4] = {1.0, 0.0, 0.0, 0.0};
-float axisY4D [4] = {0.0, 1.0, 0.0, 0.0};
-float axisZ4D [4] = {0.0, 0.0, 1.0, 0.0};
-float axisW4D [4] = {0.0, 0.0, 0.0, 1.0};
+double axisX4D [4] = {1.0, 0.0, 0.0, 0.0};
+double axisY4D [4] = {0.0, 1.0, 0.0, 0.0};
+double axisZ4D [4] = {0.0, 0.0, 1.0, 0.0};
+double axisW4D [4] = {0.0, 0.0, 0.0, 1.0};
 
 // The following are the vertices, x y pairs, of polygons with 3 to 8 sides.
 // The first vertex is always 'top dead centre' and the others follow in an anticlockwise direction
-float poly2D_3 [3][2] = {
+double poly2D_3 [3][2] = {
  { 0.0000000,  1.0000000},
  {-0.8660254, -0.5000000},
  { 0.8660254, -0.5000000},
 };
-float poly2D_4 [4][2] = {
+double poly2D_4 [4][2] = {
  { 0.0000000,  1.0000000},
  {-1.0000000,  0.0000000},
  {-0.0000000, -1.0000000},
  { 1.0000000, -0.0000000},
 };
-float poly2D_5 [5][2] = {
+double poly2D_5 [5][2] = {
  { 0.0000000,  1.0000000},
  {-0.9510565,  0.3090170},
  {-0.5877853, -0.8090170},
  { 0.5877853, -0.8090170},
  { 0.9510565,  0.3090170},
 };
-float poly2D_6 [6][2] = {
+double poly2D_6 [6][2] = {
  { 0.0000000,  1.0000000},
  {-0.8660254,  0.5000000},
  {-0.8660254, -0.5000000},
@@ -24564,7 +24611,7 @@ float poly2D_6 [6][2] = {
  { 0.8660254, -0.5000000},
  { 0.8660254,  0.5000000},
 };
-float poly2D_7 [7][2] = {
+double poly2D_7 [7][2] = {
  { 0.0000000,  1.0000000},
  {-0.7818315,  0.6234898},
  {-0.9749279, -0.2225209},
@@ -24573,7 +24620,7 @@ float poly2D_7 [7][2] = {
  { 0.9749279, -0.2225209},
  { 0.7818315,  0.6234898},
 };
-float poly2D_8 [8][2] = {
+double poly2D_8 [8][2] = {
  { 0.0000000,  1.0000000},
  {-0.7071068,  0.7071068},
  {-1.0000000,  0.0000000},
@@ -24772,12 +24819,12 @@ struct timespec tstart={0,0}, tend={0,0};
 //LARGE_INTEGER tfreezediff4;//4D
 //LARGE_INTEGER tend;
 //LARGE_INTEGER tdiff;
-float oscillation_period2D;
-float oscillation_period3D;
-float oscillation_period4D;
-float savedK_osc2D;
-float savedK_osc3D;
-float savedK_osc4D;
+double oscillation_period2D;
+double oscillation_period3D;
+double oscillation_period4D;
+double savedK_osc2D;
+double savedK_osc3D;
+double savedK_osc4D;
 
 FigInfo *figInf; // Points to the information (number of edges, faces, etc) for the current figure.
 int currFig2D = MIN_2D_SIDES;
@@ -24819,7 +24866,7 @@ char *gameDisplay3D[3] = {
 	"Ludus"
 };
 
-float *figVerts2D[MAX_2D_SIDES- MIN_2D_SIDES + 1] = {
+double *figVerts2D[MAX_2D_SIDES- MIN_2D_SIDES + 1] = {
 	poly2D_3[0],
 	poly2D_4[0],
 	poly2D_5[0],
@@ -24849,8 +24896,8 @@ Fl_Window explain3DScoresWindow(500,800); // User info on 3D Game
 Fl_Window explain4DScoresWindow(500,800); // User info on 4D Game
 Fl_Window resultsWindow(500,600); // This is used to test a pop up window. Maybe use it later for results.
 
-float radiusOf4DSphere = 1.0;
-float radiusOfExtended4D=1.01;
+double radiusOf4DSphere = 1.0;
+double radiusOfExtended4D=1.01;
 
 //static int left_mouse, middle_mouse, right_mouse; // These are set true/false (GL_TRUE/GL_FALSE) depending on the current mouse state
 
@@ -24949,10 +24996,10 @@ struct ColValue randomColorsTarg[MAX_4D_CELLS];
 
 
 static long W = 400, H = 300;
-static float acc,cht;
+static double acc,cht;
 static GLint viewport[4];
 
-static float aspectRatio;
+static double aspectRatio;
 
 #define srandom srand // No idea what this is
 
@@ -25014,9 +25061,9 @@ void openFile() {
 }
 
 void almostRandomColour(int numberOfColours, int index, int indexOfSingleColour, struct ColValue *result) {
-	float bignum;
-	float littlenum;
-	float temp;
+	double bignum;
+	double littlenum;
+	double temp;
 	
 	// This function is Only used by function randcolours.
 	// The result is three floating point numbers representing a colour.
@@ -25074,10 +25121,10 @@ void xxcalc2DIntersections(struct Intersection2DInfo *i2D, MovTarg movTarg)
 	//targOnly
 
 	int countOfIntersections = 0;
-	float d, nx, ny, sx, sy, v1x, v1y, v2x, v2y, lambda, mu, intx, inty;
+	double d, nx, ny, sx, sy, v1x, v1y, v2x, v2y, lambda, mu, intx, inty;
 
-	float lineHalfLength; // aka 'k'
-	float denom, numer;
+	double lineHalfLength; // aka 'k'
+	double denom, numer;
 	int i,j, intersectIdx;
 
 	i2D->countIntersectsions2DMov = 0;
@@ -25188,7 +25235,7 @@ void xrotate2DFigure(struct Intersection2DInfo *i2D, MovTarg movTarg) // float a
 	// Rotates a set of vertices (2D verts in 'verts', with n='sides' pairs) according to the angle 'angle'
 	// results are put in 'rotatedverts'
 	
-	float sinangleMov, sinangleTarg, cosangleMov, cosangleTarg;
+	double sinangleMov, sinangleTarg, cosangleMov, cosangleTarg;
 	//float newx, newy;
 	int i;
 	int mySides = i2D->sides;
@@ -25218,10 +25265,10 @@ void xrotate2DFigure(struct Intersection2DInfo *i2D, MovTarg movTarg) // float a
 	}
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void angleFromTime4D(float xSeconds, float *oscAng, float *oscAngDual)
+void angleFromTime4D(double xSeconds, double *oscAng, double *oscAngDual)
 {
-	float tempTime, t1, theta1, ct, tct;
-	float tempOscAng,tempOscAngDual;
+	double tempTime, t1, theta1, ct, tct;
+	double tempOscAng,tempOscAngDual;
 	struct Bivector4D tempBiv;
 	struct Rotor4D tempRot, newBasePosnRot;
 	int turningPoint;
@@ -25295,14 +25342,14 @@ void angleFromTime4D(float xSeconds, float *oscAng, float *oscAngDual)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float angleFromTime3D(float xSeconds)
+double angleFromTime3D(double xSeconds)
 {
-	float tempTime, t1, theta1, oscAngle, ct, tct;
-	float tempAxis[3], unusedRej[3];
-	float newAxis[3];
-	float tempBaseQuat[4];
-	float randomRotationAngle;
-	float lentemp, lennew;
+	double tempTime, t1, theta1, oscAngle, ct, tct;
+	double tempAxis[3], unusedRej[3];
+	double newAxis[3];
+	double tempBaseQuat[4];
+	double randomRotationAngle;
+	double lentemp, lennew;
 	int turningPoint = 0;
 
 	info3D.reducedTime = fmodf(xSeconds, oscillation_period3D);
@@ -25414,7 +25461,7 @@ void draw2DConnector(struct Intersection2DInfo *i2D, int toCentre){
 
 }
 
-void drawAccuracy2DNew(float acc1, float acc2, LeftRight lr) {
+void drawAccuracy2DNew(double acc1, double acc2, LeftRight lr) {
 	//////////////////////////////////// new version
 	// Accuracy ranges from 0.0 (total accuracy) to 1.0 (total inaccuracy)
 	float inaccuratePoint[2];
@@ -25460,7 +25507,7 @@ void drawAccuracy2DNew(float acc1, float acc2, LeftRight lr) {
 	//////////////////////////////////// new version
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void drawSurroundCircle(int brightness, int solid, float distance, float angle, float *axis) {
+void drawSurroundCircle(int brightness, int solid, double distance, double angle, double *axis) {
 	int i;
 	// Draw the circle surrounding th figure, in whichever is the current viewport.
 	if (brightness) {
@@ -25476,31 +25523,31 @@ void drawSurroundCircle(int brightness, int solid, float distance, float angle, 
 	if (angle == 0.0 && distance == 0.0) {
 		glBegin(GL_LINES);
 		for (i=0; i < NUMBEROFLINESINCIRCLE; ++i) {
-			glVertex3fv(circlePoints[i]);
+			glVertex3dv(circlePoints[i]);
 			if (i == NUMBEROFLINESINCIRCLE - 1) {
-				glVertex3fv(circlePoints[0]); //Last line
+				glVertex3dv(circlePoints[0]); //Last line
 			} else {
-				glVertex3fv(circlePoints[i+1]); //Other lines
+				glVertex3dv(circlePoints[i+1]); //Other lines
 			}
 		}
 		glEnd();
 	}
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void drawSurroundCircle3(float *colourTop, float *colourBottom, float lineWidth, int solid, float distance, float declension1) {
+void drawSurroundCircle3(double *colourTop, double *colourBottom, double lineWidth, int solid, double distance, double declension1) {
 	// Colour gives the colour of the circle
 	// Solid = 0 if the circle is to be open, and =1 if it is to be a solid circle
 	// Distance is the distance of the circle centre from the origin.
 	// 
 	// The y axis is declension 0, The z or x axis is declension Pi/2.
 	//
-	float rotAxis[3];
-	float quat1[4];
+	double rotAxis[3];
+	double quat1[4];
 	int i;
-	float newradius;
-	float angle;
-	static float xcirclePoints[NUMBEROFLINESINCIRCLE+1][3];
-	static float xcirclePointsRotated[NUMBEROFLINESINCIRCLE+1][3];
+	double newradius;
+	double angle;
+	static double xcirclePoints[NUMBEROFLINESINCIRCLE+1][3];
+	static double xcirclePointsRotated[NUMBEROFLINESINCIRCLE+1][3];
 
 	// quaternion to rotate about the x axis by an angle M_PI_2 - DECLENSION
 	rotAxis[0] = 1.0; 
@@ -25535,29 +25582,29 @@ void drawSurroundCircle3(float *colourTop, float *colourBottom, float lineWidth,
 	}
 	rotManyVec(NUMBEROFLINESINCIRCLE,xcirclePoints[0],xcirclePointsRotated[0],quat1);
 
-	glColor3fv(colourTop);
+	glColor3fv((float *)colourTop);
 	if (solid == 0) {
 		// We are only doing lines
 		glLineWidth(lineWidth);
 		glBegin(GL_LINES);
 
 		for (i=0; i < NUMBEROFLINESINCIRCLE; ++i) {
-			glVertex3fv(xcirclePointsRotated[i]);
-			glVertex3fv(xcirclePointsRotated[i+1]);
+			glVertex3dv(xcirclePointsRotated[i]);
+			glVertex3dv(xcirclePointsRotated[i+1]);
 		}
 		glEnd();
 	} else {
 		glBegin(GL_POLYGON);
 		// Do the top face of the polygon
 		for (i=0; i < NUMBEROFLINESINCIRCLE; ++i) {
-			glVertex3fv(xcirclePointsRotated[i]);
+			glVertex3dv(xcirclePointsRotated[i]);
 		}
 		glEnd();
 		// Do the bottom face of the polygon. Trace it in reverse order to the top half
-		glColor3fv(colourBottom);
+		glColor3dv(colourBottom);
 		glBegin(GL_POLYGON);
 		for (i=0; i < NUMBEROFLINESINCIRCLE; ++i) {
-			glVertex3fv(xcirclePointsRotated[NUMBEROFLINESINCIRCLE-1-i]);
+			glVertex3dv(xcirclePointsRotated[NUMBEROFLINESINCIRCLE-1-i]);
 		}
 		glEnd();
 	}
@@ -25571,8 +25618,8 @@ void drawSurroundCircle4 (struct Intersection4DInfoGeneral *info4DG, int brightn
 	int viewpor[4];
 	char *sptr;
 	int i,j;
-	static float xcirclePoints[NUMBEROFLINESINCIRCLE][3];
-	float stereoCorrection;
+	static double xcirclePoints[NUMBEROFLINESINCIRCLE][3];
+	double stereoCorrection;
 	//sptr = txtout;
 
 	switch(isStereo) {
@@ -25636,18 +25683,18 @@ void drawSurroundCircle4 (struct Intersection4DInfoGeneral *info4DG, int brightn
 			if (j > 0) glColor3f(1.0,1.0,0.7); else glColor3f(0.0,0.7,1.0);
 		}
 		glBegin(GL_LINES);
-		glVertex3fv(xcirclePoints[i]);
-		glVertex3fv(xcirclePoints[i+1]);
+		glVertex3dv(xcirclePoints[i]);
+		glVertex3dv(xcirclePoints[i+1]);
 		//sptr += sprintf(sptr,"%2d %6.3f %6.3f %6.3f , %6.3f %6.3f %6.3f\n",i,xcirclePoints[i][0],
 		//	xcirclePoints[i][1],xcirclePoints[i][2],xcirclePoints[i+1][0],xcirclePoints[i+1][1],xcirclePoints[i+1][2]);
 
-		glVertex3fv(xcirclePoints[i+1]);
+		glVertex3dv(xcirclePoints[i+1]);
 		//sptr += sprintf(sptr,"%2d %6.3f %6.3f %6.3f , ",i+1,xcirclePoints[i+1][0],xcirclePoints[i+1][1],xcirclePoints[i+1][2]);
 		if ( i < NUMBEROFLINESINCIRCLE-2) {
-			glVertex3fv(xcirclePoints[i+2]);
+			glVertex3dv(xcirclePoints[i+2]);
 			//sptr += sprintf(sptr,"%6.3f %6.3f %6.3f\n",xcirclePoints[i+2][0],xcirclePoints[i+2][1],xcirclePoints[i+2][2]);
 		} else {
-			glVertex3fv(xcirclePoints[0]);
+			glVertex3dv(xcirclePoints[0]);
 			//sptr += sprintf(sptr,"%6.3f %6.3f %6.3f\n",xcirclePoints[0][0],xcirclePoints[0][1],xcirclePoints[0][2]);
 		}
 		glEnd();
@@ -25656,10 +25703,10 @@ void drawSurroundCircle4 (struct Intersection4DInfoGeneral *info4DG, int brightn
 
 
 	glBegin(GL_LINES);
-	glVertex3fv(xcirclePoints[0]);
-	glVertex3fv(xcirclePoints[2*NUMBEROFLINESINQUADRANT]);
-	glVertex3fv(xcirclePoints[NUMBEROFLINESINQUADRANT]);
-	glVertex3fv(xcirclePoints[3*NUMBEROFLINESINQUADRANT]);
+	glVertex3dv(xcirclePoints[0]);
+	glVertex3dv(xcirclePoints[2*NUMBEROFLINESINQUADRANT]);
+	glVertex3dv(xcirclePoints[NUMBEROFLINESINQUADRANT]);
+	glVertex3dv(xcirclePoints[3*NUMBEROFLINESINQUADRANT]);
 	glEnd();
 	
 	//sptr += sprintf(sptr,"%2d %6.3f %6.3f %6.3f , %6.3f %6.3f %6.3f\n",i,xcirclePoints[i][0],
@@ -25670,11 +25717,11 @@ void drawSurroundCircle4 (struct Intersection4DInfoGeneral *info4DG, int brightn
 	}
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void drawAccuracy4D ( enum draw4DStereo isStereo, float accuracy) {
+void drawAccuracy4D ( enum draw4DStereo isStereo, double accuracy) {
 	// Accuracy is in the range 0 (completely accurate) to 1 (completely inaccurate).
 	int i,j;
-	float stereoCorrection;
-	float value;
+	double stereoCorrection;
+	double value;
 
 	value = info4D.surroundCircleRadius * accuracy;
 	switch(isStereo) {
@@ -25694,38 +25741,38 @@ void drawAccuracy4D ( enum draw4DStereo isStereo, float accuracy) {
 	if (accuracy < 0.05) glColor3f(0.0f, 1.0f, 0.0f); else glColor3f(1.0f, 0.0f, 0.0f); 
 	glBegin(GL_QUADS);
 
-	glVertex3f(-accuracy + stereoCorrection, -10.0, info4D.surroundCircleZ);
-	glVertex3f(+accuracy + stereoCorrection, -10.0, info4D.surroundCircleZ);
-	glVertex3f(+accuracy + stereoCorrection, +10.0, info4D.surroundCircleZ);
-	glVertex3f(-accuracy + stereoCorrection, +10.0, info4D.surroundCircleZ);
+	glVertex3f((float )(-accuracy + stereoCorrection), -10.0, (float )info4D.surroundCircleZ);
+	glVertex3f((float )(+accuracy + stereoCorrection), -10.0, (float )info4D.surroundCircleZ);
+	glVertex3f((float )(+accuracy + stereoCorrection), +10.0, (float )info4D.surroundCircleZ);
+	glVertex3f((float )(-accuracy + stereoCorrection), +10.0, (float )info4D.surroundCircleZ);
 	glEnd();
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void drawMovendumPolygon(float lineWidth, struct ColValue * cols) {
+void drawMovendumPolygon(double lineWidth, struct ColValue * cols) {
 	int i;
 	glLineWidth(lineWidth);
 	glBegin(GL_LINES);
 	for (i = 0; i < intersection2DInfo.sides; ++i) {
 		glColor3f(cols[i].rCol, cols[i].gCol, cols[i].bCol);
-		glVertex2fv(intersection2DInfo.rotated2DMov[i]); // Need to rotate before doing this
+		glVertex2dv(intersection2DInfo.rotated2DMov[i]); // Need to rotate before doing this
 		if (i == intersection2DInfo.sides - 1) 
-			glVertex2fv(intersection2DInfo.rotated2DMov[0]);
-		else glVertex2fv(intersection2DInfo.rotated2DMov[i+1]);  //Other lines
+			glVertex2dv(intersection2DInfo.rotated2DMov[0]);
+		else glVertex2dv(intersection2DInfo.rotated2DMov[i+1]);  //Other lines
 	}
 	glEnd();
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void drawTargetPolygon(float lineWidth, struct ColValue * cols) {
+void drawTargetPolygon(double lineWidth, struct ColValue * cols) {
 	int i;
 	glLineWidth(lineWidth);
 	glBegin(GL_LINES);
 	for (i = 0; i < intersection2DInfo.sides; ++i) {
 		glColor3f(cols[i].rCol, cols[i].gCol, cols[i].bCol);
-		glVertex2fv(intersection2DInfo.rotated2DTarg[i]); // Need to rotate before doing this
+		glVertex2dv(intersection2DInfo.rotated2DTarg[i]); // Need to rotate before doing this
 		if (i == intersection2DInfo.sides - 1) 
-			glVertex2fv(intersection2DInfo.rotated2DTarg[0]);
-		else glVertex2fv(intersection2DInfo.rotated2DTarg[i+1]);  //Other lines
+			glVertex2dv(intersection2DInfo.rotated2DTarg[0]);
+		else glVertex2dv(intersection2DInfo.rotated2DTarg[i+1]);  //Other lines
 	}
 	glEnd();
 }
@@ -25740,8 +25787,8 @@ void drawIntersectionLineAndPointsMov2D() {
 	glBegin(GL_LINES);
 	glColor3f(1.0,1.0,1.0); // intersection line is all bright on the Mov
 	// Draw the intersection line for the movendum
-	glVertex2fv(intersection2DInfo.lineEndPointsMov[0]);
-	glVertex2fv(intersection2DInfo.lineEndPointsMov[1]);
+	glVertex2dv(intersection2DInfo.lineEndPointsMov[0]);
+	glVertex2dv(intersection2DInfo.lineEndPointsMov[1]);
 	glEnd();
 
 	if (intersection2DInfo.countIntersectsions2DMov > 0) {
@@ -25751,7 +25798,7 @@ void drawIntersectionLineAndPointsMov2D() {
 		for (i = 0; i < intersection2DInfo.countIntersectsions2DMov; ++i){
 			j = intersection2DInfo.intersectionColorIndexMov[i];
 			glColor3f(   colPoint[j].rCol,colPoint[j].gCol,colPoint[j].bCol);
-			glVertex2fv(intersection2DInfo.intersection2DMov[i]);
+			glVertex2dv(intersection2DInfo.intersection2DMov[i]);
 		}
 		glEnd();
 	}
@@ -25762,26 +25809,26 @@ void drawIntersectionLineAndPointsTarg2D() {
 	int i,j;
 	struct ColValue *colPoint; 
 
-	float endvertsl[2] = {-INTERSECTION2DLINERADIUS,0.0};
-	float endvertsr[2] = {+INTERSECTION2DLINERADIUS,0.0};
+	double endvertsl[2] = {-INTERSECTION2DLINERADIUS,0.0};
+	double endvertsr[2] = {+INTERSECTION2DLINERADIUS,0.0};
 	colPoint = figColp2D[intersection2DInfo.sides - MIN_2D_SIDES];
 
 	// Draw the line of the target (It is different from the line of the movendum.)
 	glLineWidth(0.1);
 	glBegin(GL_LINES);
 	glColor3f(0.3,0.3,0.1); // Draw a feint line (outer line)
-	glVertex2fv(endvertsl);
+	glVertex2dv(endvertsl);
 	endvertsl[0] = -intersection2DInfo.lineHalfLength;
-	glVertex2fv(endvertsl);
+	glVertex2dv(endvertsl);
 
-	glVertex2fv(endvertsr);
+	glVertex2dv(endvertsr);
 	endvertsr[0] = intersection2DInfo.lineHalfLength;
-	glVertex2fv(endvertsr);
+	glVertex2dv(endvertsr);
 
 	// Draw the intersection line of the target
 	glColor3f(1.0,1.0,1.0); // Draw a brighter line (inner line)
-	glVertex2fv(endvertsl);
-	glVertex2fv(endvertsr);
+	glVertex2dv(endvertsl);
+	glVertex2dv(endvertsr);
 	glEnd();
 	// Draw the intersection points of the target
 	if (intersection2DInfo.countIntersectsions2DTarg > 0) {
@@ -25792,7 +25839,7 @@ void drawIntersectionLineAndPointsTarg2D() {
 			j = intersection2DInfo.intersectionColorIndexTarg[i];
 			glColor3f(colPoint[j].rCol,colPoint[j].gCol,colPoint[j].bCol); // Use the same colours as the movendum
 			endvertsl[0] = intersection2DInfo.muTarg[i];
-			glVertex2fv(endvertsl);
+			glVertex2dv(endvertsl);
 		}
 		glEnd();
 	}
@@ -25809,16 +25856,16 @@ void drawCountdown2D( MovTarg movTarg) {
 	if (movTarg == movOnly) {
 		for (i = 0; i < intersection2DInfo.sides; ++i) {
 			glColor3f(randomColorsMov[i].rCol,randomColorsMov[i].gCol,randomColorsMov[i].bCol);
-			glVertex2fv(intersection2DInfo.rotated2DMov[i]); // Need to rotate before doing this
-			if (i == intersection2DInfo.sides - 1) glVertex2fv(intersection2DInfo.rotated2DMov[0]); else glVertex2fv(intersection2DInfo.rotated2DMov[i+1]);  //Other lines
+			glVertex2dv(intersection2DInfo.rotated2DMov[i]); // Need to rotate before doing this
+			if (i == intersection2DInfo.sides - 1) glVertex2dv(intersection2DInfo.rotated2DMov[0]); else glVertex2dv(intersection2DInfo.rotated2DMov[i+1]);  //Other lines
 		}
 	} else {
 		//glEnd();
 		//glBegin(GL_LINES);// Right Lines
 		for (i = 0; i < intersection2DInfo.sides; ++i) {
 			glColor3f(randomColorsTarg[i].rCol,randomColorsTarg[i].gCol,randomColorsTarg[i].bCol);
-			glVertex2fv(intersection2DInfo.rotated2DTarg[i]); // Need to rotate before doing this
-			if (i == intersection2DInfo.sides - 1) glVertex2fv(intersection2DInfo.rotated2DTarg[0]); else glVertex2fv(intersection2DInfo.rotated2DTarg[i+1]);  //Other lines
+			glVertex2dv(intersection2DInfo.rotated2DTarg[i]); // Need to rotate before doing this
+			if (i == intersection2DInfo.sides - 1) glVertex2dv(intersection2DInfo.rotated2DTarg[0]); else glVertex2dv(intersection2DInfo.rotated2DTarg[i+1]);  //Other lines
 		}
 	}
 	glEnd();
@@ -25834,9 +25881,9 @@ void drawEdges3D(struct Intersection3DInfo *i3D) {
 	for (iedge = 0; iedge < info3D.fig->numEdges; ++iedge) {
 		glBegin(GL_LINES);
 		ivert = info3D.fig->edge[iedge*2];
-		glVertex3fv(&i3D->rotatedVerts[ivert][0]);
+		glVertex3dv(i3D->rotatedVerts[ivert]);
 		ivert = info3D.fig->edge[iedge*2+1];
-		glVertex3fv(&i3D->rotatedVerts[ivert][0]);
+		glVertex3dv(i3D->rotatedVerts[ivert]);
 		glEnd();
 	}
 }
@@ -25846,12 +25893,12 @@ void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVe
 	int iface, ivert, vertnum;
 	int numVertsPerFace;
 	struct ColValue *colsFig;
-	float myLocalVerts[3];
+	double myLocalVerts[3];
 	char numString[5];
 	char txtout[50];
 	char *sptr;
 	int colorSum;
-	float temp;
+	double temp;
 	int diddraw = 0;
 
 	sptr = txtout;
@@ -25871,10 +25918,10 @@ void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVe
 		}
 		glBegin(GL_POLYGON);
 
-		glNormal3fv(&i3D->rotatedFaceNormals[iface][0]);
+		glNormal3fv((float *)i3D->rotatedFaceNormals[iface]);
 		for (ivert=0; ivert < numVertsPerFace; ++ivert) {
 			vertnum = info3D.fig->faceToVert[iface*numVertsPerFace + ivert]; // The number of the vertex for this face
-			glVertex3fv(&i3D->rotatedVerts[vertnum][0]);
+			glVertex3dv(i3D->rotatedVerts[vertnum]);
 		}
 		glEnd();
 
@@ -25888,7 +25935,7 @@ void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVe
 			
 			gl_font(1,24);
 				glColor3ub(255,255,255);
-			glRasterPos3fv(myLocalVerts);
+			glRasterPos3fv((float *)myLocalVerts);
 			sprintf(numString,"%d",iface);
 			gl_draw(numString,strlen(numString));
 			//glEnable(GL_DEPTH_TEST);
@@ -25905,14 +25952,14 @@ void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVe
 			myLocalVerts[1] = i3D->rotatedVerts[ivert][1] * temp;
 			myLocalVerts[2] = i3D->rotatedVerts[ivert][2] * temp;
 
-			glRasterPos3fv(myLocalVerts);
+			glRasterPos3fv((float *)myLocalVerts);
 			sprintf(numString,"%d",ivert);
 			gl_draw(numString,strlen(numString));
 		}
 	}
 }
 
-void showAngle(float angle, Fl_Output ** op) {
+void showAngle(double angle, Fl_Output ** op) {
 	char txt[20];
 	// Show angle
 	sprintf(txt, "%9.2f", angle* M_RADIANS_TO_DEGREES);
@@ -25940,7 +25987,7 @@ void showBiv(struct Bivector4D *bv,Fl_Output ** op) {
 	op[5]->value(txt);
 }
 
-void showVec3(float *v, Fl_Output ** op) {
+void showVec3(double *v, Fl_Output ** op) {
 	char txt[20]; // display a 3 component vector
 	if (v[0] != 0.0) sprintf(txt, "%9.6f", v[0]); else txt[0] = '\0';
 	op[0]->value(txt);
@@ -25988,13 +26035,13 @@ void drawIntersectionPlane3D(struct Intersection3DInfo *i3D,int flattened, int n
 	int faceForColour;
 	int edgesAnticlockwise;
 	struct ColValue *colsFig;
-	float localVerts[20][3];
-	float edgeVector[20][3];
-	float edgeCentre[3];
-	float normalVec[3];
-	float crossV[3];
-	float posnOfDigit[3];
-	float temp;
+	double localVerts[20][3];
+	double edgeVector[20][3];
+	double edgeCentre[3];
+	double normalVec[3];
+	double crossV[3];
+	double posnOfDigit[3];
+	double temp;
 	char faceNumString[5];
 
 
@@ -26016,8 +26063,8 @@ void drawIntersectionPlane3D(struct Intersection3DInfo *i3D,int flattened, int n
 				glColor3ubv(myColours);
 			}
 			glBegin(GL_LINES);
-			glVertex3fv(i3D->iPoint[v1].p);
-			glVertex3fv(i3D->iPoint[v2].p);
+			glVertex3dv(i3D->iPoint[v1].p);
+			glVertex3dv(i3D->iPoint[v2].p);
 			glEnd();
 		}
 	} else{
@@ -26062,8 +26109,8 @@ void drawIntersectionPlane3D(struct Intersection3DInfo *i3D,int flattened, int n
 				glColor3ubv(myColours);
 			}
 			glBegin(GL_LINES);
-			glVertex3fv(localVerts[iedge]);
-			glVertex3fv(localVerts[iedge+1]);
+			glVertex3dv(localVerts[iedge]);
+			glVertex3dv(localVerts[iedge+1]);
 			glEnd();
 
 			if (numbers) {
@@ -26086,7 +26133,7 @@ void drawIntersectionPlane3D(struct Intersection3DInfo *i3D,int flattened, int n
 				// Now to draw the integer for the edge
 				gl_font(1,24);
 				glColor3ub(255,255,255); // The edge integers are in white
-				glRasterPos3fv(posnOfDigit);
+				glRasterPos3dv(posnOfDigit);
 				sprintf(faceNumString,"%d",faceForColour);
 				gl_draw(faceNumString,strlen(faceNumString));
 			}
@@ -26189,16 +26236,16 @@ void drawWireFrame4D(struct Intersection4DInfo *i4D, int specialCellNum, int eye
 			glBegin(GL_LINES);
 			switch (eStereo) {
 			case rightEyeLeftScreenStereo:
-				glVertex3fv(i4D->verts4DTo3DRightEye[v1]);
-				glVertex3fv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DRightEye);
+				glVertex3dv(i4D->verts4DTo3DRightEye[v1]);
+				glVertex3dv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DRightEye);
 				break;
 			case leftEyeRightScreenStereo:
-				glVertex3fv(i4D->verts4DTo3DLeftEye[v1]);
-				glVertex3fv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DLeftEye);
+				glVertex3dv(i4D->verts4DTo3DLeftEye[v1]);
+				glVertex3dv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DLeftEye);
 				break;
 			default: // no stereo
-				glVertex3fv(i4D->verts4DProjectedTo3D[v1]);
-				glVertex3fv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3D);
+				glVertex3dv(i4D->verts4DProjectedTo3D[v1]);
+				glVertex3dv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3D);
 				break;
 			}
 			glEnd();
@@ -26215,16 +26262,16 @@ void drawWireFrame4D(struct Intersection4DInfo *i4D, int specialCellNum, int eye
 			glBegin(GL_LINES);
 			switch (eStereo) {
 			case rightEyeLeftScreenStereo:
-				glVertex3fv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DRightEye);
-				glVertex3fv(i4D->verts4DTo3DRightEye[v2]);
+				glVertex3dv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DRightEye);
+				glVertex3dv(i4D->verts4DTo3DRightEye[v2]);
 				break;
 			case leftEyeRightScreenStereo:
-				glVertex3fv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DLeftEye);
-				glVertex3fv(i4D->verts4DTo3DLeftEye[v2]);
+				glVertex3dv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3DLeftEye);
+				glVertex3dv(i4D->verts4DTo3DLeftEye[v2]);
 				break;
 			default: // no stereo
-			glVertex3fv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3D);
-			glVertex3fv(i4D->verts4DProjectedTo3D[v2]);
+			glVertex3dv(i4D->iObj.edgeIntsct[intersectingEdgeIndex].intersectionPointProjTo3D);
+			glVertex3dv(i4D->verts4DProjectedTo3D[v2]);
 				break;
 			}
 			glEnd();
@@ -26236,16 +26283,16 @@ void drawWireFrame4D(struct Intersection4DInfo *i4D, int specialCellNum, int eye
 
 			switch (eStereo) {
 			case rightEyeLeftScreenStereo:
-				glVertex3fv(i4D->verts4DTo3DRightEye[v1]);
-				glVertex3fv(i4D->verts4DTo3DRightEye[v2]);
+				glVertex3dv(i4D->verts4DTo3DRightEye[v1]);
+				glVertex3dv(i4D->verts4DTo3DRightEye[v2]);
 				break;
 			case leftEyeRightScreenStereo:
-				glVertex3fv(i4D->verts4DTo3DLeftEye[v1]);
-				glVertex3fv(i4D->verts4DTo3DLeftEye[v2]);
+				glVertex3dv(i4D->verts4DTo3DLeftEye[v1]);
+				glVertex3dv(i4D->verts4DTo3DLeftEye[v2]);
 				break;
 			default: // no stereo
-				glVertex3fv(i4D->verts4DProjectedTo3D[v1]);
-				glVertex3fv(i4D->verts4DProjectedTo3D[v2]);
+				glVertex3dv(i4D->verts4DProjectedTo3D[v1]);
+				glVertex3dv(i4D->verts4DProjectedTo3D[v2]);
 				break;
 			}
 
@@ -26266,28 +26313,28 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 	int xFaceIndex; // Index of a face in the faceIntsct array (an array of all the face intersections, as opposed to the face intersections for the current cell)
 	bool gotAFace; // Temp for processing faces of a cell.
 
-	float tmpv1[3]; // the first  edge in the polygon constructed from the intersecting edges, i.e. vertex2 - vertex1. 
-	float tmpv2[3]; // the second edge in the polygon constructed from the intersecting edges, i.e. vertex3 - vertex2.
-	float crosstest[3]; // The cross product of tmpv1 and tmpv2, used in calculating the correct order (clock or anticlock) for listing the vertices.
-	float firstTriangleVertex[3];
-	float secondTriangleVertex[3];
-	float thirdTriangleVertex[3];
-	float s1,s2,s3,s;
-	float area,cumulativeArea;
-	float dotProd; // Used in calculating the correct order (clock or anticlock)
+	double tmpv1[3]; // the first  edge in the polygon constructed from the intersecting edges, i.e. vertex2 - vertex1. 
+	double tmpv2[3]; // the second edge in the polygon constructed from the intersecting edges, i.e. vertex3 - vertex2.
+	double crosstest[3]; // The cross product of tmpv1 and tmpv2, used in calculating the correct order (clock or anticlock) for listing the vertices.
+	double firstTriangleVertex[3];
+	double secondTriangleVertex[3];
+	double thirdTriangleVertex[3];
+	double s1,s2,s3,s;
+	double area,cumulativeArea;
+	double dotProd; // Used in calculating the correct order (clock or anticlock)
 	bool reverseit; // Used in calculating clock or anticlock
 	int j,numOfVertsInIntersectionFace; // Used in drawing the each face.
 	struct ColValue *colsFig; // Array of colours for each cell. the faces of the intersection take on the colours of the parent cell.
-	float centrePolygonCurrent[3],centrePolygonCumulative[3];
-	float polyDist, temp1, temp2;
-	float numbersLoc[3];
+	double centrePolygonCurrent[3],centrePolygonCumulative[3];
+	double polyDist, temp1, temp2;
+	double numbersLoc[3];
 	int myIndex; // Used when drawing the intersection polygon
 	char numstring[5];
 	char txtout[5000];
 	char * sptr = txtout;
-	int loopsCount, loopsMin, loopsMax, loopsTot; float loopsAvg; // for debug
+	int loopsCount, loopsMin, loopsMax, loopsTot; double loopsAvg; // for debug
 
-	float minz;
+	double minz;
 	switch (info4D.fig->numCells) { // This is used for drawing face numbers in stereo. It sort of works.
 		case 5: minz = -1.0; break;
 		case 8: minz = -1.0; break;
@@ -26429,7 +26476,7 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 		}
 
 		glBegin(GL_POLYGON);
-		glNormal3fv(crosstest);
+		glNormal3dv(crosstest);
 
 		// The division by two below, and the increment of the j index by two ( also below ) is because each vertex is stored twice.
 		// This redundancy could be cleaned up, but it works as it is and 'fixing' the code is low priority.
@@ -26442,13 +26489,13 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 
 			switch (eStereo) {
 			case rightEyeLeftScreenStereo:
-				glVertex3fv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DRightEye);			
+				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DRightEye);			
 				break;
 			case leftEyeRightScreenStereo:
-				glVertex3fv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DLeftEye);			
+				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DLeftEye);			
 				break;
 			default: // no stereo
-				glVertex3fv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);			
+				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);			
 				break;
 			}
 			j+=2;
@@ -26464,13 +26511,13 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 			myIndex = reverseit ? isctEdgeIndex - j - 2 : j;
 			switch (eStereo) {
 			case rightEyeLeftScreenStereo:
-				glVertex3fv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DRightEye);
+				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DRightEye);
 				break;
 			case leftEyeRightScreenStereo:
-				glVertex3fv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DLeftEye);
+				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DLeftEye);
 				break;
 			default: // no stereo
-				glVertex3fv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);
+				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);
 				break;
 			}
 			j+=2;
@@ -26571,14 +26618,14 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 				gl_font(1,(info4D.fig->numCells > 100? 18 : 24)); // Smaller font for 120 and 600 cells figures.
 				glColor3ub(255,255,255); // Numbers are white
 				sprintf(numstring,"%d",cellNumGlobal);
-				glRasterPos3fv(numbersLoc);
+				glRasterPos3dv(numbersLoc);
 				gl_draw(numstring,strlen(numstring));
 				//sptr += sprintf(sptr,"x");
 				//sptr += sprintf(sptr,"%7.3f %7.3f %7.3f %7.3f\n",numbersLoc[0],numbersLoc[1],numbersLoc[2],minz);
 			}
 		}
 	} // End of the loop for the intersecting cells
-	loopsAvg = (float)loopsTot/(float)i4D->iObj.cellIntersectionIndex;  // Just debug and monitoring.
+	loopsAvg = (double)loopsTot/(double)i4D->iObj.cellIntersectionIndex;  // Just debug and monitoring.
 	if (drawFaceNumbers) {
 		//sptr += sprintf(sptr,"\n");
 		//sprintf(txtout,"lmin=%3d, max=%4d, avg=%6.3f\n",loopsMin, loopsMax, loopsAvg); // for debug
@@ -26587,10 +26634,10 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void drawAccuracy3D(float angle, float xxtime, int onTheLeft)
+void drawAccuracy3D(double angle, double xxtime, int onTheLeft)
 {
 	char counting[25];
-	float tempVal;
+	double tempVal;
 
 	// Draw the accuracy
 	tempVal = correctAngle(angle);
@@ -26608,50 +26655,50 @@ void drawAccuracy3D(float angle, float xxtime, int onTheLeft)
 
 void createRotMatFromRotor(struct Rotor4D *r) {
 	// Creates a rotation matrix in sqm from the indicated rotor
-	float scalarsquared = r->scalar*r->scalar;
+	double scalarsquared = r->scalar*r->scalar;
 
-	float e12sq = r->b.e12 * r->b.e12;
-	float e13sq = r->b.e13 * r->b.e13;
-	float e14sq = r->b.e14 * r->b.e14;
-	float e23sq = r->b.e23 * r->b.e23;
-	float e24sq = r->b.e24 * r->b.e24;
-	float e34sq = r->b.e34 * r->b.e34;
+	double e12sq = r->b.e12 * r->b.e12;
+	double e13sq = r->b.e13 * r->b.e13;
+	double e14sq = r->b.e14 * r->b.e14;
+	double e23sq = r->b.e23 * r->b.e23;
+	double e24sq = r->b.e24 * r->b.e24;
+	double e34sq = r->b.e34 * r->b.e34;
 
-	float e1234sq = r->e1234 * r->e1234;
+	double e1234sq = r->e1234 * r->e1234;
 
-	float sc12 = r->scalar * r->b.e12;
-	float sc13 = r->scalar * r->b.e13;
-	float sc14 = r->scalar * r->b.e14;
-	float sc23 = r->scalar * r->b.e23;
-	float sc24 = r->scalar * r->b.e24;
-	float sc34 = r->scalar * r->b.e34;
+	double sc12 = r->scalar * r->b.e12;
+	double sc13 = r->scalar * r->b.e13;
+	double sc14 = r->scalar * r->b.e14;
+	double sc23 = r->scalar * r->b.e23;
+	double sc24 = r->scalar * r->b.e24;
+	double sc34 = r->scalar * r->b.e34;
 
-	float e12_13 = r->b.e12 * r->b.e13;
-	float e12_14 = r->b.e12 * r->b.e14;
-	float e12_23 = r->b.e12 * r->b.e23;
-	float e12_24 = r->b.e12 * r->b.e24;
-	float e12_34 = r->b.e12 * r->b.e34;
+	double e12_13 = r->b.e12 * r->b.e13;
+	double e12_14 = r->b.e12 * r->b.e14;
+	double e12_23 = r->b.e12 * r->b.e23;
+	double e12_24 = r->b.e12 * r->b.e24;
+	double e12_34 = r->b.e12 * r->b.e34;
 
-	float e13_14 = r->b.e13 * r->b.e14;
-	float e13_23 = r->b.e13 * r->b.e23;
-	float e13_24 = r->b.e13 * r->b.e24;
-	float e13_34 = r->b.e13 * r->b.e34;
+	double e13_14 = r->b.e13 * r->b.e14;
+	double e13_23 = r->b.e13 * r->b.e23;
+	double e13_24 = r->b.e13 * r->b.e24;
+	double e13_34 = r->b.e13 * r->b.e34;
 
-	float e14_23 = r->b.e14 * r->b.e23;
-	float e14_24 = r->b.e14 * r->b.e24;
-	float e14_34 = r->b.e14 * r->b.e34;
+	double e14_23 = r->b.e14 * r->b.e23;
+	double e14_24 = r->b.e14 * r->b.e24;
+	double e14_34 = r->b.e14 * r->b.e34;
 
-	float e23_24 = r->b.e23 * r->b.e24;
-	float e23_34 = r->b.e23 * r->b.e34;
+	double e23_24 = r->b.e23 * r->b.e24;
+	double e23_34 = r->b.e23 * r->b.e34;
 
-	float e24_34 = r->b.e24 * r->b.e34;
+	double e24_34 = r->b.e24 * r->b.e34;
 
-	float e12_1234 = r->b.e12 * r->e1234;
-	float e13_1234 = r->b.e13 * r->e1234;
-	float e14_1234 = r->b.e14 * r->e1234;
-	float e23_1234 = r->b.e23 * r->e1234;
-	float e24_1234 = r->b.e24 * r->e1234;
-	float e34_1234 = r->b.e34 * r->e1234;
+	double e12_1234 = r->b.e12 * r->e1234;
+	double e13_1234 = r->b.e13 * r->e1234;
+	double e14_1234 = r->b.e14 * r->e1234;
+	double e23_1234 = r->b.e23 * r->e1234;
+	double e24_1234 = r->b.e24 * r->e1234;
+	double e34_1234 = r->b.e34 * r->e1234;
 
 // e1 rotated:
 //e1    r1scalar^2 - r1be12^2 - r1be13^2 - r1be14^2 + r1be23^2 + r1be24^2 + r1be34^2 - r1e1234^2
@@ -26841,7 +26888,7 @@ void disp4DResults()
 	char dispres[20];
 	char * sptr;
 	sptr = txtout;
-	float sumOfDiffs = fabs(info4D.initialAngularDifference1)+fabs(info4D.initialAngularDifference2); 
+	double sumOfDiffs = fabs(info4D.initialAngularDifference1)+fabs(info4D.initialAngularDifference2); 
 
 
 	// The difference between the figure initial position and the target initial position is
@@ -26927,7 +26974,7 @@ void disp4DResults()
 }
 ////////////////////////////////////////////////////////////////////////
 
-void drawAcc4D(float currang) {
+void drawAcc4D(double currang) {
 	glLineWidth(POLYGONLINEWIDTH);
 	glBegin(GL_LINES);
 
@@ -26960,26 +27007,26 @@ void kbSpeed() {
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void redraw4D(float old_xxtime, int doStereo)
+void redraw4D(double old_xxtime, int doStereo)
 {
-	float oscAngle,oscAngleDual;
+	double oscAngle,oscAngleDual;
 	char txtout[300];
 	char dispNum[5];
 	char dispres[50];
 	char *sptr = txtout;
 	unsigned char myLineCols[3] = {0,0,0};
-	float tempVal, tempProportion, propFalseStartTarg1, propFalseStartFig1, propFalseStartTarg2, propFalseStartFig2;
+	double tempVal, tempProportion, propFalseStartTarg1, propFalseStartFig1, propFalseStartTarg2, propFalseStartFig2;
 	long q;
 	int case4D;
-	float tempv3[4];
-	float currentAngle, sumOfDiffs;
+	double tempv3[4];
+	double currentAngle, sumOfDiffs;
 	struct Bivector4D tempBvD,*tempPtr;
 	int keycount;
 	bool solvres;
 	struct Rotor4D tempRotor4D, tempTargRotor4D, tempFigRotor4D;
 	int whichbiv1, whichbiv2;
-	float maxval1;
-	float maxval2;
+	double maxval1;
+	double maxval2;
 
 	mouseCalcs(); // set the mouse states (up down etc
 
@@ -27433,7 +27480,7 @@ void redraw4D(float old_xxtime, int doStereo)
 	}
 
 	// new version
-	aspectRatio = (float)cht/(float)q;  // Aspect ratio = ht/width.
+	aspectRatio = (double)cht/(double)q;  // Aspect ratio = ht/width.
 
 	if (aspectRatio >= 1.0) { // Tall and thin
 		glViewport(0, 0,	// Specify the lower left corner of the viewport, x and y.
@@ -27902,7 +27949,7 @@ void displayDebugResults3D() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void displayResults3D() {
 	char counting[100];
-	float value, value1;
+	double value, value1;
 
 	sprintf(counting,"Required angle:%6.2f %c",
 		(fabs(info3D.initialAngularDifference) - ACCURACYWINANGLE3D)*M_RADIANS_TO_DEGREES,176);
@@ -27940,13 +27987,13 @@ void displayResults3D() {
 	if (state3DGamePlay != haveSuccess3D) displayDebugResults3D();
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void redraw3DVersion2(float xxtime)
+void redraw3DVersion2(double xxtime)
 {
-	float tempVal;//,templ1,templ2;
-	float oscAngle,propFalseStartTarg,propFalseStartFig;
-	float tempProportion;
-	float tempQuat[4], newTrueStartQuat[4];
-	float tempColTop[3],tempColBottom[3],unusedRej[3],tempAxis[3];
+	double tempVal;//,templ1,templ2;
+	double oscAngle,propFalseStartTarg,propFalseStartFig;
+	double tempProportion;
+	double tempQuat[4], newTrueStartQuat[4];
+	double tempColTop[3],tempColBottom[3],unusedRej[3],tempAxis[3];
 	int intersectionsFig, intersectionsTarg, itwasnegative;
 	char dispNum[5];
 	char txtout[200];
@@ -28126,7 +28173,7 @@ void redraw3DVersion2(float xxtime)
 			drawFaces3D(&info3DFig,numbers3D->value(),0,0); // 1 makes the routine put face numbers on the faces
 			drawEdges3D(&info3DFig);
 			drawSurroundCircle3(tempColTop,tempColBottom,1.1,1,info3D.userPlaneDistance,info3D.userPlaneDeclension);
-			drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (float *)0);
+			drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (double *)0);
 			glViewport(W, 0, W, H); /////////////////// Draw RHS
 			drawFaces3D(&info3DTarg,numbers3D->value(),0,0);// Zero suppresses the drawing of face numbers
 			drawEdges3D(&info3DTarg);
@@ -28152,7 +28199,7 @@ void redraw3DVersion2(float xxtime)
 
 	case threeDGame:
 		if (state3DGamePlay == waitingForNew3D) {
-			drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (float *)0);
+			drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (double *)0);
 			//sptr += sprintf(sptr,"Waiting for new in redraw3D\n");
 		} else if (state3DGamePlay == countingDown3D) {
 			//sptr += sprintf(sptr,"Counting Dn in redraw3D\n");
@@ -28163,7 +28210,7 @@ void redraw3DVersion2(float xxtime)
 				countdownOutput3D->value(dispNum);
 			}
 			info3D.prevDisplayNumber = info3D.displayNumber;
-			drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (float *)0);
+			drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (double *)0);
 
 			glViewport(W, 0, W, H);
 			drawFaces3D(&info3DTarg,0,0,1); // 0 makes the routine remove numbers on the faces
@@ -28173,7 +28220,7 @@ void redraw3DVersion2(float xxtime)
 			case directus3D:
 				switch (state3DGamePlay) {
 				case playing3D:
-					drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (float *)0);
+					drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (double *)0);
 					drawFaces3D(&info3DFig,numbers3D->value(),(info3D.fig->numVerts == 4),0); // 0 makes the routine remove numbers on the faces
 					drawEdges3D(&info3DFig);
 					// Game is still in progress: display the angle and the time.
@@ -28209,7 +28256,7 @@ void redraw3DVersion2(float xxtime)
 					drawEdges3D(&info3DFig);
 					drawIntersectionPlane3D(&info3DFig,0,numbers3D->value(),myLineCols);
 					drawAccuracy3D(info3D.diffAngle,xxtime,1); // last '1' means on the left
-					drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (float *)0);
+					drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (double *)0);
 
 					glViewport(W, 0, W, H);
 					drawIntersectionPlane3D(&info3DTarg,1,numbers3D->value(),0); // First param is 'flattened', second is 'numbers', last param points to colour of lines or zero
@@ -28236,7 +28283,7 @@ void redraw3DVersion2(float xxtime)
 			case ludus3D:
 				switch (state3DGamePlay) {
 				case playing3D:
-					drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (float *)0);
+					drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (double *)0);
 					drawIntersectionPlane3D(&info3DFig,1,numbers3D->value(),0); // First param is 'flattened', second is 'numbers', last param points to colour of lines or zero
 					drawAccuracy3D(info3D.diffAngle,xxtime,1); // last '1' means on the left
 					glViewport(W, 0, W, H); /////////////////// Draw RHS
@@ -28281,9 +28328,9 @@ void newredraw(void)
 	char * txtPtr;
 	char debug[100];
 
-	float xxangle;
+	double xxangle;
 	//float diff;
-	float fullAngle;
+	double fullAngle;
 	char counting[32];
 	double diff;
 	//double tempang  = ACCURACYWINANGLE;
@@ -28476,7 +28523,7 @@ void newredraw(void)
 	glLoadIdentity();
 	glTranslatef(0, 0, -TRANSLATIONOF2DFIGURES);
 
-	float accuracy2D;//, displayScore2D;
+	double accuracy2D;//, displayScore2D;
 
 	//writeGameState(); // This is for debug only
 	// Draw the left hand figure
@@ -28486,7 +28533,7 @@ void newredraw(void)
 		}
 		drawIntersectionLineAndPointsMov2D();
 		//glTextOutput(-0.25, FIGNAMESYVALUE, figNames2D[currFig2D-MIN_2D_SIDES],twhite);
-		drawSurroundCircle(0, 0, 0.0, 0.0, (float *)0);
+		drawSurroundCircle(0, 0, 0.0, 0.0, (double *)0);
 	} else if (state2DOverview == twoDGame) {
 		if (state2DGamePlay == countingDown2D) {
 			drawCountdown2D( movOnly);
@@ -28566,7 +28613,7 @@ void newredraw(void)
 
 			drawAccuracy2DNew(fabs(intersection2DInfo.angularDistance*M_1_PI),0.0,leftOnly);
 		}
-		drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (float *)0);
+		drawSurroundCircle(intersection2DInfo.mouse3DRadius > INTERSECTION2DLINERADIUS, 0, 0.0, 0.0, (double *)0);
 	}
 
 
@@ -28643,14 +28690,14 @@ void keyboard(unsigned char c, int x, int y)
 	}
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void setMouseInsideOutside (float wx, float hy) {
+void setMouseInsideOutside (double wx, double hy) {
 	// This routine used in 2D gameplay
 	// From the current position of the mouse, it calculate the radius from the movendum centre
 	// and calculates whether it is inside or outside the surrounding circle
 
 	// It also calculates the angle of the mouse in relation to the centre of the figure, giving an angle
 	// comparable to the angle of the movendum.
-	float mouseCosine;
+	double mouseCosine;
 
 	intersection2DInfo.mouse3DxInitialPosition = wx * intersection2DInfo.convertFromMouseTo3D;
 	intersection2DInfo.mouse3DyInitialPosition = hy * intersection2DInfo.convertFromMouseTo3D;
@@ -28678,7 +28725,7 @@ void setMouseInsideOutside (float wx, float hy) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void checkStateChangeMousePosn(Mouse2DInsideOutsideCircle prevMouse) {
 	// This routine used in 2D gameplay
-	float x = 0.0;
+	double x = 0.0;
 	if (prevMouse != mouse2DInsideOutsideCircle) {
 		// The mouse has just moved inside or outside
 		if (state2DGameDetail == movingMovendum) {
@@ -28709,7 +28756,7 @@ void mouse4D(int x, int y)
 	//char txt[300];
 	//int vp[3];
 	//char *ptr = txt;
-	float newradius2;
+	double newradius2;
 	int tempval;
 	tempval = stereo4D->value();
 
@@ -28761,7 +28808,7 @@ void mouse4D(int x, int y)
 	}
 	newradius2 = trackbI.currMouse4D[0]*trackbI.currMouse4D[0] + trackbI.currMouse4D[1]*trackbI.currMouse4D[1];
 
-	float temp = radiusOfExtended4D*radiusOfExtended4D - newradius2;
+	double temp = radiusOfExtended4D*radiusOfExtended4D - newradius2;
 
 	// OUt of the screen towards the viewer is the negative z direction.  // Edit, no it isn't, it's positive!!
 	trackbI.currMouse4D[2] = temp >= 0.0 ?  sqrt(radiusOfExtended4D*radiusOfExtended4D - newradius2) : 0.0;
@@ -28785,10 +28832,10 @@ void motion(int x, int y)
 	tnow = localtime(&myTime);
 	//ptr += sprintf(ptr,"%02d:%02d:%02d ",tnow->tm_hour,tnow->tm_min,tnow->tm_sec);
 
-	float thiswx;// = (2.0*x - W) / W;
-	float thishy;// = (H - 2.0*y) / H;
-	float prevwx;// = (2.0*mousex - W) / W;
-	float prevhy;// = (H - 2.0*mousey) / H;
+	double thiswx;// = (2.0*x - W) / W;
+	double thishy;// = (H - 2.0*y) / H;
+	double prevwx;// = (2.0*mousex - W) / W;
+	double prevhy;// = (H - 2.0*mousey) / H;
 
 
 	thiswx = (2.0*x - W) / W;
@@ -29192,7 +29239,7 @@ void setupTrackballInfo()
 {
 	// Initialize the values for the trackball. These are the constant values.
 
-	float costheta;
+	double costheta;
 
 	trackbI.trackballsize = TRACKBALLSIZE;
 	trackbI.littleballsize = trackbI.trackballsize * 0.4; // multiply it by a 'reasonable'figure
@@ -29215,8 +29262,8 @@ void populateStartColours()
 	int numColours,coloursFound,extraColours;
 	struct ColValue * colV;
 	FigInfo *fi;
-	float botdifference = MAXCOLOUR*MINPERCENTAGE/100.0;
-	float topdifference = MAXCOLOUR*MAXPERCENTAGE/100.0;
+	double botdifference = MAXCOLOUR*MINPERCENTAGE/100.0;
+	double topdifference = MAXCOLOUR*MAXPERCENTAGE/100.0;
 
 	for (i = 0; i < NUMBEROFFIGS; ++i)
 	{
@@ -29268,9 +29315,9 @@ void populateStartColours()
 					ic1 = j/(c2*c3);
 					ic2 = (j - ic1*(c2*c3))/c3;
 					ic3 = j - ic1*c2*c3 - ic2*c3;
-					colV[coloursFound].rCol = botdifference + ic1 * (MAXCOLOUR - (topdifference+botdifference))/(float)(c1-1);
-					colV[coloursFound].gCol = botdifference + ic2 * (MAXCOLOUR - (topdifference+botdifference))/(float)(c2-1);
-					colV[coloursFound].bCol = botdifference + ic3 * (MAXCOLOUR - (topdifference+botdifference))/(float)(c3-1);
+					colV[coloursFound].rCol = botdifference + ic1 * (MAXCOLOUR - (topdifference+botdifference))/(double)(c1-1);
+					colV[coloursFound].gCol = botdifference + ic2 * (MAXCOLOUR - (topdifference+botdifference))/(double)(c2-1);
+					colV[coloursFound].bCol = botdifference + ic3 * (MAXCOLOUR - (topdifference+botdifference))/(double)(c3-1);
 					if ((colV[coloursFound].rCol + colV[coloursFound].gCol + colV[coloursFound].bCol ) >= MINTOTALCOLOUR) {
 						// Colour is bright enough
 						++coloursFound;
@@ -29349,7 +29396,7 @@ void setGLColor(TextOutputColour topc) {
 	}
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void glTextOutput(float x, float y, char *string, TextOutputColour topc)
+void glTextOutput(double x, double y, char *string, TextOutputColour topc)
 {	// Puts text into the opengl part of the screen
 	char * p = string;
 	setGLColor(topc);
@@ -29439,8 +29486,8 @@ void cb_freezer2D(Fl_Widget *w, void*) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_speed3D(Fl_Widget *w, void* param) {
 	int intParam = (long int)param;
-	float newdiff;
-	float old_osc_period;
+	double newdiff;
+	double old_osc_period;
 	double temp, temp2;
 
 	if ((StateDemoMotion)intParam == motionStateOfDemo3D) return; // Nothing to do, nothing has changed
@@ -29475,8 +29522,8 @@ void cb_speed3D(Fl_Widget *w, void* param) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_speed4D(Fl_Widget *w, void* param) {
 	int intParam = (long int)param;
-	float newdiff;
-	float old_osc_period;
+	double newdiff;
+	double old_osc_period;
 	double temp, temp2;
 
 	if ((StateDemoMotion)intParam == motionStateOfDemo4D) return; // Nothing to do, nothing has changed
@@ -29790,8 +29837,8 @@ void cb_RadioDemoGame2D(Fl_Widget *w, void * param) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_newGame3D(Fl_Widget *w, void *param) {
 	int thisParam = (long int)param;
-	float axisFromTrueTargToTrueFig[3];
-	float tempQuat[4];
+	double axisFromTrueTargToTrueFig[3];
+	double tempQuat[4];
 	char txtout[200];
 	char *sptr = txtout;
 	//char disptype[20];
@@ -29916,7 +29963,7 @@ void cb_reset_Slider2D(Fl_Widget *w, void *param) {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_Sliders3D(Fl_Widget *w, void *param) {
-	float temp;
+	double temp;
 	switch( (long int)param) {
 	case 0:
 		// This is for distUser3D
@@ -29945,9 +29992,9 @@ void cb_Sliders3D(Fl_Widget *w, void *param) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_Sliders4D(Fl_Widget *w, void *param) {
 	//float x;
-	float minVal = 1.5;
-	float maxVal = 8.0;
-	float temp;
+	double minVal = 1.5;
+	double maxVal = 8.0;
+	double temp;
 
 	switch((long int)param) {
 	case 0:
@@ -30015,7 +30062,7 @@ void cb_Sliders4D(Fl_Widget *w, void *param) {
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_reset3DSliders(Fl_Widget *w, void *param) {
-	float newValue;
+	double newValue;
 	switch ((long int)param) {
 	case 0:
 		newValue = 0.0;
@@ -30103,7 +30150,7 @@ void cb_SolveType(Fl_Widget *w, void * param) {
 }
 
 void startNew4D() {
-	float randAngle1, randAngle2;
+	double randAngle1, randAngle2;
 	char txtout[200];
 	char *sptr = txtout;
 
@@ -30276,8 +30323,8 @@ void passivemotion(int x, int y)
 	Mouse2DInsideOutsideCircle prevMouse = mouse2DInsideOutsideCircle;
 
 
-	float thiswx = (2.0*x - W) / W;
-	float thishy = (H - 2.0*y) / H;
+	double thiswx = (2.0*x - W) / W;
+	double thishy = (H - 2.0*y) / H;
 
 	switch (stateFourot) {
 	case twoD:

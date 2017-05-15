@@ -164,7 +164,7 @@ enum StateMouseState {
 };
 
 
-// from:  figdata.c Generated on Fri May 23 18:28:27 2014
+// from:  figdata.c Generated on Sun May 14 18:28:27 2017
 typedef struct figInfo {
  int numDims;                 // Number of dimensions (will be 3 or 4)
  int numVerts;                // Number of vertices in the whole figure
@@ -182,11 +182,11 @@ typedef struct figInfo {
  int numCellsPerVert;         // Number of cells meeting at a vertex (always 1 for 3D figures)
  int numCellsPerEdge;         // Number of cells meeting at an edge (either 2 or 3, for 3d and 4d respectively)
  int numCellsPerFace;         // Number of cells meeting at a Face (1 for 3d, 2 for 4d)
- float dihedralCosine;        // Cosine of the angle between faces in a cell
- float cellRadius;            // Radius of an individual cell in a 4d figure
- float cellCentreRadius;      // Distance from the centre of figure to the centre of an individual cell
- float faceCentreRadius;      // Distance from the centre of figure to the centre of an individual face (3D)
- float *vertex;               // Pointer to the array of vertices (number of vertices X number of dimensions)
+ double dihedralCosine;        // Cosine of the angle between faces in a cell
+ double cellRadius;            // Radius of an individual cell in a 4d figure
+ double cellCentreRadius;      // Distance from the centre of figure to the centre of an individual cell
+ double faceCentreRadius;      // Distance from the centre of figure to the centre of an individual face (3D)
+ double *vertex;               // Pointer to the array of vertices (number of vertices X number of dimensions)
  int *edge;                   // Pointer to the array of edges (an edge is a pair of vertex numbers)
  int *vertToEdge;             // Pointer to the array of edges per vertex (number of vertices X number of edges meeting at a vertex)
  int *face;                   // Pointer to the array of faces (number of faces X edges per face)
@@ -194,105 +194,105 @@ typedef struct figInfo {
  int *faceToVert;             // Pointer to the array of vertices per face (number of faces X vertices per face)
  int *vertToFace;             // Pointer to the array of faces per vertex (number of vertices X faces meeting at a vertex)
  int *faceToCell;             // Pointer to the array of cells per face (number of faces X cells per face (two in 4D))
- float *faceNormal;           // Pointer to the face normals (number of faces X number of dimensions)
+ double *faceNormal;           // Pointer to the face normals (number of faces X number of dimensions)
  int *cell;                   // Pointer to the array of cells (a cell is a set of face numbers)
- float *cellNormal;           // Pointer to the cell normals (number of cells X number of dimensions)
+ double *cellNormal;           // Pointer to the cell normals (number of cells X number of dimensions)
  int *cellToEdge;             // Pointer to the edges per cell (number of cells X edges per cell)
  int *cellToOpposite;         // Pointer to the opposite cell per cell (number of cells X 1, but not for K005)
 } FigInfo;
 
 
 struct Intersection2DInfo {
-	float *verts; // point to current vertices
+	double *verts; // point to current vertices
 	int sides; // same as currFig2D
 
-	float rotated2DMov [MAX_2D_SIDES][2]; // The rotated vertices of the 2D figure on the Mov
-	float rotated2DTarg [MAX_2D_SIDES][2]; // The rotated vertices of the 2D figure on the Targ
-	float intersection2DMov [4][2]; // The Intersections of the 2D figure
-	float intersection2DTarg [4][2]; // The Intersections of the 2D figure on the Targ
+	double rotated2DMov [MAX_2D_SIDES][2]; // The rotated vertices of the 2D figure on the Mov
+	double rotated2DTarg [MAX_2D_SIDES][2]; // The rotated vertices of the 2D figure on the Targ
+	double intersection2DMov [4][2]; // The Intersections of the 2D figure
+	double intersection2DTarg [4][2]; // The Intersections of the 2D figure on the Targ
 	int intersectionColorIndexMov [4];
 	int intersectionColorIndexTarg [4];
-	float muMov[2]; // Distance of the two intersection points from the centre of the intersection line.
-	float muTarg[2]; // Distance of the two intersection points from the centre of the intersection line.
-	float lineEndPointsMov[2][2];
-	float lineHalfLength;
+	double muMov[2]; // Distance of the two intersection points from the centre of the intersection line.
+	double muTarg[2]; // Distance of the two intersection points from the centre of the intersection line.
+	double lineEndPointsMov[2][2];
+	double lineHalfLength;
 	int countIntersectsions2DMov;
 	int countIntersectsions2DTarg;
-	float displacementLine2D; // Distance of the intersection plane from the origin.
-	float normalLine2D; // Angle of the normal to the intersection line (initialise to 0 = vertical normal = horizontal line)
-	float normalVector2D[2]; // The vector corresponding to normalLine2D (vertical line)
+	double displacementLine2D; // Distance of the intersection plane from the origin.
+	double normalLine2D; // Angle of the normal to the intersection line (initialise to 0 = vertical normal = horizontal line)
+	double normalVector2D[2]; // The vector corresponding to normalLine2D (vertical line)
 
-	float angle2DMov; // Rotation angle for Mov figure (as displayed)
-	float angle2DTarg; // Rotation angle for Targ figure (as displayed)
+	double angle2DMov; // Rotation angle for Mov figure (as displayed)
+	double angle2DTarg; // Rotation angle for Targ figure (as displayed)
 
 	// Following are used to convert from mouse 2D screen position coords to x y coords in the 3d scene
-	float convertFromMouseTo3D;
-	float mouse3DxInitialPosition;
-	float mouse3DyInitialPosition;
-	float mouse3DRadius;
+	double convertFromMouseTo3D;
+	double mouse3DxInitialPosition;
+	double mouse3DyInitialPosition;
+	double mouse3DRadius;
 
 	// Following are to display the countdown graphics
-	float falseStartMov;
-	float trueStartMov;
-	float falseStartTarg;
-	float trueStartTarg;
-	float countdownDispNum;
+	double falseStartMov;
+	double trueStartMov;
+	double falseStartTarg;
+	double trueStartTarg;
+	double countdownDispNum;
 	int displayNumber;
 	int prevdisplayNumber;
 
 	// The following are used in gameplay.
-	float mouseAngleStart;
-	float mouseAngleNow;
-	float angleMovOriginal;
-	float angularDistance;
-	float prevAngularDistance;
-	float cumulativeMotionAngularError;
-	float cumulativeAngularMotion;
+	double mouseAngleStart;
+	double mouseAngleNow;
+	double angleMovOriginal;
+	double angularDistance;
+	double prevAngularDistance;
+	double cumulativeMotionAngularError;
+	double cumulativeAngularMotion;
 	int angularErrorCount;
-	float successTime; // The time to completion
-	float finalScore;
+	double successTime; // The time to completion
+	double finalScore;
 };
 
 
-void project4Dto3D(float *v4D, float *v3D, int count, float dPersp);
-void randomVec3D (float * vec);
+void project4Dto3D(double *v4D, double *v3D, int count, double dPersp);
+void randomVec3D (double * vec);
 
-void calcNormalBivector4DFromVectors (float *v1, float *v2, struct Bivector4D *biv);
+void calcNormalBivector4DFromVectors (double *v1, double *v2, struct Bivector4D *biv);
 
 void copyRotor( struct Rotor4D *r1,  struct Rotor4D *r2);
 void copyBivector( struct Bivector4D *r1,  struct Bivector4D *r2);
-void sortFloats(int Kount, float *values, int* vind);
+void sortFloats(int Kount, double *values, int* vind);
 
 struct Bivector4D {
-	float e12;
-	float e13;
-	float e14;
-	float e23;
-	float e24;
-	float e34;
+	double e12;
+	double e13;
+	double e14;
+	double e23;
+	double e24;
+	double e34;
 };
 
 struct trackballInfo {
-	float trackballsize;
-	float littleballsize;
-	float rsquared; // trackballsize ^2
-	float t; //The horizontal distance from the centre of the trackball to the centre of the little ball 
-	float p; // The horizontal distance from the centre of the trackball to the point where the trackball meets the little ball.
-	float axis[3]; // The computed axis
-	float currentxyz[3]; // Current mouse posn
-	float prevxyz[3]; // Prev mouse posn
-	float rotangle; // the computed angle of rotation.
-	float myquat[4]; //quaternion resulting from calculation
+	double trackballsize;
+	double littleballsize;
+	double rsquared; // trackballsize ^2
+	double t; //The horizontal distance from the centre of the trackball to the centre of the little ball 
+	double p; // The horizontal distance from the centre of the trackball to the point where the trackball meets the little ball.
+	double axis[3]; // The computed axis
+	double currentxyz[3]; // Current mouse posn
+	double prevxyz[3]; // Prev mouse posn
+	double rotangle; // the computed angle of rotation.
+	double myquat[4]; //quaternion resulting from calculation
 	int zone; // Where the mouse is located relative to the centre of the trackball
-	float mousex2D;
-	float mousey2D;
+	double mousex2D;
+	double mousey2D;
 
 	// 4D
 	int horrible4DFlag;
-	float prevMouse4D[3];
-	float currMouse4D[3];
-	float normalisedCurr[4];
-	float normalisedPrev[4];
+	double prevMouse4D[3];
+	double currMouse4D[3];
+	double normalisedCurr[4];
+	double normalisedPrev[4];
 	int insideTrackballArea;
 };
 
@@ -301,46 +301,46 @@ struct IntersectPoint {
 	enum IntersectionObjectType iType;
 	int objectIndex;
 	int faceIndexForColour; // This for a given point applies to the new edge between this point and the previous point
-	float p[3]; // The actual intersection point
+	double p[3]; // The actual intersection point
 };
 
 struct Intersection3DInfoGeneral {
 	// 3D info that applies to both figure and target.
-	float userPlaneDeclension; // varies from zero (the normal is the y axis) to Pi/2 (the normal is the positive z axis)
-	float userPlaneNormal[3];
-	float userPlaneDistance;
+	double userPlaneDeclension; // varies from zero (the normal is the y axis) to Pi/2 (the normal is the positive z axis)
+	double userPlaneNormal[3];
+	double userPlaneDistance;
 	FigInfo *fig; // The current figure
 
-	float baseAxisOfDemo[3];
-	float reducedTime; // Used for the 3D demo
-	float previousReducedTime; // Used for the 3D demo
-	float basePositionDemoQuat[4];
+	double baseAxisOfDemo[3];
+	double reducedTime; // Used for the 3D demo
+	double previousReducedTime; // Used for the 3D demo
+	double basePositionDemoQuat[4];
 	int displayNumber;
 	int prevDisplayNumber;
 
-	float diffAngle;
-	float diffAxis[3];
-	float diffQuat[4];
-	float cumulativeAngularTravel;
-	float initialAngularDifference;
-	float successTime;
-	float finalScore;
-	float escapeAngle;
-	float cumulativeEscape;
+	double diffAngle;
+	double diffAxis[3];
+	double diffQuat[4];
+	double cumulativeAngularTravel;
+	double initialAngularDifference;
+	double successTime;
+	double finalScore;
+	double escapeAngle;
+	double cumulativeEscape;
 	int firstEscape;
 };
 
 struct Intersection3DInfo {
 
-	float rotatedVerts[MAX_3D_VERTS][3];
-	float rotatedFaceNormals[MAX_3D_VERTS][3];
+	double rotatedVerts[MAX_3D_VERTS][3];
+	double rotatedFaceNormals[MAX_3D_VERTS][3];
 
-	float dotProdOfRotVertsWithUserNormal[MAX_3D_VERTS];
+	double dotProdOfRotVertsWithUserNormal[MAX_3D_VERTS];
 
-	float distOfRotVertsFromUserPlane[MAX_3D_VERTS];
-	float finalPositionQuaternion[4]; // The quaternion which when applied in a double rotation (with it's conjugate) leads to the rotated final position
+	double distOfRotVertsFromUserPlane[MAX_3D_VERTS];
+	double finalPositionQuaternion[4]; // The quaternion which when applied in a double rotation (with it's conjugate) leads to the rotated final position
 
-	float edgeLambda[MAX_3D_EDGES];
+	double edgeLambda[MAX_3D_EDGES];
 	int numberIntersections;
 	int firstCoincidentEdge;
 	int numberCoincidentEdges;
@@ -352,30 +352,30 @@ struct Intersection3DInfo {
 
 	// These deal with the countdown process
 	// Once the game is underway, truestartaxis, truestartangle and truestartquat refer to the current position
-	float trueStartAxis[3];
-	float trueStartAngle;
-	float trueStartQuat[4];
-	float falseStartAxis[3];
-	float falseStartAngle;
-	float falseStartQuat[4];
+	double trueStartAxis[3];
+	double trueStartAngle;
+	double trueStartQuat[4];
+	double falseStartAxis[3];
+	double falseStartAngle;
+	double falseStartQuat[4];
 	struct ColValue *randomColors;
 };
 
 struct Rotor4D {
-	float scalar;
+	double scalar;
 	struct Bivector4D b;
-	float e1234;
+	double e1234;
 };
 
 struct RotorComponents {
 	struct Bivector4D biv;
-	float angle; // This is the full angle
+	double angle; // This is the full angle
 };
 
 struct Intersection4DInfoGeneral {
 	// 4D info that applies to both figure and target.
-	float userSpaceNormal[4];
-	float userSpaceDistance;
+	double userSpaceNormal[4];
+	double userSpaceDistance;
 	FigInfo *fig; // The current figure
 
 	struct Bivector4D demoRotationPlanes;
@@ -387,44 +387,44 @@ struct Intersection4DInfoGeneral {
 	// Structures for the 4D countdown;
 	struct Rotor4D trueStartRotTarg;
 	struct Bivector4D falseStartBivTarg;
-	float falseStartTargAngle1, falseStartTargAngle2;
+	double falseStartTargAngle1, falseStartTargAngle2;
 
 	struct Rotor4D trueStartRotFig;
 	struct Bivector4D falseStartBivFig;
-	float falseStartFigAngle1, falseStartFigAngle2;
+	double falseStartFigAngle1, falseStartFigAngle2;
 
 
-	float reducedTime; // Used for the 4D demo
-	float previousReducedTime; // Used for the 4D demo
+	double reducedTime; // Used for the 4D demo
+	double previousReducedTime; // Used for the 4D demo
 	int displayNumber;
 	int prevDisplayNumber;
 
 	struct RotorComponents trueStartPosition;
 	struct RotorComponents falseStartPosition;
 	// Some stuff relevant to the solution;
-	float cumulativeAngularTravel;
-	float initialAngularDifference1,initialAngularDifference2;
-	float successTime;
-	float finalScore;
-	float requiredAngle, fspeed, faccuracy, fscore;
+	double cumulativeAngularTravel;
+	double initialAngularDifference1,initialAngularDifference2;
+	double successTime;
+	double finalScore;
+	double requiredAngle, fspeed, faccuracy, fscore;
 
-	float startEscapeTime;
+	double startEscapeTime;
 	int firstEscape;
 	int currentCellInWireframe;
 	int oppositeCellInWireframe;
 
-	float projectDist4D3D; // Used for perspective projection from 4D to 3D.
-	float projectDist3D2D;
-	float rightEyeX3D2D; // The x position of the right eye in stereo projection in 3d.
-	float frustum_ag;
-	float frustum_bg;
-	float frustum_topf;
-	float frustum_botf;
-	float frustum_near;
-	float frustum_far;
+	double projectDist4D3D; // Used for perspective projection from 4D to 3D.
+	double projectDist3D2D;
+	double rightEyeX3D2D; // The x position of the right eye in stereo projection in 3d.
+	double frustum_ag;
+	double frustum_bg;
+	double frustum_topf;
+	double frustum_botf;
+	double frustum_near;
+	double frustum_far;
 
-	float surroundCircleRadius;
-	float surroundCircleZ;
+	double surroundCircleRadius;
+	double surroundCircleZ;
 
 	int keyDownXAxis,keyDownYAxis,keyDownZAxis,keyDownWAxis,keyDownShift,keyDownCtrl;
 	int keyDownSpeedUp,keyDownSlowDown;
@@ -433,24 +433,24 @@ struct Intersection4DInfoGeneral {
 	struct Rotor4D solutionRotor;
 	struct Rotor4D escapeRotor;
 	struct Bivector4D escapeBiv;
-	float cumulativeAngularEscape;
-	float solvangle1,solvangle2, prevangle;
+	double cumulativeAngularEscape;
+	double solvangle1,solvangle2, prevangle;
 	int autosolve4D;
-	float kbRotation, escRotation;
+	double kbRotation, escRotation;
 
 	int prevDisplayPositionOfSolvBiv1;
 	int displayPositionOfSolvBiv1;
-	float angleBiv[12], asigns[12];
+	double angleBiv[12], asigns[12];
 	int vinds[12];
 	int solveType4D;
 };
 
 struct EdgeIntersection { //One of these for each edge that intersects with the user space (in array edgeIntsct)
 	int globalEdgeIndex; // ID of the edge that intersects
-    float intersectionPoint[4]; // The point at which this intersection
-    float intersectionPointProjTo3D[3]; // The point at which this intersection
-    float intersectionPointProjTo3DLeftEye[3]; // The point at which this intersection
-    float intersectionPointProjTo3DRightEye[3]; // The point at which this intersection
+    double intersectionPoint[4]; // The point at which this intersection
+    double intersectionPointProjTo3D[3]; // The point at which this intersection
+    double intersectionPointProjTo3DLeftEye[3]; // The point at which this intersection
+    double intersectionPointProjTo3DRightEye[3]; // The point at which this intersection
     int faceIntersectionIndex[5]; // The indices of faces (in faceIntsct) that must also intersect. Max number of face intersections per edge.
     int faceIntersectionIndexInd; // The number of entries in faceIntersectionIndex
 };
@@ -483,15 +483,15 @@ struct IntersectionObject {
 
 struct Intersection4DInfo { // This struct is instantiated separately for fig and target.
 	struct IntersectionObject iObj;
-	float rotatedVerts[MAX_4D_VERTS][4];
-	float rotatedCellNormals[MAX_4D_CELLS][4];
-	float dotProdOfRotVertsWithUserNormal[MAX_4D_VERTS];
-	float distOfRotVertsFromUserPlane[MAX_4D_VERTS];
-	float numberCoincidentVerts;
-	float edgeLambda[MAX_4D_EDGES];
-	float verts4DProjectedTo3D[MAX_4D_VERTS][3];
-	float verts4DTo3DLeftEye[MAX_4D_VERTS][3];
-	float verts4DTo3DRightEye[MAX_4D_VERTS][3];
+	double rotatedVerts[MAX_4D_VERTS][4];
+	double rotatedCellNormals[MAX_4D_CELLS][4];
+	double dotProdOfRotVertsWithUserNormal[MAX_4D_VERTS];
+	double distOfRotVertsFromUserPlane[MAX_4D_VERTS];
+	double numberCoincidentVerts;
+	double edgeLambda[MAX_4D_EDGES];
+	double verts4DProjectedTo3D[MAX_4D_VERTS][3];
+	double verts4DTo3DLeftEye[MAX_4D_VERTS][3];
+	double verts4DTo3DRightEye[MAX_4D_VERTS][3];
 	struct ColValue *randomColors;	
 };
 
