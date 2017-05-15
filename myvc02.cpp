@@ -26595,9 +26595,9 @@ void drawAccuracy3D(float angle, float xxtime, int onTheLeft)
 	// Draw the accuracy
 	tempVal = correctAngle(angle);
 	if (onTheLeft) {
-		sprintf(counting, "Angle:%5.1f\n", tempVal*M_RADIANS_TO_DEGREES);
+		sprintf(counting, "Angle:%5.1f", tempVal*M_RADIANS_TO_DEGREES);
 		glTextOutput(0.81, ANGULARDISTANCEYVALUE, counting, twhite);
-		sprintf(counting, "Time:%5.0f\n", xxtime);
+		sprintf(counting, "Time:%5.0f", xxtime);
 		glTextOutput(0.81, ANGULARDISTANCEYVALUE-0.1, counting, twhite);
 		drawAccuracy2DNew(fabs(tempVal*M_1_PI),0.0,leftOnly);
 	} else {
@@ -26888,8 +26888,8 @@ void disp4DResults()
 	reqdForSoln->value(dispres);
 
 
-	sptr += sprintf(sptr,"Required Angle: %7.1f %c\n",info4D.requiredAngle*M_RADIANS_TO_DEGREES,176);
-	sptr += sprintf(sptr,"Cumulative Escape Angle: %9.1f %c\n",info4D.cumulativeAngularEscape*M_RADIANS_TO_DEGREES,176);
+	sptr += sprintf(sptr,"Required Angle: %7.1f %c",info4D.requiredAngle*M_RADIANS_TO_DEGREES,176);
+	sptr += sprintf(sptr,"Cumulative Escape Angle: %9.1f %c",info4D.cumulativeAngularEscape*M_RADIANS_TO_DEGREES,176);
 
 
 	// The time it took to solve the problem, in seconds
@@ -27722,7 +27722,7 @@ void redraw4D(float old_xxtime, int doStereo)
 
 				// set the viewport for the purpose of doing the raster text output
 				if (aspectRatio >= 1) glViewport(0, 0, q, cht); else glViewport(0,0,cht,cht); 
-				sprintf(dispres, "Angle:%6.1f\n", currentAngle*M_RADIANS_TO_DEGREES);
+				sprintf(dispres, "Angle:%6.1f", currentAngle*M_RADIANS_TO_DEGREES);
 				glTextOutput(0.7, 0.9, dispres, twhite);
 				sprintf(dispres,"Time:%8.0f",xxxtime);
 				glTextOutput(0.7, 0.8, dispres, twhite);
@@ -27904,14 +27904,14 @@ void displayResults3D() {
 	char counting[100];
 	float value, value1;
 
-	sprintf(counting,"Required angle:%6.2f %c\n",
+	sprintf(counting,"Required angle:%6.2f %c",
 		(fabs(info3D.initialAngularDifference) - ACCURACYWINANGLE3D)*M_RADIANS_TO_DEGREES,176);
 	glTextOutput(0.80, ANGULARDISTANCEYVALUE, counting, twhite);
 	if (state3DGamePlay != haveSuccess3D) {if (pFile) fputs(counting,pFile);}
-	sprintf(counting, "Time:%6.2f s\n", info3D.successTime);
+	sprintf(counting, "Time:%6.2f s", info3D.successTime);
 	glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.1, counting, twhite);
 	if (state3DGamePlay != haveSuccess3D) {if (pFile) fputs(counting,pFile);}
-	sprintf(counting, "Speed:%6.2f %c/s\n",info3D.finalScore*M_RADIANS_TO_DEGREES,176);
+	sprintf(counting, "Speed:%6.2f %c/s",info3D.finalScore*M_RADIANS_TO_DEGREES,176);
 	glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.2, counting, tredgreen);
 	if (state3DGamePlay != haveSuccess3D) {if (pFile) fputs(counting,pFile);}
 
@@ -27922,18 +27922,18 @@ void displayResults3D() {
 	}
 
 	if (info3D.cumulativeEscape > 0.0 ) {
-		sprintf(counting, "Escape:%6.1f %c\n", info3D.cumulativeEscape*M_RADIANS_TO_DEGREES, 176);
+		sprintf(counting, "Escape:%6.1f %c", info3D.cumulativeEscape*M_RADIANS_TO_DEGREES, 176);
 		glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.57, counting, twhite);
 		if (state3DGamePlay != haveSuccess3D) {if (pFile) fputs(counting,pFile);}
 	}
 
-	sprintf(counting, "Accuracy:%5.1f%%\n", value*100);
+	sprintf(counting, "Accuracy:%5.1f%%", value*100);
 	glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.3, counting, tredgreen);
 	if (state3DGamePlay != haveSuccess3D) {if (pFile) fputs(counting,pFile);}
 
 	glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.4,"Speed x Accuracy",twhite);
 	value1 = value * 100 * info3D.finalScore*M_RADIANS_TO_DEGREES; // Units are degrees per second, mult by accuracy
-	sprintf(counting, "Score:%7.1f\n", value1);
+	sprintf(counting, "Score:%7.1f", value1);
 	glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.5, counting, twhite);
 	if (state3DGamePlay != haveSuccess3D) {if (pFile) fputs(counting,pFile);}
 
