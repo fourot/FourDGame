@@ -24537,9 +24537,9 @@ enum State2DGameDetail {
 State2DGameDetail state2DGameDetail;
 
 struct ColValue {
-	double rCol;   
-	double gCol;
-	double bCol;
+	float rCol;   
+	float gCol;
+	float bCol;
 };
 
 enum FigType {
@@ -25061,9 +25061,9 @@ void openFile() {
 }
 
 void almostRandomColour(int numberOfColours, int index, int indexOfSingleColour, struct ColValue *result) {
-	double bignum;
-	double littlenum;
-	double temp;
+	float bignum;
+	float littlenum;
+	float temp;
 	
 	// This function is Only used by function randcolours.
 	// The result is three floating point numbers representing a colour.
@@ -25582,7 +25582,7 @@ void drawSurroundCircle3(double *colourTop, double *colourBottom, double lineWid
 	}
 	rotManyVec(NUMBEROFLINESINCIRCLE,xcirclePoints[0],xcirclePointsRotated[0],quat1);
 
-	glColor3fv((float *)colourTop);
+	glColor3dv(colourTop);
 	if (solid == 0) {
 		// We are only doing lines
 		glLineWidth(lineWidth);
@@ -25887,13 +25887,12 @@ void drawEdges3D(struct Intersection3DInfo *i3D) {
 		glEnd();
 	}
 }
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVertsNumbers, int useRandomColours){
 	int iface, ivert, vertnum;
 	int numVertsPerFace;
 	struct ColValue *colsFig;
-	double myLocalVerts[3];
+	float myLocalVerts[3];
 	char numString[5];
 	char txtout[50];
 	char *sptr;
@@ -25914,11 +25913,13 @@ void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVe
 			colorSum = 255*(i3D->randomColors[iface].rCol + i3D->randomColors[iface].gCol + i3D->randomColors[iface].bCol);
 		} else {
 			glColor3ub((unsigned char)colsFig[iface].rCol,(unsigned char)colsFig[iface].gCol,(unsigned char)colsFig[iface].bCol);
-			colorSum = (unsigned char)colsFig[iface].rCol+(unsigned char)colsFig[iface].gCol+(unsigned char)colsFig[iface].bCol;
-		}
+			colorSum = ((int)colsFig[iface].rCol+(int)colsFig[iface].gCol+(int)colsFig[iface].bCol);
+		}	
+		
+		
 		glBegin(GL_POLYGON);
 
-		glNormal3fv((float *)i3D->rotatedFaceNormals[iface]);
+		glNormal3dv(i3D->rotatedFaceNormals[iface]);
 		for (ivert=0; ivert < numVertsPerFace; ++ivert) {
 			vertnum = info3D.fig->faceToVert[iface*numVertsPerFace + ivert]; // The number of the vertex for this face
 			glVertex3dv(i3D->rotatedVerts[vertnum]);
@@ -25933,9 +25934,11 @@ void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVe
 			myLocalVerts[1] = i3D->rotatedFaceNormals[iface][1] * temp;
 			myLocalVerts[2] = i3D->rotatedFaceNormals[iface][2] * temp + 0.3;  // Bring the numbers towards the viewer ( +0.3)
 			
+			//gl_font(1,24);
 			gl_font(1,24);
 				glColor3ub(255,255,255);
-			glRasterPos3fv((float *)myLocalVerts);
+			glRasterPos3fv(myLocalVerts);
+			//glRasterPos3fv((float *)myLocalVerts);
 			sprintf(numString,"%d",iface);
 			gl_draw(numString,strlen(numString));
 			//glEnable(GL_DEPTH_TEST);
@@ -25952,20 +25955,21 @@ void drawFaces3D(struct Intersection3DInfo *i3D, int drawFaceNumbers, int drawVe
 			myLocalVerts[1] = i3D->rotatedVerts[ivert][1] * temp;
 			myLocalVerts[2] = i3D->rotatedVerts[ivert][2] * temp;
 
-			glRasterPos3fv((float *)myLocalVerts);
+			//glRasterPos3fv((float *)myLocalVerts);
+			glRasterPos3fv(myLocalVerts);
 			sprintf(numString,"%d",ivert);
 			gl_draw(numString,strlen(numString));
 		}
 	}
 }
-
+/////////////////////////////////////////////////////////////////////
 void showAngle(double angle, Fl_Output ** op) {
 	char txt[20];
 	// Show angle
 	sprintf(txt, "%9.2f", angle* M_RADIANS_TO_DEGREES);
 	op[0]->value(txt);
 }
-
+/////////////////////////////////////////////////////////////////////
 void showBiv(struct Bivector4D *bv,Fl_Output ** op) {
 	char txt[20]; // display a bivector
 	if (bv->e12 != 0.0) sprintf(txt, "%9.6f", bv->e12); else txt[0] = '\0';
@@ -26471,8 +26475,14 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 
 		if (useRandomColours) {
 			glColor3f(i4D->randomColors[cellNumGlobal].rCol,i4D->randomColors[cellNumGlobal].gCol,i4D->randomColors[cellNumGlobal].bCol);
+			//glColor3ub((unsigned char)i4D->randomColors[cellNumGlobal].rCol,
+			//	(unsigned char)i4D->randomColors[cellNumGlobal].gCol,
+			//	(unsigned char)i4D->randomColors[cellNumGlobal].bCol);
 		} else {
-			glColor3ub((unsigned char)colsFig[cellNumGlobal].rCol,(unsigned char)colsFig[cellNumGlobal].gCol,(unsigned char)colsFig[cellNumGlobal].bCol);
+			//glColor3f(colsFig[cellNumGlobal].rCol,colsFig[cellNumGlobal].gCol,colsFig[cellNumGlobal].bCol);
+			glColor3ub((unsigned char)colsFig[cellNumGlobal].rCol,
+				(unsigned char)colsFig[cellNumGlobal].gCol,
+				(unsigned char)colsFig[cellNumGlobal].bCol);
 		}
 
 		glBegin(GL_POLYGON);
@@ -30541,12 +30551,15 @@ int	main(int argc, char **argv)
 
 	Fl_Group *tGroup3D = new Fl_Group(0, TABYPOSITION+25, TABWIDTH, TABHEIGHT-20,"&3D Game");//
 	tGroup3D->user_data((void *)tab3D);
+	
 
 	countdownOutput3D = new Fl_Output(10,TABYPOSITION+35,105,100);
 	countdownOutput3D->box(FL_FLAT_BOX);
-	countdownOutput3D->textsize(100);
+	countdownOutput3D->textsize(36);
+	countdownOutput3D->textfont(FL_SCREEN );
+	//countdownOutput3D->textfont(FontsList[0]);
 	countdownOutput3D->color(FL_BACKGROUND_COLOR);
-
+	
 	// Group to toggle 3D figure
 	Fl_Group *tgFigureChoice3D = new Fl_Group(130, TABYPOSITION+35, 240, TABHEIGHT-45);
 	tgFigureChoice3D->tooltip(tt3ChooseFigure);
