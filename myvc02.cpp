@@ -30414,7 +30414,7 @@ int	main(int argc, char **argv)
 	///////////////////////////////
 	Fl_Group *tGroupWelcome = new Fl_Group(TABXPOSITION, TABYPOSITION+25, TABWIDTH, TABHEIGHT-20,"Welcom&e");// Tab 3
 	tGroupWelcome->user_data((void *)tabWelcome);
-	Fl_Multiline_Output *wmo = new Fl_Multiline_Output(TABXPOSITION+10, TABYPOSITION+40, 450, TABHEIGHT-60);
+	Fl_Multiline_Output *wmo = new Fl_Multiline_Output(TABXPOSITION+10, TABYPOSITION+40, 450, TABHEIGHT-55);
 	wmo->box(FL_FLAT_BOX);
 	wmo->color(FL_BACKGROUND_COLOR);
 	wmo->textsize(16);
@@ -30468,30 +30468,30 @@ int	main(int argc, char **argv)
 	fig2D_4->callback(cb_setfig2D,(void*)4);
 	fig2D_5 = new Fl_Radio_Round_Button(TABXPOSITION+130, TABYPOSITION+100, 70, 25, "Pentagon");
 	fig2D_5->callback(cb_setfig2D,(void*)5);
-	fig2D_6 = new Fl_Radio_Round_Button(TABXPOSITION+210, TABYPOSITION+40, 70, 25, "Hexagon");
+	fig2D_6 = new Fl_Radio_Round_Button(TABXPOSITION+215, TABYPOSITION+40, 70, 25, "Hexagon");
 	fig2D_6->callback(cb_setfig2D,(void*)6);
-	fig2D_7 = new Fl_Radio_Round_Button(TABXPOSITION+210, TABYPOSITION+70, 70, 25, "Heptagon");
+	fig2D_7 = new Fl_Radio_Round_Button(TABXPOSITION+215, TABYPOSITION+70, 70, 25, "Heptagon");
 	fig2D_7->callback(cb_setfig2D,(void*)7);
-	fig2D_8 = new Fl_Radio_Round_Button(TABXPOSITION+210, TABYPOSITION+100, 70, 25, "Octagon");
+	fig2D_8 = new Fl_Radio_Round_Button(TABXPOSITION+215, TABYPOSITION+100, 70, 25, "Octagon");
 	fig2D_8->callback(cb_setfig2D,(void*)8);
 	tgFigureChoice->end();
-	toggleFig2D = new Fl_Button(TABXPOSITION+310, TABYPOSITION+65, 100, 30,"Toggle Figure");
+	toggleFig2D = new Fl_Button(TABXPOSITION+310, TABYPOSITION+65, 105, 30,"Toggle Figure");
 	toggleFig2D->tooltip(tt2ChooseFigure);
 	toggleFig2D->callback(cb_togglefig2D,(void*)0);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Group to select visuals
-	Fl_Group *tgRadioVisuals = new Fl_Group(TABXPOSITION+550, TABYPOSITION+35, 85, TABHEIGHT-60);
+	Fl_Group *tgRadioVisuals = new Fl_Group(TABXPOSITION+545, TABYPOSITION+35, 90, TABHEIGHT-60);
 	tgRadioVisuals->tooltip(ttDirectus);
 	tgRadioVisuals->box(FL_THIN_UP_FRAME);
-	ros = new Fl_Radio_Round_Button(TABXPOSITION+550, TABYPOSITION+40, 80, 25, "Directus");
+	ros = new Fl_Radio_Round_Button(TABXPOSITION+545, TABYPOSITION+40, 80, 25, "Directus");
 	ros->value(1);
 	ros->callback(cb_RadioVisuals2D,(void *)all2D);
 
-	rop = new Fl_Radio_Round_Button(TABXPOSITION+550, TABYPOSITION+70, 80, 25, "Dimidium");
+	rop = new Fl_Radio_Round_Button(TABXPOSITION+545, TABYPOSITION+70, 80, 25, "Dimidium");
 	rop->callback(cb_RadioVisuals2D,(void *)mov2DTarg1D); 
 
-	Fl_Radio_Round_Button * rol = new Fl_Radio_Round_Button(TABXPOSITION+550, TABYPOSITION+100, 70, 25, "Ludus");
+	Fl_Radio_Round_Button * rol = new Fl_Radio_Round_Button(TABXPOSITION+545, TABYPOSITION+100, 70, 25, "Ludus");
 	rol->callback(cb_RadioVisuals2D,(void *)all1D); 
 
 	tgRadioVisuals->end();
@@ -30504,7 +30504,7 @@ int	main(int argc, char **argv)
 	line2DDisp->tooltip(tt2Intersect);
 	line2DDisp->deactivate();
 
-	resetSlider = new Fl_Button(TABXPOSITION+675, TABYPOSITION+65, 65, 30, "<- Reset");
+	resetSlider = new Fl_Button(TABXPOSITION+675, TABYPOSITION+65, 70, 30, "<- Reset");
 	resetSlider->deactivate();
 	resetSlider->tooltip(tt2Reset);
 	resetSlider->callback(cb_reset_Slider2D);
@@ -30555,7 +30555,7 @@ int	main(int argc, char **argv)
 
 	countdownOutput3D = new Fl_Output(10,TABYPOSITION+35,105,100);
 	countdownOutput3D->box(FL_FLAT_BOX);
-	countdownOutput3D->textsize(36);
+	countdownOutput3D->textsize(100);
 	countdownOutput3D->textfont(FL_SCREEN );
 	//countdownOutput3D->textfont(FontsList[0]);
 	countdownOutput3D->color(FL_BACKGROUND_COLOR);
@@ -30576,7 +30576,7 @@ int	main(int argc, char **argv)
 	fig3D_icosa->callback(cb_setfig3D,(void*)icosa);
 	tgFigureChoice3D->end();
 
-	toggleFig3D = new Fl_Button(TABXPOSITION+240, TABYPOSITION+100, 100, 30,"Toggle Figure");
+	toggleFig3D = new Fl_Button(TABXPOSITION+240, TABYPOSITION+100, 105, 30,"Toggle Figure");
 	toggleFig3D->tooltip(tt3ChooseFigure);
 	toggleFig3D->callback(cb_togglefig3D,(void*)0);
 
@@ -30608,13 +30608,13 @@ int	main(int argc, char **argv)
 	declUser3D->maximum(0.0); // Zero at the bottom, 1 at the top (of the slider)
 	declUser3D->value(0.0);
 
-	reset3DSliders = new Fl_Button(600, TABYPOSITION+95, 65, 30, "<- Reset");
+	reset3DSliders = new Fl_Button(600, TABYPOSITION+95, 70, 30, "<- Reset");
 	reset3DSliders->tooltip(tt3BaseReset);
 	reset3DSliders->callback(cb_reset3DSliders, (void *)1);
-	reset3DSliders = new Fl_Button(600, TABYPOSITION+65, 65, 30, "<- Reset");
+	reset3DSliders = new Fl_Button(600, TABYPOSITION+65, 70, 30, "<- Reset");
 	reset3DSliders->tooltip(tt3MidReset);
 	reset3DSliders->callback(cb_reset3DSliders, (void *)0);
-	reset3DSliders = new Fl_Button(600, TABYPOSITION+35, 110, 30, "Dimidium Reset");
+	reset3DSliders = new Fl_Button(600, TABYPOSITION+35, 120, 30, "Dimidium Reset");
 	reset3DSliders->tooltip(tt3DimReset);
 	reset3DSliders->callback(cb_reset3DSliders, (void *)2);
 
@@ -30647,7 +30647,7 @@ int	main(int argc, char **argv)
 	freeze3D = new Fl_Radio_Round_Button(970, TABYPOSITION+96, 80, 25, "Freeze");
 	freeze3D->callback(cb_speed3D,(void *)demoIsStopped);
 	speed3DNormal->value(1);
-	Fl_Output *infoSpeed3D = new Fl_Output(970,TABYPOSITION+117,80,22);
+	Fl_Output *infoSpeed3D = new Fl_Output(975,TABYPOSITION+117,80,22);
 	infoSpeed3D->value("Speed");
 	infoSpeed3D->box(FL_FLAT_BOX);
 	infoSpeed3D->color(FL_BACKGROUND_COLOR);
@@ -30715,7 +30715,7 @@ int	main(int argc, char **argv)
 	fig4D_600 = new Fl_Radio_Round_Button(TABXPOSITION+200, TABYPOSITION+100, 70, 25, "600 Cell");
 	fig4D_600->callback(cb_setfig4D,(void*)10);
 	tgFigureChoice4D->end();
-	toggleFig4D = new Fl_Button(TABXPOSITION+290, TABYPOSITION+65, 100, 30,"Toggle Figure");
+	toggleFig4D = new Fl_Button(TABXPOSITION+290, TABYPOSITION+65, 105, 30,"Toggle Figure");
 	toggleFig4D->callback(cb_togglefig4D,(void*)0);
 	toggleFig4D->tooltip(tt4ChooseFigure);
 
@@ -30912,7 +30912,7 @@ int	main(int argc, char **argv)
 	freeze4D->callback(cb_speed4D,(void *)demoIsStopped);
 	speed4DNormal->value(1);
 
-	Fl_Output *infoSpeed4D = new Fl_Output(970,TABYPOSITION+117,80,22);
+	Fl_Output *infoSpeed4D = new Fl_Output(975,TABYPOSITION+117,80,22);
 	infoSpeed4D->value("Speed");
 	infoSpeed4D->box(FL_FLAT_BOX);
 	infoSpeed4D->color(FL_BACKGROUND_COLOR);
