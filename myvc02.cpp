@@ -10,7 +10,7 @@
 // all of which were downloaded from the FLTK website www.fltk.org.
 // Almost none of the original code of glpuzzle.cxx, trackball.c and trackball.h remains.
 //
-// The Fourot GUI uses FLTK 1.3.2.
+// The Fourot GUI uses FLTK 1.3.4.
 // Fourot is based in part on the work of the FLTK project (http://www.fltk.org).
 //
 // The 3D graphics of Fourot are created with OpenGL
@@ -21701,42 +21701,24 @@ To play the simplest game, leave the other options at default and select Game mo
 \
 \
 HOW TO ROTATE THE FIGURE:\n\n\
-The figure can be rotated with either the mouse or the keyboard. Simple rotations in 4D are possible, but compound rotations are not.\n\n\
-Rotation using the mouse can be done with the control key either up or down:\n\n\
-Control key UP:\n\
-In this mode, the rotation is the same as in the 3D game, namely, \
-move the mouse while holding down the left mouse button. The response of the figure depends on whether the pointer is inside or outside the circle.\n\n\
-Control key DOWN:\n\
-In this mode, the rotation involves the fourth dimension. As before, move the mouse pointer while holding down the left mouse button. \
+The figure can be rotated by moving the the mouse with either the left or right button down. Simple rotations in 4D are possible, but compound rotations are not.\n\n\
+\n\
+Left mouse button down:\n\
+In this mode, the rotation is the same as in the 3D game. \
+Move the mouse while holding down the left button and the response of the figure depends on whether the pointer is inside or outside the circle.\n\n\
+Right mouse button down:\n\
+In this mode, the rotation involves the fourth dimension. Move the mouse while holding down the right button. \
 The response of the figure depends on whether the pointer is inside or outside the circle. This is not a normal rotation! \
 Try the movements and see what happens.\n\n\
-The technical explanation of the figure movement with the control key down is: if the pointer is inside the circle, \
+The technical explanation of the figure movement with the right button down is: if the pointer is inside the circle, \
 the plane of rotation is the span of the pointer movement and the w-axis - for example if the pointer moves along the x-axis, the \
 plane of rotation is the x-w plane. \
 If the pointer is outside the circle, the plane of rotation \
 is the z-w plane, no matter how the mouse moves.\n\n\
 \
 \
-Rotation using the keyboard:\n\n\
-You can use the keyboard left or right-handed. In both cases you use the thumb and three fingers.\n\
-Left handed: rest your hand lightly on the keyboard with your thumb on the space-bar and three fingers in one of the following patterns:\n\
-1-2-3, Q-W-E or A-S-D.\n\
-Right handed: rest your hand lightly on the keyboard with your thumb on the space-bar and three fingers in one of the following patterns:\n\
-8-9-0, I-O-P or J-K-L.\n\
-Rotation is accomplished by holding down two keys simultaneously (remember that rotations only work in Game mode, not Demo mode). \
-Suppose you are using the 1-2-3-space pattern. There are six possible pairs of keys:\n\
-1-2, 1-3, 2-3, 1-space, 2-space or 3-space.\n\
-Try the different combinations in your preferred position.\
-To rotate the figure in a normal 3D manner, do not use the space bar. Any combination that involves the space bar \
-rotates the figure into the fourth dimension.\n\
-Each key represents an axis, thus two keys represent a plane - the plane of rotation.\n\
-The x-axis (horizontal across a desktop computer screen) is represented by 1, Q, A, 8, I or J.\n\
-The y-axis (vertical on a desktop computer screen) is represented by 2, W, S, 9, O or K.\n\
-The z-axis (horizontal from front to back on a desktop computer screen) is represented by 3, E, D, 0, P or L.\n\
-The w-axis (the invisible axis into the fourth dimension) is represented by the space bar.\n\
-If you press the shift key while pressing the rotation keys, you reverse the direction of rotation.\n\
-If you hold down either Z or N while pressing the rotation keys, the speed of rotation will increase up to a maximum.\n\
-If you hold down either X or M while pressing the rotation keys, the speed of rotation will decrease to a minimum.\n\n\
+Rotation using the keyboard:\n\
+You cannot rotate the figure using the keyboard in the Linux version of fourot.\n\n\
 \
 \
 \
@@ -21770,7 +21752,7 @@ Then try moving the P4 slider slowly up and down. If you \
 select the 8-Cell figure, the display may be more familiar. Also try selecting the Slower speed radio button, and viewing the display in stereo.\n\n\
 BUGS:\n\n\
 There is a bug in the calculation of the angle during gameplay. At times the angle suddenly changes its value. The bug appears more often when \
-using the 120-cell or 600-cell.";
+using the 120-cell or 600-cell. In this (Linux) version of Fourot, the bug appears infrequently.";
 
 
 const char * generalInfo = 
