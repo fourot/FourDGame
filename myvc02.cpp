@@ -22036,19 +22036,18 @@ const char * tt4AutoSolve =
 	"The program Automatically solves itself when in Game mode. New puzzles and solutions repeat until Autosolve is unchecked. Works in conjuction with the \
 Best, Keys and Rand options, also the Key and Esc sliders. You can override Autosolve by using the mouse or keyboard to rotate the figure manually";
 const char * tt4AutoBest = 
-	"Solves the puzzle using the best 4D simple rotation available, regardless of whether it can be input from the keyboard or mouse";
+	"Solves the puzzle using the best 4D simple rotation available, regardless of whether it can be input using the mouse";
 const char * tt4AutoKey = 
-	"Solves the puzzle using the best 4D simple rotation available that can be acheived using keyboard input. Thus the only rotation planes that are available are \
+	"Solves the puzzle using the best 4D simple rotation available that can be acheived using the canonical rotation planes. The rotation planes that are available are \
 x-y (or e12), x-z (or e13), x-w (or e14), y-z (or e23), y-w (or e24) and z-w (or e34). When using this option, figure will occasionally get 'stuck'. Moving the figure \
-slightly using the mouse or keyboard will usually free its motion";
+slightly using the mouse will usually free its motion";
 const char * tt4AutoRand = 
 	"Solves the puzzle using one of the six possible simple 4D rotations, selected at random: The six possible are \
 x-y (or e12), x-z (or e13), x-w (or e14), y-z (or e23), y-w (or e24) and z-w (or e34)";
 const char * tt4KeySlider = 
-	"Vary the rate at which the figure rotates in response to keyboard input. The rate of rotation of the figure when autosolving also varies in response to this slider. \
-The same effect is possible using either key 'z' or 'n' to speed the rotation, or keys 'x' or 'm' to slow the rotation";
+	"Vary the rate at which the figure rotates during autosolving";
 const char * tt4KeySliderReset = 
-	"Reset the rate at which the figure rotates in response to keyboard input to the default value. Also resets the rate of rotation of the figure when autosolving";
+	"Reset the rate at which the figure rotates during autosolving";
 const char * tt4EscapeSpeed = 
 	"Vary the rate at which the target rotates to 'escape' the figure. By default this is zero. Escape behaviour can operate in AutoSolve mode also";
 const char * tt4EscapeReset = 
