@@ -24437,7 +24437,8 @@ State3DOverview state3DOverview;
 
 enum State4DOverview {
 	fourDDemo,
-	fourDGame
+	fourDGame,
+	fourDModel
 };
 State4DOverview state4DOverview;
 
@@ -24635,6 +24636,7 @@ Fl_Button * reset3DSliders;
 Fl_Button * startAndStopGame;
 Fl_Button * startGame3D;
 Fl_Button * startGame4D;
+Fl_Button * modelling4D;
 Fl_Button * reset4DSliders;
 Fl_Button * reset4DSlidersE3;
 Fl_Button * reset4DSliderKey;
@@ -30214,6 +30216,13 @@ void cb_newGame4D(Fl_Widget *w, void *param) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void cb_modelling4D(Fl_Widget *w, void *param) {
+// Need this to be done.
+	startNew4D();
+	return;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_window(Fl_Widget* w, void*) {
   //puts("window callback called");
   ((Fl_Window *)w)->hide();
@@ -30859,24 +30868,33 @@ int	main(int argc, char **argv)
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Group to select demo or game type in 4D
-	Fl_Group *tgRadioDemGame4D = new Fl_Group(TABXPOSITION+880, TABYPOSITION+35, 75, TABHEIGHT-85);
+//	Fl_Group *tgRadioDemGame4D = new Fl_Group(TABXPOSITION+880, TABYPOSITION+35, 75, TABHEIGHT-85);
+	Fl_Group *tgRadioDemGame4D = new Fl_Group(TABXPOSITION+880, TABYPOSITION+35, 75, TABHEIGHT-105);
 	tgRadioDemGame4D->box(FL_THIN_UP_FRAME);
 	{
-		Fl_Radio_Round_Button * o = new Fl_Radio_Round_Button(TABXPOSITION+880, TABYPOSITION+40, 70, 25, "Demo");
+//		Fl_Radio_Round_Button * o = new Fl_Radio_Round_Button(TABXPOSITION+880, TABYPOSITION+40, 70, 25, "Demo");
+		Fl_Radio_Round_Button * o = new Fl_Radio_Round_Button(TABXPOSITION+880, TABYPOSITION+37, 70, 25, "Demo");
 		o->callback(cb_RadioDemoGame4D,(void *)fourDDemo);
 		o->tooltip(tt4Demo);
 		o->value(1);
 	}
 	{
-		Fl_Radio_Round_Button * o = new Fl_Radio_Round_Button(TABXPOSITION+880, TABYPOSITION+70, 70, 25, "Game");
+//		Fl_Radio_Round_Button * o = new Fl_Radio_Round_Button(TABXPOSITION+880, TABYPOSITION+70, 70, 25, "Game");
+		Fl_Radio_Round_Button * o = new Fl_Radio_Round_Button(TABXPOSITION+880, TABYPOSITION+55, 70, 25, "Game");
 		o->callback(cb_RadioDemoGame4D,(void *)fourDGame);
 		o->tooltip(tt4Game);
 	}
 	tgRadioDemGame4D->end();
 
-	startGame4D = new Fl_Button(TABXPOSITION + 880, TABYPOSITION+100, 75, 45, "Start New\nGame");
+//	startGame4D = new Fl_Button(TABXPOSITION + 880, TABYPOSITION+100, 75, 45, "Start New\nGame");
+	startGame4D = new Fl_Button(TABXPOSITION + 880, TABYPOSITION+81, 75, 40, "Start New\nGame");
 	startGame4D->deactivate();
 	startGame4D->callback(cb_newGame4D, (void *)1);
+	
+	modelling4D = new Fl_Button(TABXPOSITION + 880, TABYPOSITION+125, 75, 18, "Model");
+	modelling4D->deactivate();
+	modelling4D->callback(cb_modelling4D, (void *)1);
+	
 	///////////////////////////////////////////////
 
 	///////////////////////////////
