@@ -24437,8 +24437,7 @@ State3DOverview state3DOverview;
 
 enum State4DOverview {
 	fourDDemo,
-	fourDGame,
-	fourDModel
+	fourDGame
 };
 State4DOverview state4DOverview;
 
@@ -24500,7 +24499,8 @@ enum State4DGamePlay {
 	playing4D,
 	justSucceeded4D,
 	haveSuccess4D,
-	spinningTarget4D
+	spinningTarget4D,
+	showingModel4D
 };
 State4DGamePlay state4DGamePlay;
 
