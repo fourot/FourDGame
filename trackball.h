@@ -495,4 +495,11 @@ struct Intersection4DInfo { // This struct is instantiated separately for fig an
 	struct ColValue *randomColors;	
 };
 
+struct ModelInfo {
+	struct Rotor4D modelPosn;
+	double userSpaceDist;
+	int numOfModelFaces;
+	double modelVert[MAX_4D_VERTS][3];
+};
+
 #endif // for include file recursion

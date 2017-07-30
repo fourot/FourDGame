@@ -22067,7 +22067,7 @@ struct Intersection4DInfo info4DTarg;
 struct Intersection4DInfoGeneral info4D;
 
 static int left_mouse, middle_mouse, right_mouse; // These are set true/false (GL_TRUE/GL_FALSE) depending on the current mouse state
-
+struct ModelInfo modelInfo;
 
 /*
  * This size should really be based on the distance from the center of
@@ -26322,6 +26322,8 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 	int loopsCount, loopsMin, loopsMax, loopsTot; double loopsAvg; // for debug
 
 	double minz;
+	
+	
 	switch (info4D.fig->numCells) { // This is used for drawing face numbers in stereo. It sort of works.
 		case 5: minz = -1.0; break;
 		case 8: minz = -1.0; break;
@@ -26331,6 +26333,9 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 		case 600: minz = 0.4; break;
 		default: break;
 	}
+	/////// This is to check that there is a request to output a model
+	
+	
 
 	if (i4D->iObj.cellIntersectionIndex == 0) return;
 
@@ -26488,6 +26493,13 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3DLeftEye);			
 				break;
 			default: // no stereo
+				//
+				// cellIndx is the index of the cell that this will be the model of.
+				//
+				//
+				// This is the vertex for this face that should be stored for a model.
+				// When writing a model, stereo should be suppressed
+				//
 				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);			
 				break;
 			}
