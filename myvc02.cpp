@@ -24636,7 +24636,7 @@ Fl_Button * reset3DSliders;
 Fl_Button * startAndStopGame;
 Fl_Button * startGame3D;
 Fl_Button * startGame4D;
-Fl_Button * modelling4D;
+Fl_Check_Button * modelling4D;
 Fl_Button * reset4DSliders;
 Fl_Button * reset4DSlidersE3;
 Fl_Button * reset4DSliderKey;
@@ -24767,7 +24767,18 @@ Fl_Output * accurac;
 Fl_Output * allowedError;
 Fl_Output * reqdForSoln;
 Fl_Output * finalScore;
-Fl_Group *tgAutoSolveType; 
+Fl_Group *tgAutoSolveType;
+
+
+
+Fl_Text_Display *modelFileNames;
+Fl_Text_Buffer *modelFileNamestxtbuf;
+Fl_Output *modelFileLabel;
+
+Fl_Button * modelWrite;
+Fl_Check_Button * modelTextFile;
+Fl_Check_Button * modelPDFFile;
+
 
 struct timespec gotres; // Use clock_getres
 double doublegotres;
@@ -24873,6 +24884,8 @@ FigInfo *figp[NUMBEROFFIGS] = { // Info for all the different figures.
 };
 
 Fl_Window dbg4Dwindow(450,780); // This is used to dump information during 4d play.
+Fl_Window modelwindow(490,780); // Used to control the dump of the model, if required.
+
 Fl_Window explainWelcomeWindow(500,800); // General info
 Fl_Window explain2DScoresWindow(500,800); // User info on 2D Game
 Fl_Window explain3DScoresWindow(500,800); // User info on 3D Game
@@ -26009,12 +26022,62 @@ void showRotor(struct Rotor4D * r, Fl_Output ** op) {
 
 	if (r->b.e34 != 0.0) sprintf(txt, "%9.6f", r->b.e34); else txt[0] = '\0';
 	op[6]->value(txt);
-
+ 
 	if (r->e1234 != 0.0) sprintf(txt, "%9.6f", r->e1234); else txt[0] = '\0';
 	op[7]->value(txt);
-
 }
 
+void writeModelFile() {
+	FILE *pF;
+	time_t myTime1;
+	char myStringTime1[100];
+	struct tm *tnow1;
+	int countVerts;
+	double dist;
+	int i,j,k,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber;
+
+	time(&myTime1);
+	tnow1 = localtime(&myTime1);
+
+	sprintf(myStringTime1,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.txt",
+		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
+	pF = fopen(myStringTime1,"w");
+
+	sprintf(myStringTime1,"Fourot %d-Cell model created %04d %02d %02d   %02d:%02d:%02d\n\n",
+		info4D.fig->numCells,
+		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
+	fputs(myStringTime1,pF);
+	
+	modelInfo.numOfModelEdges /= 2; // This is because edges are counted for each face, so each edge is counted twice.
+	countVerts = modelInfo.numOfModelEdges - modelInfo.numOfModelFaces + 2; // From V + F = E + 2
+	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:    %3d\nEdges:    %3d\nVertices: %3d\n\n",
+		modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,countVerts);
+	fputs(myStringTime1,pF);
+
+
+	startOfFaceIndex = 0;
+	vertexNumber = -1;
+	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+			thisVertIndex = startOfFaceIndex + j;
+			if (modelInfo.vertNum[thisVertIndex] == -1) {// If this vertex is already assigned, skip to the next vertex.
+				startSearchingIndex = startOfFaceIndex + modelInfo.vertsPerFace[i];
+				modelInfo.vertNum[thisVertIndex] = ++vertexNumber;
+				for (k = startSearchingIndex; k < modelInfo.mIndex; ++k) {
+					dist = sqrt(
+						pow(modelInfo.modelVert[thisVertIndex][0] - modelInfo.modelVert[k][0], 2) +
+						pow(modelInfo.modelVert[thisVertIndex][1] - modelInfo.modelVert[k][1], 2) +
+						pow(modelInfo.modelVert[thisVertIndex][2] - modelInfo.modelVert[k][2], 2) );
+					if (dist < 0.000001) { // These are the same vertices, so assign a vertex number.
+						modelInfo.vertNum[k] = vertexNumber;
+					}
+				}
+			}
+		}
+		startOfFaceIndex += modelInfo.vertsPerFace[i];
+	}	
+	fclose(pF);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 void drawIntersectionPlane3D(struct Intersection3DInfo *i3D,int flattened, int numbers, unsigned char * myColours){
@@ -26338,7 +26401,12 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 	
 
 	if (i4D->iObj.cellIntersectionIndex == 0) return;
-
+	
+	if (modelInfo.modelFlag) {
+		modelInfo.mIndex = 0;			// Get ready to produce a file of model details.
+		modelInfo.numOfModelFaces = 0;
+		modelInfo.numOfModelEdges = 0;
+	}
 	colsFig = figColp[currFig4D];
 	loopsMin = 1000000; loopsMax = -1000000; loopsTot= 0;
 	//if (drawFaceNumbers) sptr += sprintf(sptr," To DrawFN ");
@@ -26500,13 +26568,24 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 				// This is the vertex for this face that should be stored for a model.
 				// When writing a model, stereo should be suppressed
 				//
-				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);			
+				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);
+				if (modelInfo.modelFlag) {
+					modelInfo.modelVert[modelInfo.mIndex][0] = i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D[0];
+					modelInfo.modelVert[modelInfo.mIndex][1] = i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D[1];
+					modelInfo.modelVert[modelInfo.mIndex][2] = i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D[2];
+					modelInfo.vertNum[modelInfo.mIndex] = -1; // Initialise this for future processing when extracting the file
+					++modelInfo.mIndex;
+				}
 				break;
 			}
 			j+=2;
 		}
 		glEnd();
-
+		if (modelInfo.modelFlag) {
+			// Need to record the number vertices on each face
+			modelInfo.vertsPerFace[modelInfo.numOfModelFaces++] = numOfVertsInIntersectionFace;
+			modelInfo.numOfModelEdges += numOfVertsInIntersectionFace;
+		}
 		// Now draw the edges of the intersection
 		glColor3ub(127,127,127);
 		glLineWidth(3.0);
@@ -26635,7 +26714,12 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 		//sptr += sprintf(sptr,"\n");
 		//sprintf(txtout,"lmin=%3d, max=%4d, avg=%6.3f\n",loopsMin, loopsMax, loopsAvg); // for debug
 		//fputs(txtout,pFile);
+	}	
+	if (modelInfo.modelFlag) {
+		writeModelFile();
+		modelInfo.modelFlag = 0;
 	}
+	
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27107,6 +27191,9 @@ void redraw4D(double old_xxtime, int doStereo)
 				countdownOutput4D->color(FL_BACKGROUND_COLOR);
 				countdownOutput4D->value("");
 				countdownOutput4D->redraw();
+						
+				modelling4D->value(0);
+				modelling4D->activate();			
 
 				// The next line is so that keyboard events are not sent to the GUI once the game starts.
 				glut_window->take_focus(); /// Be very careful of this!!!!!
@@ -27425,8 +27512,6 @@ void redraw4D(double old_xxtime, int doStereo)
 			if (info4D.autosolve4D == autoSolving) {
 				
 				clock_gettime(CLOCK_REALTIME, &ltinitial);
-				
-				
 				//QueryPerformanceCounter(&tinitial); // Initialise the timer to time 5 secs to display the results.
 			}
 
@@ -27441,7 +27526,12 @@ void redraw4D(double old_xxtime, int doStereo)
 			info4D.fscore = info4D.faccuracy * info4D.fspeed;
 
 			disp4DResults();
-
+			
+			// the modelling window is only available during 4D gameplay.
+			// Ditto the model checkbox
+			modelling4D->value(0);
+			modelling4D->deactivate();	
+			modelwindow.hide();		
 			break;
 		case haveSuccess4D:
 			calcFrustum (&info4D, &info4DFig, doStereo, numbers4D->value(),radiusOf4DSphere);
@@ -27756,7 +27846,21 @@ void redraw4D(double old_xxtime, int doStereo)
 				// Do the figure on the left hand side
 				sptr += sprintf(sptr," :To draw faces 4D Playing:\n");
 				drawSurroundCircle4(&info4D, trackbI.currMouse4D[2] <= 0.0 ? 1:0, noStereo);
-				drawFaces4D(&info4DFig,numbers4D->value(),0,noStereo); // LHS solid, no face numbers when counting down
+				
+				// // This is the point where we can set the flag.
+				// // i.e. during the game, not counting down or anywhere else
+				//
+				//	If (the user has pressed the 'produce model' button) {
+				//		set the modelInfo.modelFlag = 1;
+				//		drawFaces4D(&info4DFig,numbers4D->value(),0,noStereo); // LHS solid, no face numbers when counting down
+				//		set the modelInfo.modelFlag = 0;
+				//	} else {
+				//		drawFaces4D(&info4DFig,numbers4D->value(),0,noStereo); // LHS solid, no face numbers when counting down
+				//	}				
+				
+				drawFaces4D(&info4DFig,numbers4D->value(),0,noStereo); // LHS solid, no face numbers when counting down				
+				
+				
 				if (wireFrame4D->value()) {
 					drawWireFrame4D(&info4DFig,info4D.currentCellInWireframe,noStereo); // LHS wireframe
 				}
@@ -29441,6 +29545,11 @@ void cb_writefile(Fl_Widget *w, void*)
 		pFile = 0;
 	}
 }
+void cb_modelWrite(Fl_Widget *w, void*)
+{
+	// Set the flag true so that 
+	modelInfo.modelFlag = 1;
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void set2DFigure() {
 	// Only write the figure selection to a file if we are actively playing.
@@ -30222,15 +30331,24 @@ void cb_newGame4D(Fl_Widget *w, void *param) {
 
 	//struct Bivector4D bvTemp;
 	//struct Rotor4D tempRotor;
-
+	
+	
 	startNew4D();
 	return;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_modelling4D(Fl_Widget *w, void *param) {
-// Need this to be done.
-	startNew4D();
+// TODO - Need this function be done.
+
+	if (modelling4D->value()){
+			stereo4D->value(0);
+			stereo4D->deactivate();
+			modelwindow.show();
+	} else {
+			stereo4D->activate();
+			modelwindow.hide();
+	}
 	return;
 }
 
@@ -30903,9 +31021,11 @@ int	main(int argc, char **argv)
 	startGame4D->deactivate();
 	startGame4D->callback(cb_newGame4D, (void *)1);
 	
-	modelling4D = new Fl_Button(TABXPOSITION + 880, TABYPOSITION+125, 75, 18, "Model");
+	modelling4D = new Fl_Check_Button(TABXPOSITION + 880, TABYPOSITION+125, 75, 18, "Model");
+	modelling4D->value(0);
 	modelling4D->deactivate();
 	modelling4D->callback(cb_modelling4D, (void *)1);
+
 	
 	///////////////////////////////////////////////
 
@@ -31016,6 +31136,10 @@ int	main(int argc, char **argv)
 	explain4DScoresWindow.hide();
 	explain4DScoresWindow.end();
 
+	
+
+	
+	
 
 	//dbg4Dwindow.resizable(mainWindow);
 	dbg4Dwindow.resizable(dbg4Dwindow);
@@ -31133,6 +31257,46 @@ int	main(int argc, char **argv)
 	dbg4Dwindow.hide();
 	dbg4Dwindow.end();
 
+	
+	
+	
+	
+	
+	
+
+	
+	
+
+	//modelwindow.resizable(mainWindow);
+	modelwindow.resizable(modelwindow);
+	modelwindow.label("Model information from 4D figure");
+	modelwindow.begin();
+
+	modelFileNamestxtbuf = new Fl_Text_Buffer();
+	modelFileNames = new Fl_Text_Display(10,85,470,300);
+	modelFileNames->buffer(modelFileNamestxtbuf);
+	modelFileNames->textsize(16);
+	modelFileNames->wrap_mode(4,0);
+	
+	modelPDFFile = new Fl_Check_Button(300,13,75,18,"Also create PDF File");
+
+	modelFileLabel = new Fl_Output(40,60,120,25);
+	modelFileLabel->value("Model File Name");
+	modelFileLabel->color(FL_BACKGROUND_COLOR);
+	modelFileLabel->cursor_color(FL_BACKGROUND_COLOR);
+	modelFileLabel->box(FL_NO_BOX);
+
+	modelWrite = new Fl_Button(10,10,250,30,"Create a text file of the model");
+	modelWrite->callback(cb_modelWrite);
+
+	modelwindow.hide();
+	modelwindow.end();
+
+	
+	
+	
+	
+	
 
 	glGetIntegerv(GL_VIEWPORT, viewport); // This returns the viewport into viewport
 

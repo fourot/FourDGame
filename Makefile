@@ -9,10 +9,10 @@ fourot: squarematrix.o myvc02.o
  -lXft -lfontconfig -lXinerama -lpthread -ldl -lm -lX11 \
  -o fourot
 
-myvc02.o: myvc02.cpp
+myvc02.o: myvc02.cpp trackball.h
 	g++ -c -g -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT myvc02.cpp
 
-squarematrix.o: squarematrix.cpp
+squarematrix.o: squarematrix.cpp squarematrix.h
 	g++ -c -g squarematrix.cpp
 
 clean:

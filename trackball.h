@@ -496,10 +496,15 @@ struct Intersection4DInfo { // This struct is instantiated separately for fig an
 };
 
 struct ModelInfo {
-	struct Rotor4D modelPosn;
-	double userSpaceDist;
+	int modelFlag; // Set this true if a file of the 4D figure is needed
+	int mIndex;
 	int numOfModelFaces;
+	int numOfModelEdges;
+	int vertsPerFace[MAX_4D_VERTS];
 	double modelVert[MAX_4D_VERTS][3];
+	int edgeNum[MAX_4D_VERTS];
+	int vertNum[MAX_4D_VERTS];
+	struct Rotor4D modelPosn;
 };
 
 #endif // for include file recursion
