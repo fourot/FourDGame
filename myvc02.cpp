@@ -26026,6 +26026,22 @@ void showRotor(struct Rotor4D * r, Fl_Output ** op) {
 	if (r->e1234 != 0.0) sprintf(txt, "%9.6f", r->e1234); else txt[0] = '\0';
 	op[7]->value(txt);
 }
+int checkEdgeCoincidence(int vert1, int vert2, int poss1, int poss2) {
+	// returns 1 if the first 2 parameters, in any order, match the second two parameters, in any order.
+	if (poss1 == vert1) {
+		if (poss2 == vert2) {
+			return 1;
+		}
+	} else {
+		if (poss1 == vert2) {
+			if (poss2 == vert1) {
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 
 void writeModelFile() {
 	FILE *pF;
@@ -26034,8 +26050,9 @@ void writeModelFile() {
 	struct tm *tnow1;
 	int countVerts;
 	double dist;
-	int i,j,k,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber;
-
+	int i,j,k,l,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber,edgeNumber;
+	int thisVert1,thisVert2,possibleVert1,possibleVert2; // Used to discover common edges
+	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
 
@@ -26060,6 +26077,7 @@ void writeModelFile() {
 	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			thisVertIndex = startOfFaceIndex + j;
+			
 			if (modelInfo.vertNum[thisVertIndex] == -1) {// If this vertex is already assigned, skip to the next vertex.
 				startSearchingIndex = startOfFaceIndex + modelInfo.vertsPerFace[i];
 				modelInfo.vertNum[thisVertIndex] = ++vertexNumber;
@@ -26068,15 +26086,72 @@ void writeModelFile() {
 						pow(modelInfo.modelVert[thisVertIndex][0] - modelInfo.modelVert[k][0], 2) +
 						pow(modelInfo.modelVert[thisVertIndex][1] - modelInfo.modelVert[k][1], 2) +
 						pow(modelInfo.modelVert[thisVertIndex][2] - modelInfo.modelVert[k][2], 2) );
-					if (dist < 0.000001) { // These are the same vertices, so assign a vertex number.
+					if (dist < 0.00000001) { // These are the same vertices, so assign a vertex number.
 						modelInfo.vertNum[k] = vertexNumber;
 					}
 				}
 			}
+			
 		}
 		startOfFaceIndex += modelInfo.vertsPerFace[i];
-	}	
+	}
+	// At this point we have worked out the common vertices
+	// Now to work out the edges from the common vertices
+	// Each edge will appear twice.
+
+	for (i = 0; i < modelInfo.mIndex; ++i) { // initialise the edge numbers
+		modelInfo.edgeNum[i] = -1;
+	}
+
+	startOfFaceIndex = 0;
+	edgeNumber = -1;
+	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+			thisVertIndex = startOfFaceIndex + j;
+			
+			if (modelInfo.edgeNum[thisVertIndex] == -1) { // Ignore if this edge is already processed
+				modelInfo.edgeNum[thisVertIndex] = ++edgeNumber;
+				// If we are at the last vertex for this face, we need to connect to the first vertex to create an edge.
+				
+				thisVert1 = modelInfo.vertNum[thisVertIndex];
+				thisVert2 = (j == modelInfo.vertsPerFace[i] - 1 ? modelInfo.vertNum[startOfFaceIndex] : modelInfo.vertNum[thisVertIndex+1]);
+
+				edgeSearchFinished = 0;
+				startSearchEdgeIndex = startOfFaceIndex + modelInfo.vertsPerFace[i];
+				for (currSearchFaceNum = i+1; currSearchFaceNum < modelInfo.numOfModelFaces; ++currSearchFaceNum) {
+					if (edgeSearchFinished)
+						break;
+					for (k = 0; k < modelInfo.vertsPerFace[currSearchFaceNum]; ++k) {
+						if (modelInfo.edgeNum[startSearchEdgeIndex + k] == -1) {
+							// This edge is not yet processed
+							possibleVert1 = modelInfo.vertNum[startSearchEdgeIndex + k];							
+							if (possibleVert1 == thisVert1 || possibleVert1 == thisVert2) {
+								possibleVert2 = (k == modelInfo.vertsPerFace[currSearchFaceNum] - 1 ?
+									modelInfo.vertNum[startSearchEdgeIndex] :
+									modelInfo.vertNum[startSearchEdgeIndex + k + 1]);
+								if (possibleVert2 == thisVert1 || possibleVert2 == thisVert2) {
+									modelInfo.edgeNum[startSearchEdgeIndex + k] = edgeNumber;
+									edgeSearchFinished = 1;
+									break;
+								}
+							}
+						}
+					}
+					if (!edgeSearchFinished) {
+						startSearchEdgeIndex += modelInfo.vertsPerFace[currSearchFaceNum];
+					}		
+				}
+				if (!edgeSearchFinished) {
+					k = 1/edgeSearchFinished;
+					// There is a bug in the program
+				}
+
+			}
+		}
+		startOfFaceIndex += modelInfo.vertsPerFace[i];
+	}		
 	fclose(pF);
+	return;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

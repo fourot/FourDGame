@@ -501,9 +501,9 @@ struct ModelInfo {
 	int numOfModelFaces;
 	int numOfModelEdges;
 	int vertsPerFace[MAX_4D_VERTS];
-	double modelVert[MAX_4D_VERTS][3];
 	int edgeNum[MAX_4D_VERTS];
 	int vertNum[MAX_4D_VERTS];
+	double modelVert[MAX_4D_VERTS][3];
 	struct Rotor4D modelPosn;
 };
 
