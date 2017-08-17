@@ -26026,27 +26026,27 @@ void showRotor(struct Rotor4D * r, Fl_Output ** op) {
 	if (r->e1234 != 0.0) sprintf(txt, "%9.6f", r->e1234); else txt[0] = '\0';
 	op[7]->value(txt);
 }
-int checkEdgeCoincidence(int vert1, int vert2, int poss1, int poss2) {
-	// returns 1 if the first 2 parameters, in any order, match the second two parameters, in any order.
-	if (poss1 == vert1) {
-		if (poss2 == vert2) {
-			return 1;
-		}
-	} else {
-		if (poss1 == vert2) {
-			if (poss2 == vert1) {
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
 
+//int checkEdgeCoincidence(int vert1, int vert2, int poss1, int poss2) {
+	//// returns 1 if the first 2 parameters, in any order, match the second two parameters, in any order.
+	//if (poss1 == vert1) {
+		//if (poss2 == vert2) {
+			//return 1;
+		//}
+	//} else {
+		//if (poss1 == vert2) {
+			//if (poss2 == vert1) {
+				//return 1;
+			//}
+		//}
+	//}
+	//return 0;
+//}
 
 void writeModelFile() {
 	FILE *pF;
 	time_t myTime1;
-	char myStringTime1[100];
+	char myStringTime1[200];
 	struct tm *tnow1;
 	int countVerts;
 	double dist;
@@ -26055,6 +26055,8 @@ void writeModelFile() {
 	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
+	
+	// ModelInfo.mindex has twice the number number of edges in the model (ie modelINfo.numOfModelEdges)
 
 	sprintf(myStringTime1,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.txt",
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
@@ -26067,14 +26069,15 @@ void writeModelFile() {
 	
 	modelInfo.numOfModelEdges /= 2; // This is because edges are counted for each face, so each edge is counted twice.
 	countVerts = modelInfo.numOfModelEdges - modelInfo.numOfModelFaces + 2; // From V + F = E + 2
-	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:    %3d\nEdges:    %3d\nVertices: %3d\n\n",
-		modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,countVerts);
+	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:    %3d        F1 - F%d\nEdges:    %3d        E1 - E%d\nVertices: %3d        V1 - V%d\n\n",
+		modelInfo.numOfModelFaces,modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,modelInfo.numOfModelEdges,countVerts,countVerts);
 	fputs(myStringTime1,pF);
 
-
+	// This loop identifies vertices which are the same, i.e. vertices shared by different faces.
 	startOfFaceIndex = 0;
 	vertexNumber = -1;
 	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
+		modelInfo.faceStartIndex[i] = startOfFaceIndex;
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			thisVertIndex = startOfFaceIndex + j;
 			
@@ -26096,28 +26099,39 @@ void writeModelFile() {
 		startOfFaceIndex += modelInfo.vertsPerFace[i];
 	}
 	// At this point we have worked out the common vertices
-	// Now to work out the edges from the common vertices
+	// Now to work out the common edges from the common vertices
 	// Each edge will appear twice.
 
 	for (i = 0; i < modelInfo.mIndex; ++i) { // initialise the edge numbers
 		modelInfo.edgeNum[i] = -1;
 	}
+	
+	//// Initialise the edge to face matrix
+	//for (i=0; i < modelInfo.numOfModelEdges; ++i) {//Initialise to -1
+		//modelInfo.edgeToFaceModel[i][0] = -1;
+		//modelInfo.edgeToFaceModel[i][1] = -1;
+	//}
 
-	startOfFaceIndex = 0;
+	//startOfFaceIndex = 0;
 	edgeNumber = -1;
 	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
-			thisVertIndex = startOfFaceIndex + j;
+			//thisVertIndex = startOfFaceIndex + j;
+			thisVertIndex = modelInfo.faceStartIndex[i] + j;
 			
 			if (modelInfo.edgeNum[thisVertIndex] == -1) { // Ignore if this edge is already processed
 				modelInfo.edgeNum[thisVertIndex] = ++edgeNumber;
 				// If we are at the last vertex for this face, we need to connect to the first vertex to create an edge.
 				
 				thisVert1 = modelInfo.vertNum[thisVertIndex];
-				thisVert2 = (j == modelInfo.vertsPerFace[i] - 1 ? modelInfo.vertNum[startOfFaceIndex] : modelInfo.vertNum[thisVertIndex+1]);
+				thisVert2 = (j == modelInfo.vertsPerFace[i] - 1 ?
+					modelInfo.vertNum[modelInfo.faceStartIndex[i]] : modelInfo.vertNum[thisVertIndex+1]);
+				//thisVert2 = (j == modelInfo.vertsPerFace[i] - 1 ? modelInfo.vertNum[startOfFaceIndex] : modelInfo.vertNum[thisVertIndex+1]);
 
 				edgeSearchFinished = 0;
-				startSearchEdgeIndex = startOfFaceIndex + modelInfo.vertsPerFace[i];
+				startSearchEdgeIndex = modelInfo.faceStartIndex[i+1];
+				//startSearchEdgeIndex = modelInfo.faceStartIndex[i] + modelInfo.vertsPerFace[i];
+				//startSearchEdgeIndex = startOfFaceIndex + modelInfo.vertsPerFace[i];
 				for (currSearchFaceNum = i+1; currSearchFaceNum < modelInfo.numOfModelFaces; ++currSearchFaceNum) {
 					if (edgeSearchFinished)
 						break;
@@ -26131,6 +26145,11 @@ void writeModelFile() {
 									modelInfo.vertNum[startSearchEdgeIndex + k + 1]);
 								if (possibleVert2 == thisVert1 || possibleVert2 == thisVert2) {
 									modelInfo.edgeNum[startSearchEdgeIndex + k] = edgeNumber;
+									
+									// At this point, face number currSearchFaceNum is known to contain edge edgeNumber
+									// also face number i contains the edge.
+									modelInfo.edgeToFaceModel[edgeNumber][0] = i;
+									modelInfo.edgeToFaceModel[edgeNumber][1] = currSearchFaceNum;
 									edgeSearchFinished = 1;
 									break;
 								}
@@ -26142,14 +26161,25 @@ void writeModelFile() {
 					}		
 				}
 				if (!edgeSearchFinished) {
-					k = 1/edgeSearchFinished;
-					// There is a bug in the program
+					k = 1/edgeSearchFinished; // There is a bug in the program, This shouldn't happen
 				}
 
 			}
 		}
-		startOfFaceIndex += modelInfo.vertsPerFace[i];
-	}		
+		//startOfFaceIndex += modelInfo.vertsPerFace[i];
+	}
+	for (i = 0; i < 10; ++i) {modelInfo.vertFreq[i]=0;} // For counting the number of sides in each face
+	modelInfo.maxVertFreq = 0;
+	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
+		modelInfo.vertFreq[modelInfo.vertsPerFace[i]-1]++;
+		if (modelInfo.vertsPerFace[i] > modelInfo.maxVertFreq)
+			modelInfo.maxVertFreq = modelInfo.vertsPerFace[i];
+	}
+	for (i = 2; i < modelInfo.maxVertFreq; ++i) {
+		sprintf(myStringTime1,"Number of faces with %2d sides is %3d\n", i+1 , modelInfo.vertFreq[i]);
+		fputs(myStringTime1,pF);
+	}
+		
 	fclose(pF);
 	return;
 }
