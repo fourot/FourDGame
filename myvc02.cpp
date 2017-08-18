@@ -26047,10 +26047,12 @@ void writeModelFile() {
 	FILE *pF;
 	time_t myTime1;
 	char myStringTime1[200];
+	char *ptr;
 	struct tm *tnow1;
 	int countVerts;
 	double dist;
-	int i,j,k,l,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber,edgeNumber;
+	int i,j,k,v1,v2,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber,edgeNumber;
+	int prevVertex;
 	int thisVert1,thisVert2,possibleVert1,possibleVert2; // Used to discover common edges
 	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
 	time(&myTime1);
@@ -26072,6 +26074,10 @@ void writeModelFile() {
 	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:    %3d        F1 - F%d\nEdges:    %3d        E1 - E%d\nVertices: %3d        V1 - V%d\n\n",
 		modelInfo.numOfModelFaces,modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,modelInfo.numOfModelEdges,countVerts,countVerts);
 	fputs(myStringTime1,pF);
+
+
+
+
 
 	// This loop identifies vertices which are the same, i.e. vertices shared by different faces.
 	startOfFaceIndex = 0;
@@ -26098,6 +26104,19 @@ void writeModelFile() {
 		}
 		startOfFaceIndex += modelInfo.vertsPerFace[i];
 	}
+	
+	//ptr = myStringTime1;
+	for (thisVertIndex = 0; thisVertIndex < modelInfo.mIndex; ++thisVertIndex) {
+		sprintf(myStringTime1,"thisVertIndex=%3d Vertnum=%3d %14.10f %14.10f %14.10f\n",thisVertIndex,
+		modelInfo.vertNum[thisVertIndex],
+		modelInfo.modelVert[thisVertIndex][0],
+		modelInfo.modelVert[thisVertIndex][1],
+		modelInfo.modelVert[thisVertIndex][2]);
+		fputs(myStringTime1,pF);		
+	}
+	
+	
+	
 	// At this point we have worked out the common vertices
 	// Now to work out the common edges from the common vertices
 	// Each edge will appear twice.
@@ -26106,67 +26125,67 @@ void writeModelFile() {
 		modelInfo.edgeNum[i] = -1;
 	}
 	
-	//// Initialise the edge to face matrix
-	//for (i=0; i < modelInfo.numOfModelEdges; ++i) {//Initialise to -1
-		//modelInfo.edgeToFaceModel[i][0] = -1;
-		//modelInfo.edgeToFaceModel[i][1] = -1;
-	//}
-
-	//startOfFaceIndex = 0;
-	edgeNumber = -1;
-	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
-		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
-			//thisVertIndex = startOfFaceIndex + j;
-			thisVertIndex = modelInfo.faceStartIndex[i] + j;
+	edgeNumber = -1; // Initialise this so that numbers start from zero.
+	for (i=0; i < modelInfo.numOfModelFaces; ++i) { // outer loop round each face
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // for each face, create the edges from adjacent vertices
+			thisVertIndex = modelInfo.faceStartIndex[i] + j; // This is the first vertex to be looked at
 			
-			if (modelInfo.edgeNum[thisVertIndex] == -1) { // Ignore if this edge is already processed
-				modelInfo.edgeNum[thisVertIndex] = ++edgeNumber;
-				// If we are at the last vertex for this face, we need to connect to the first vertex to create an edge.
-				
+			// - 1 in the following line indicates 'not yet processed'
+			if (modelInfo.edgeNum[thisVertIndex] == -1) { // Only process this vertex if the edge not yet processed
+				modelInfo.edgeNum[thisVertIndex] = ++edgeNumber; // We have found the first vertex of an edge, so get a new edge number
 				thisVert1 = modelInfo.vertNum[thisVertIndex];
+				// If we are at the last vertex for this face, we need to connect to the first vertex to create an edge.
 				thisVert2 = (j == modelInfo.vertsPerFace[i] - 1 ?
 					modelInfo.vertNum[modelInfo.faceStartIndex[i]] : modelInfo.vertNum[thisVertIndex+1]);
-				//thisVert2 = (j == modelInfo.vertsPerFace[i] - 1 ? modelInfo.vertNum[startOfFaceIndex] : modelInfo.vertNum[thisVertIndex+1]);
-
-				edgeSearchFinished = 0;
-				startSearchEdgeIndex = modelInfo.faceStartIndex[i+1];
-				//startSearchEdgeIndex = modelInfo.faceStartIndex[i] + modelInfo.vertsPerFace[i];
-				//startSearchEdgeIndex = startOfFaceIndex + modelInfo.vertsPerFace[i];
+				// Now we have found the vertices of an edge (namely thisvert1 and thisvert2).
+				// Search the remainder of the figure for a matching edge. There must be one since each edge
+				// is shared by two faces.
+				edgeSearchFinished = 0; // initialise the flag that signals that the matching edge is foud.
+				startSearchEdgeIndex = modelInfo.faceStartIndex[i+1]; // Sets where to start searching for a matching edge, i.e. the next face
 				for (currSearchFaceNum = i+1; currSearchFaceNum < modelInfo.numOfModelFaces; ++currSearchFaceNum) {
 					if (edgeSearchFinished)
 						break;
 					for (k = 0; k < modelInfo.vertsPerFace[currSearchFaceNum]; ++k) {
+
+						// startSearchEdgeIndex + k is modelInfo.faceStartIndex[currSearchFaceNum] + k
+						// strictly speaking, 'startSearchEdgeIndex ' could be deleted, but it works, so I keep it.
 						if (modelInfo.edgeNum[startSearchEdgeIndex + k] == -1) {
+
 							// This edge is not yet processed
+							// Look at the next edge to be checked (which is possiblevert1 and possiblevert2)
+							// and see if it is the same as the original edge (thisvert1 and thisvert2)
 							possibleVert1 = modelInfo.vertNum[startSearchEdgeIndex + k];							
 							if (possibleVert1 == thisVert1 || possibleVert1 == thisVert2) {
+								// OK, possiblevert1 matches
 								possibleVert2 = (k == modelInfo.vertsPerFace[currSearchFaceNum] - 1 ?
 									modelInfo.vertNum[startSearchEdgeIndex] :
 									modelInfo.vertNum[startSearchEdgeIndex + k + 1]);
 								if (possibleVert2 == thisVert1 || possibleVert2 == thisVert2) {
+									// OK, possiblevert2 matches, so we have found the matching edge.
 									modelInfo.edgeNum[startSearchEdgeIndex + k] = edgeNumber;
-									
-									// At this point, face number currSearchFaceNum is known to contain edge edgeNumber
-									// also face number i contains the edge.
+									// So now we have found an edge and the two faces that share it
+									// The edge is 'edgeNumber'
+									// The two faces are 'i' and 'currSearchFaceNum'
 									modelInfo.edgeToFaceModel[edgeNumber][0] = i;
 									modelInfo.edgeToFaceModel[edgeNumber][1] = currSearchFaceNum;
-									edgeSearchFinished = 1;
+									edgeSearchFinished = 1; // flag the end of processing for this face.
 									break;
 								}
 							}
 						}
 					}
 					if (!edgeSearchFinished) {
+						// We didnt find the matching edge on the face just finished, so bump up the index in preparation
+						// for looking at the next face. 
 						startSearchEdgeIndex += modelInfo.vertsPerFace[currSearchFaceNum];
 					}		
 				}
 				if (!edgeSearchFinished) {
-					k = 1/edgeSearchFinished; // There is a bug in the program, This shouldn't happen
+					k = 1/edgeSearchFinished; // If this happens, there is a bug in the program. We MUST find the matching edge!
 				}
 
 			}
 		}
-		//startOfFaceIndex += modelInfo.vertsPerFace[i];
 	}
 	for (i = 0; i < 10; ++i) {modelInfo.vertFreq[i]=0;} // For counting the number of sides in each face
 	modelInfo.maxVertFreq = 0;
@@ -26178,6 +26197,58 @@ void writeModelFile() {
 	for (i = 2; i < modelInfo.maxVertFreq; ++i) {
 		sprintf(myStringTime1,"Number of faces with %2d sides is %3d\n", i+1 , modelInfo.vertFreq[i]);
 		fputs(myStringTime1,pF);
+	}
+	
+	for (i = 0; i < modelInfo.numOfModelFaces; ++i) {
+		ptr = myStringTime1;
+		ptr += sprintf(ptr,"\n\nDetails for face F%-3d\nFace F%-3d has edges ", i+1,i+1);
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+			ptr += sprintf(ptr, " E%-4d",modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j] + 1);
+		}
+		ptr += sprintf(ptr,"\nWhich adjoin faces  ");
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+			k = modelInfo.edgeToFaceModel[modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j]][0];
+			if (k == i) {
+				// We don't want to duplicate the current face, we want the adjoining face
+				k = modelInfo.edgeToFaceModel[modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j]][1];
+			}
+			ptr += sprintf(ptr, " F%-4d",k + 1);
+		}
+		ptr += sprintf(ptr,"\n");
+		fputs(myStringTime1,pF);
+		// Now to output the fine details of each fig.
+		// The face index is i (hence the face number as printed is i+1)
+		
+		prevVertex = -1;
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+			ptr = myStringTime1;
+			v1 = modelInfo.faceStartIndex[i] + j;
+			v2 = (j == modelInfo.vertsPerFace[i] - 1) ? modelInfo.faceStartIndex[i] : v1 + 1;
+			edgeNumber = modelInfo.edgeNum[ v1]; // This just saves a bit of typing
+			ptr += sprintf(ptr,"E%-3d has length ",edgeNumber+1);
+			
+			thisVert1 = modelInfo.vertNum[ v1]; // Get the first vertex of the edge
+			//k = (j == modelInfo.vertsPerFace[i] - 1) ? modelInfo.faceStartIndex[i] : modelInfo.faceStartIndex[i] + j + 1;
+			thisVert2 = modelInfo.vertNum[v2];
+			// We now have the indices of the two vertices of the edge: thisVert1 and thisVert2.
+			dist = sqrt(pow(modelInfo.modelVert[v1][0] - modelInfo.modelVert[v2][0], 2) +
+						pow(modelInfo.modelVert[v1][1] - modelInfo.modelVert[v2][1], 2) +
+						pow(modelInfo.modelVert[v1][2] - modelInfo.modelVert[v2][2], 2) );
+			ptr += sprintf(ptr, "%13.10f  V%-3d - V%-3d\n",dist,thisVert1+1,thisVert2+1);
+			fputs(myStringTime1,pF);
+			if (dist < 0.00000001) {
+				ptr = myStringTime1;
+				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f\n",thisVert1+1,
+					modelInfo.modelVert[v1][0],
+					modelInfo.modelVert[v1][1],
+					modelInfo.modelVert[v1][2]);
+				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f\n",thisVert2+1,
+					modelInfo.modelVert[v2][0],
+					modelInfo.modelVert[v2][1],
+					modelInfo.modelVert[v2][2]);
+				fputs(myStringTime1,pF);
+			}			
+		}	
 	}
 		
 	fclose(pF);
