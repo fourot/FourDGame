@@ -22358,12 +22358,6 @@ int mytrackball3D(struct trackballInfo *ti, enum StateMouseState *mouseState)
 	int leavePreviousValuesAlone = 0; // by default, we will update the previous values
 	ti->rotangle = 0.0; // By default, there is no rotation
 
-//	time(&tmyTime);
-//	ttnow = localtime(&tmyTime);
-	//ptr += sprintf(ptr,"%02d:%02d:%02d Trackball3D Prevxyz %8.4f %8.4f %8.4f currxy %8.4f %8.4f %8.4f mouseState ",
-	//	ttnow->tm_hour,ttnow->tm_min,ttnow->tm_sec,
-	//	ti->prevxyz[0],ti->prevxyz[1],ti->prevxyz[2],ti->currentxyz[0],ti->currentxyz[1],ti->currentxyz[2], *mouseState);
-
 	ti->myquat[0] = 1.0; // Set the quaternion to indicate no rotation.
 
 	switch(*mouseState) {
@@ -26026,23 +26020,11 @@ void showRotor(struct Rotor4D * r, Fl_Output ** op) {
 	if (r->e1234 != 0.0) sprintf(txt, "%9.6f", r->e1234); else txt[0] = '\0';
 	op[7]->value(txt);
 }
-
-//int checkEdgeCoincidence(int vert1, int vert2, int poss1, int poss2) {
-	//// returns 1 if the first 2 parameters, in any order, match the second two parameters, in any order.
-	//if (poss1 == vert1) {
-		//if (poss2 == vert2) {
-			//return 1;
-		//}
-	//} else {
-		//if (poss1 == vert2) {
-			//if (poss2 == vert1) {
-				//return 1;
-			//}
-		//}
-	//}
-	//return 0;
-//}
-
+void nextModelVert(int faceNum, int faceVert, int *prevVert, int *thisVert, int *nextVert) {
+	*thisVert = modelInfo.faceStartIndex[faceNum] + faceVert;
+	*nextVert = (faceVert == modelInfo.vertsPerFace[faceNum] - 1) ? modelInfo.faceStartIndex[faceNum] : *thisVert + 1;
+	*prevVert = (faceVert == 0) ? modelInfo.faceStartIndex[faceNum] + modelInfo.vertsPerFace[faceNum] - 1: *thisVert - 1;
+}
 void writeModelFile() {
 	FILE *pF;
 	time_t myTime1;
@@ -26050,11 +26032,13 @@ void writeModelFile() {
 	char *ptr;
 	struct tm *tnow1;
 	int countVerts;
-	double dist;
-	int i,j,k,v1,v2,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber,edgeNumber;
+	double edge1[3], edge2[3];
+	double dist,dotprod,intAng,extAng,sumAng;
+	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber,edgeNumber;
 	int prevVertex;
-	int thisVert1,thisVert2,possibleVert1,possibleVert2; // Used to discover common edges
+	int thisVert1,thisVert2,possibleVert1,possibleVert2,thisVertPrev; // Used to discover common edges
 	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
+	
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
 	
@@ -26074,9 +26058,6 @@ void writeModelFile() {
 	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:    %3d        F1 - F%d\nEdges:    %3d        E1 - E%d\nVertices: %3d        V1 - V%d\n\n",
 		modelInfo.numOfModelFaces,modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,modelInfo.numOfModelEdges,countVerts,countVerts);
 	fputs(myStringTime1,pF);
-
-
-
 
 
 	// This loop identifies vertices which are the same, i.e. vertices shared by different faces.
@@ -26105,16 +26086,17 @@ void writeModelFile() {
 		startOfFaceIndex += modelInfo.vertsPerFace[i];
 	}
 	
-	//ptr = myStringTime1;
-	for (thisVertIndex = 0; thisVertIndex < modelInfo.mIndex; ++thisVertIndex) {
-		sprintf(myStringTime1,"thisVertIndex=%3d Vertnum=%3d %14.10f %14.10f %14.10f\n",thisVertIndex,
-		modelInfo.vertNum[thisVertIndex],
-		modelInfo.modelVert[thisVertIndex][0],
-		modelInfo.modelVert[thisVertIndex][1],
-		modelInfo.modelVert[thisVertIndex][2]);
-		fputs(myStringTime1,pF);		
-	}
-	
+	if (0) { //Dump the vertices if debugging
+		//ptr = myStringTime1;
+		for (thisVertIndex = 0; thisVertIndex < modelInfo.mIndex; ++thisVertIndex) {
+			sprintf(myStringTime1,"thisVertIndex=%3d Vertnum=%3d %14.10f %14.10f %14.10f\n",thisVertIndex,
+			modelInfo.vertNum[thisVertIndex],
+			modelInfo.modelVert[thisVertIndex][0],
+			modelInfo.modelVert[thisVertIndex][1],
+			modelInfo.modelVert[thisVertIndex][2]);
+			fputs(myStringTime1,pF);		
+		}
+	}	
 	
 	
 	// At this point we have worked out the common vertices
@@ -26148,10 +26130,10 @@ void writeModelFile() {
 					for (k = 0; k < modelInfo.vertsPerFace[currSearchFaceNum]; ++k) {
 
 						// startSearchEdgeIndex + k is modelInfo.faceStartIndex[currSearchFaceNum] + k
-						// strictly speaking, 'startSearchEdgeIndex ' could be deleted, but it works, so I keep it.
+						// strictly speaking, 'startSearchEdgeIndex ' could be deleted, but it works, so I'm not going to fix it.
 						if (modelInfo.edgeNum[startSearchEdgeIndex + k] == -1) {
 
-							// This edge is not yet processed
+							// This edge is not yet processed, so we proceed to check it
 							// Look at the next edge to be checked (which is possiblevert1 and possiblevert2)
 							// and see if it is the same as the original edge (thisvert1 and thisvert2)
 							possibleVert1 = modelInfo.vertNum[startSearchEdgeIndex + k];							
@@ -26199,6 +26181,7 @@ void writeModelFile() {
 		fputs(myStringTime1,pF);
 	}
 	
+	
 	for (i = 0; i < modelInfo.numOfModelFaces; ++i) {
 		ptr = myStringTime1;
 		ptr += sprintf(ptr,"\n\nDetails for face F%-3d\nFace F%-3d has edges ", i+1,i+1);
@@ -26219,38 +26202,57 @@ void writeModelFile() {
 		// Now to output the fine details of each fig.
 		// The face index is i (hence the face number as printed is i+1)
 		
-		prevVertex = -1;
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			ptr = myStringTime1;
-			v1 = modelInfo.faceStartIndex[i] + j;
-			v2 = (j == modelInfo.vertsPerFace[i] - 1) ? modelInfo.faceStartIndex[i] : v1 + 1;
-			edgeNumber = modelInfo.edgeNum[ v1]; // This just saves a bit of typing
+			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
+			edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
 			ptr += sprintf(ptr,"E%-3d has length ",edgeNumber+1);
 			
-			thisVert1 = modelInfo.vertNum[ v1]; // Get the first vertex of the edge
-			//k = (j == modelInfo.vertsPerFace[i] - 1) ? modelInfo.faceStartIndex[i] : modelInfo.faceStartIndex[i] + j + 1;
-			thisVert2 = modelInfo.vertNum[v2];
+			thisVert1 = modelInfo.vertNum[vt]; // Get the first vertex of the edge
+			thisVert2 = modelInfo.vertNum[vn];
 			// We now have the indices of the two vertices of the edge: thisVert1 and thisVert2.
-			dist = sqrt(pow(modelInfo.modelVert[v1][0] - modelInfo.modelVert[v2][0], 2) +
-						pow(modelInfo.modelVert[v1][1] - modelInfo.modelVert[v2][1], 2) +
-						pow(modelInfo.modelVert[v1][2] - modelInfo.modelVert[v2][2], 2) );
+			dist = sqrt(pow(modelInfo.modelVert[vt][0] - modelInfo.modelVert[vn][0], 2) +
+						pow(modelInfo.modelVert[vt][1] - modelInfo.modelVert[vn][1], 2) +
+						pow(modelInfo.modelVert[vt][2] - modelInfo.modelVert[vn][2], 2) );
 			ptr += sprintf(ptr, "%13.10f  V%-3d - V%-3d\n",dist,thisVert1+1,thisVert2+1);
 			fputs(myStringTime1,pF);
-			if (dist < 0.00000001) {
+			if (dist < 0.00000001) { // Something is wrong, so dump the vertex details. (used for debugging)
 				ptr = myStringTime1;
 				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f\n",thisVert1+1,
-					modelInfo.modelVert[v1][0],
-					modelInfo.modelVert[v1][1],
-					modelInfo.modelVert[v1][2]);
+					modelInfo.modelVert[vt][0],	modelInfo.modelVert[vt][1],	modelInfo.modelVert[vt][2]);
 				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f\n",thisVert2+1,
-					modelInfo.modelVert[v2][0],
-					modelInfo.modelVert[v2][1],
-					modelInfo.modelVert[v2][2]);
+					modelInfo.modelVert[vn][0],	modelInfo.modelVert[vn][1],	modelInfo.modelVert[vn][2]);
 				fputs(myStringTime1,pF);
-			}			
-		}	
-	}
-		
+			}
+		}
+
+		// Now to do details of the angles
+		sumAng = 0.0;
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+			ptr = myStringTime1;
+			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
+			thisVert1 =    modelInfo.vertNum[vt]; // Get the first vertex of the edge
+			thisVert2 =    modelInfo.vertNum[vn];
+			thisVertPrev = modelInfo.vertNum[vp];
+
+			ptr += sprintf(ptr,"Angle between edges E%-3d E%-3d  (V%-3d V%-3d V%-3d) ",
+				modelInfo.edgeNum[vp]+1,modelInfo.edgeNum[vt]+1,thisVertPrev+1,thisVert1+1,thisVert2+1);
+			
+			vsub3(modelInfo.modelVert[vt], modelInfo.modelVert[vp], edge1);
+			myNormaliseVector3D(edge1);
+			vsub3(modelInfo.modelVert[vn], modelInfo.modelVert[vt], edge2);
+			myNormaliseVector3D(edge2);
+			
+			dotprod = vdot3(edge1,edge2);
+			extAng = acos(dotprod)*M_RADIANS_TO_DEGREES; //
+			intAng = 180.0 - extAng;
+			sumAng += extAng;
+			ptr += sprintf(ptr, "Internal %11.7f  External %11.7f degrees\n",intAng,extAng);
+			fputs(myStringTime1,pF);
+		}
+		sprintf(myStringTime1,"Sum of external angles is %11.7f (should be 360 degrees)\n",sumAng);
+		fputs(myStringTime1,pF);
+	}		
 	fclose(pF);
 	return;
 }
