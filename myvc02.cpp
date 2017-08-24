@@ -89,6 +89,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <setjmp.h>
 #include <sys/types.h>
 #include <time.h>
 #include <sys/timeb.h>
@@ -98,6 +99,8 @@
 #include <assert.h>
 #include "squarematrix.h"
 #include "trackball.h"
+#include "hpdf.h"
+//#include "grid_sheet.h"
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // figdata.c Generated on Sun May 14 18:08:50 2017
 // typedef struct figInfo {
@@ -22087,8 +22090,18 @@ void createQuatFor3DRotation(double *axis, double angle, double *quat);
 double correctAngle(double oldAngle);
 void projectOnePoint4Dto3D(double *v4D, double *v3D, double dPersp);
 void projectOnePoint4Dto3DStereo2(double *v4D, double *v3DLeft, double *v3DRight, double dPersp, double eyex);
+
+// Error handler as per the libharu documentation.
+jmp_buf env;
+//HPDF_Doc pdf;
+void error_handler (HPDF_STATUS error_no, HPDF_STATUS detail_no, void *user_data)
+{
+    printf ("ERROR: error_no=%04X, detail_no=%d\n",
+      (unsigned int) error_no, (int) detail_no);
+    longjmp (env, 1); /* invoke longjmp() on error */
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
+void 
 vzero3(double *v)
 {
     v[0] = 0.0;
@@ -26020,15 +26033,18 @@ void showRotor(struct Rotor4D * r, Fl_Output ** op) {
 	if (r->e1234 != 0.0) sprintf(txt, "%9.6f", r->e1234); else txt[0] = '\0';
 	op[7]->value(txt);
 }
+
 void nextModelVert(int faceNum, int faceVert, int *prevVert, int *thisVert, int *nextVert) {
 	*thisVert = modelInfo.faceStartIndex[faceNum] + faceVert;
 	*nextVert = (faceVert == modelInfo.vertsPerFace[faceNum] - 1) ? modelInfo.faceStartIndex[faceNum] : *thisVert + 1;
 	*prevVert = (faceVert == 0) ? modelInfo.faceStartIndex[faceNum] + modelInfo.vertsPerFace[faceNum] - 1: *thisVert - 1;
 }
+
 void writeModelFile() {
 	FILE *pF;
 	time_t myTime1;
 	char myStringTime1[200];
+	char pdfName[50];
 	char *ptr;
 	struct tm *tnow1;
 	int countVerts;
@@ -26038,20 +26054,73 @@ void writeModelFile() {
 	int prevVertex;
 	int thisVert1,thisVert2,possibleVert1,possibleVert2,thisVertPrev; // Used to discover common edges
 	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
+	HPDF_Doc pdf;
+	HPDF_Page page;
+	HPDF_Point pos;
+	HPDF_REAL page_height;
+	float tw;
+    HPDF_Font font;
+
 	
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
 	
-	// ModelInfo.mindex has twice the number number of edges in the model (ie modelINfo.numOfModelEdges)
+	// ModelInfo.mindex has twice the number number of edges in the model (i.e. modelINfo.numOfModelEdges)
 
 	sprintf(myStringTime1,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.txt",
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
 	pF = fopen(myStringTime1,"w");
+	
+	//
+	pdf = HPDF_New(error_handler,NULL);
+	if (!pdf) {
+		printf("error: cannot create PdfDoc object\n");
+		return;
+	}
+	if (setjmp(env)) {
+		HPDF_Free(pdf);
+		return;
+	}
+	sprintf(pdfName,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.pdf",
+		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
+	
+
+    /* add a new page object. */
+    page = HPDF_AddPage (pdf);
+    HPDF_Page_SetSize (page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
+    font = HPDF_GetFont (pdf, "Courier-Bold", NULL);
+    HPDF_Page_SetFontAndSize (page, font, 16);
+    tw = HPDF_Page_TextWidth (page, pdfName);
+    page_height = HPDF_Page_GetHeight (page);
+    //HPDF_Page_SetFontAndSize (page, font, 11);
+    HPDF_Page_SetTextLeading (page, 11);
+    HPDF_Page_BeginText (page);
+    // Output the title 
+    HPDF_Page_TextOut (page,  (HPDF_Page_GetWidth(page) - tw) / 2,
+                HPDF_Page_GetHeight (page) - 50, pdfName);
+    HPDF_Page_EndText (page);
+
+    HPDF_Page_BeginText (page);
+    HPDF_Page_SetFontAndSize (page, font, 12);
+    HPDF_Page_MoveTextPos (page, 0, // Need to do this before moving to relative text posn
+                HPDF_Page_GetHeight (page) - 80);
+
 
 	sprintf(myStringTime1,"Fourot %d-Cell model created %04d %02d %02d   %02d:%02d:%02d\n\n",
 		info4D.fig->numCells,
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
 	fputs(myStringTime1,pF);
+
+
+    HPDF_Page_MoveTextPos (page, 0, -30);
+    //HPDF_Page_BeginText (page);
+
+    //HPDF_Page_TextOut (page, (HPDF_Page_GetWidth(page) - tw) / 2,
+    //            HPDF_Page_GetHeight (page) - 80, myStringTime1);
+    HPDF_Page_ShowText(page, myStringTime1);
+    HPDF_Page_EndText (page);
+
+
 	
 	modelInfo.numOfModelEdges /= 2; // This is because edges are counted for each face, so each edge is counted twice.
 	countVerts = modelInfo.numOfModelEdges - modelInfo.numOfModelFaces + 2; // From V + F = E + 2
@@ -26254,6 +26323,11 @@ void writeModelFile() {
 		fputs(myStringTime1,pF);
 	}		
 	fclose(pF);
+	
+	// Now output a PDF file
+	HPDF_SaveToFile(pdf, pdfName);
+	
+	HPDF_Free(pdf);
 	return;
 }
 
