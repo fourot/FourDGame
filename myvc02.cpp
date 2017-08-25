@@ -26049,10 +26049,10 @@ void writeModelFile() {
 	struct tm *tnow1;
 	int countVerts;
 	double edge1[3], edge2[3];
-	double dist,dotprod,intAng,extAng,sumAng;
+	double dist,dotprod,intAng,extAng,sumAng,maxDist,minDist;
 	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber,edgeNumber;
 	int prevVertex;
-	int thisVert1,thisVert2,possibleVert1,possibleVert2,thisVertPrev; // Used to discover common edges
+	int thisVert1,thisVert2,possibleVert1,possibleVert2,thisVertPrev,maxv1,maxv2,minv1,minv2; // Used to discover common edges
 	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
 	HPDF_Doc pdf;
 	HPDF_Page page;
@@ -26061,17 +26061,14 @@ void writeModelFile() {
 	float tw;
     HPDF_Font font;
 
-	
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
 	
 	// ModelInfo.mindex has twice the number number of edges in the model (i.e. modelINfo.numOfModelEdges)
-
 	sprintf(myStringTime1,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.txt",
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
 	pF = fopen(myStringTime1,"w");
 	
-	//
 	pdf = HPDF_New(error_handler,NULL);
 	if (!pdf) {
 		printf("error: cannot create PdfDoc object\n");
@@ -26084,7 +26081,6 @@ void writeModelFile() {
 	sprintf(pdfName,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.pdf",
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
 	
-
     /* add a new page object. */
     page = HPDF_AddPage (pdf);
     HPDF_Page_SetSize (page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
@@ -26092,41 +26088,46 @@ void writeModelFile() {
     HPDF_Page_SetFontAndSize (page, font, 16);
     tw = HPDF_Page_TextWidth (page, pdfName);
     page_height = HPDF_Page_GetHeight (page);
-    //HPDF_Page_SetFontAndSize (page, font, 11);
     HPDF_Page_SetTextLeading (page, 11);
     HPDF_Page_BeginText (page);
-    // Output the title 
+    // Output the Page title 
     HPDF_Page_TextOut (page,  (HPDF_Page_GetWidth(page) - tw) / 2,
                 HPDF_Page_GetHeight (page) - 50, pdfName);
     HPDF_Page_EndText (page);
 
-    HPDF_Page_BeginText (page);
-    HPDF_Page_SetFontAndSize (page, font, 12);
-    HPDF_Page_MoveTextPos (page, 0, // Need to do this before moving to relative text posn
-                HPDF_Page_GetHeight (page) - 80);
 
+    HPDF_Page_BeginText (page);
+    font = HPDF_GetFont (pdf, "Courier", NULL);
+    HPDF_Page_SetFontAndSize (page, font, 12);
+    HPDF_Page_MoveTextPos (page, 20, // Need to do this before moving to relative text posn
+                HPDF_Page_GetHeight (page) - 80);
 
 	sprintf(myStringTime1,"Fourot %d-Cell model created %04d %02d %02d   %02d:%02d:%02d\n\n",
 		info4D.fig->numCells,
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
 	fputs(myStringTime1,pF);
 
-
-    HPDF_Page_MoveTextPos (page, 0, -30);
-    //HPDF_Page_BeginText (page);
-
-    //HPDF_Page_TextOut (page, (HPDF_Page_GetWidth(page) - tw) / 2,
-    //            HPDF_Page_GetHeight (page) - 80, myStringTime1);
+    HPDF_Page_MoveTextPos (page, 0, -25);
     HPDF_Page_ShowText(page, myStringTime1);
-    HPDF_Page_EndText (page);
-
-
 	
 	modelInfo.numOfModelEdges /= 2; // This is because edges are counted for each face, so each edge is counted twice.
 	countVerts = modelInfo.numOfModelEdges - modelInfo.numOfModelFaces + 2; // From V + F = E + 2
 	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:    %3d        F1 - F%d\nEdges:    %3d        E1 - E%d\nVertices: %3d        V1 - V%d\n\n",
 		modelInfo.numOfModelFaces,modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,modelInfo.numOfModelEdges,countVerts,countVerts);
 	fputs(myStringTime1,pF);
+    HPDF_Page_MoveTextPos (page, 0, -30);
+	sprintf(myStringTime1,"Characteristics of 3D Model");
+    HPDF_Page_ShowText(page, myStringTime1);
+    HPDF_Page_MoveTextPos (page, 0, -10);
+	sprintf(myStringTime1,"Faces:    %3d        F1 - F%d",modelInfo.numOfModelFaces,modelInfo.numOfModelFaces);
+    HPDF_Page_ShowText(page, myStringTime1);
+    HPDF_Page_MoveTextPos (page, 0, -10);
+	sprintf(myStringTime1,"Edges:    %3d        E1 - E%d",modelInfo.numOfModelEdges,modelInfo.numOfModelEdges);
+    HPDF_Page_ShowText(page, myStringTime1);
+    HPDF_Page_MoveTextPos (page, 0, -10);
+	sprintf(myStringTime1,"Vertices: %3d        V1 - V%d\n\n",countVerts,countVerts);
+    HPDF_Page_ShowText(page, myStringTime1);
+    //HPDF_Page_EndText (page);
 
 
 	// This loop identifies vertices which are the same, i.e. vertices shared by different faces.
@@ -26155,6 +26156,28 @@ void writeModelFile() {
 		startOfFaceIndex += modelInfo.vertsPerFace[i];
 	}
 	
+	// Find the maximum and minimum distance between vertices
+	maxDist = 0.0; minDist = 999999999.9;
+	for (j = 0; j < modelInfo.mIndex-1; ++j) {
+		for (k = j+1; k < modelInfo.mIndex; ++k) {
+			if (modelInfo.vertNum[j] != modelInfo.vertNum[k] ) {
+				dist = sqrt(
+						pow(modelInfo.modelVert[j][0] - modelInfo.modelVert[k][0], 2) +
+						pow(modelInfo.modelVert[j][1] - modelInfo.modelVert[k][1], 2) +
+						pow(modelInfo.modelVert[j][2] - modelInfo.modelVert[k][2], 2) );
+				if (dist > maxDist) {
+					maxDist = dist;
+					maxv1 = modelInfo.vertNum[j];
+					maxv2 = modelInfo.vertNum[k];
+				} else if (dist < minDist) {
+					minDist = dist;
+					minv1 = modelInfo.vertNum[j];
+					minv2 = modelInfo.vertNum[k];
+				}					
+			}
+		}
+	}
+	
 	if (0) { //Dump the vertices if debugging
 		//ptr = myStringTime1;
 		for (thisVertIndex = 0; thisVertIndex < modelInfo.mIndex; ++thisVertIndex) {
@@ -26166,8 +26189,7 @@ void writeModelFile() {
 			fputs(myStringTime1,pF);		
 		}
 	}	
-	
-	
+		
 	// At this point we have worked out the common vertices
 	// Now to work out the common edges from the common vertices
 	// Each edge will appear twice.
@@ -26248,8 +26270,20 @@ void writeModelFile() {
 	for (i = 2; i < modelInfo.maxVertFreq; ++i) {
 		sprintf(myStringTime1,"Number of faces with %2d sides is %3d\n", i+1 , modelInfo.vertFreq[i]);
 		fputs(myStringTime1,pF);
-	}
 	
+		HPDF_Page_MoveTextPos (page, 0, -10);
+		HPDF_Page_ShowText(page, myStringTime1);
+	}
+	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1,maxv2,maxDist);
+	fputs(myStringTime1,pF);	
+	HPDF_Page_MoveTextPos (page, 0, -12);
+	HPDF_Page_ShowText(page, myStringTime1);
+	sprintf(myStringTime1,"Minimum distance between vertices (V%-3d - V%-3d) is %13.10f\n",minv1,minv2,minDist);
+	fputs(myStringTime1,pF);	
+	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_ShowText(page, myStringTime1);
+
+    HPDF_Page_EndText (page);
 	
 	for (i = 0; i < modelInfo.numOfModelFaces; ++i) {
 		ptr = myStringTime1;
