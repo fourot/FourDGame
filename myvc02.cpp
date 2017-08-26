@@ -26274,23 +26274,51 @@ void writeModelFile() {
 		HPDF_Page_MoveTextPos (page, 0, -10);
 		HPDF_Page_ShowText(page, myStringTime1);
 	}
-	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1,maxv2,maxDist);
+	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1+1,maxv2+1,maxDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);
-	sprintf(myStringTime1,"Minimum distance between vertices (V%-3d - V%-3d) is %13.10f\n",minv1,minv2,minDist);
+	sprintf(myStringTime1,"Minimum distance between vertices (V%-3d - V%-3d) is %13.10f\n",minv1+1,minv2+1,minDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -10);
 	HPDF_Page_ShowText(page, myStringTime1);
 
     HPDF_Page_EndText (page);
-	
+
+
+
+
 	for (i = 0; i < modelInfo.numOfModelFaces; ++i) {
-		ptr = myStringTime1;
-		ptr += sprintf(ptr,"\n\nDetails for face F%-3d\nFace F%-3d has edges ", i+1,i+1);
+		//ptr = myStringTime1;
+		// Start of a new Face and a new pdf page.		
+		sprintf(myStringTime1,"\n\nDetails of face F%-3d   (%d edges)\n",i+1,modelInfo.vertsPerFace[i]);
+		fputs(myStringTime1,pF);
+		
+		page = HPDF_AddPage(pdf);
+        HPDF_Page_SetSize (page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
+		HPDF_Page_SetFontAndSize (page, font, 16);
+		HPDF_Page_SetTextLeading (page, 11);
+		HPDF_Page_BeginText (page);
+		HPDF_Page_MoveTextPos (page, 20, // Need to do this before moving to relative text posn
+                HPDF_Page_GetHeight (page) - 50);
+		HPDF_Page_ShowText(page, myStringTime1);
+		HPDF_Page_SetFontAndSize (page, font, 9);
+
+
+		ptr = myStringTime1;		
+		ptr += sprintf(ptr,"Face F%-3d has edges ", i+1);
+
+
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			ptr += sprintf(ptr, " E%-4d",modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j] + 1);
 		}
+		
+		fputs(myStringTime1,pF);
+		HPDF_Page_MoveTextPos (page, 0, -10);
+		HPDF_Page_ShowText(page, myStringTime1);
+
+		
+		ptr = myStringTime1;		
 		ptr += sprintf(ptr,"\nWhich adjoin faces  ");
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			k = modelInfo.edgeToFaceModel[modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j]][0];
@@ -26302,11 +26330,20 @@ void writeModelFile() {
 		}
 		ptr += sprintf(ptr,"\n");
 		fputs(myStringTime1,pF);
+
+		HPDF_Page_MoveTextPos (page, 0, -10);
+		HPDF_Page_ShowText(page, myStringTime1);
+
 		// Now to output the fine details of each fig.
 		// The face index is i (hence the face number as printed is i+1)
 		
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			ptr = myStringTime1;
+			
+			//HPDF_Page_BeginText (page);
+			//HPDF_Page_MoveTextPos (page, 20, // Need to do this before moving to relative text posn
+            //    HPDF_Page_GetHeight (page) - 50);
+					
 			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
 			edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
 			ptr += sprintf(ptr,"E%-3d has length ",edgeNumber+1);
@@ -26319,6 +26356,13 @@ void writeModelFile() {
 						pow(modelInfo.modelVert[vt][2] - modelInfo.modelVert[vn][2], 2) );
 			ptr += sprintf(ptr, "%13.10f  V%-3d - V%-3d\n",dist,thisVert1+1,thisVert2+1);
 			fputs(myStringTime1,pF);
+			
+			HPDF_Page_MoveTextPos (page, 0, -10);
+			HPDF_Page_ShowText(page, myStringTime1);
+			
+			
+			
+			
 			if (dist < 0.00000001) { // Something is wrong, so dump the vertex details. (used for debugging)
 				ptr = myStringTime1;
 				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f\n",thisVert1+1,
@@ -26352,13 +26396,24 @@ void writeModelFile() {
 			sumAng += extAng;
 			ptr += sprintf(ptr, "Internal %11.7f  External %11.7f degrees\n",intAng,extAng);
 			fputs(myStringTime1,pF);
+			HPDF_Page_MoveTextPos (page, 0, -10);
+			HPDF_Page_ShowText(page, myStringTime1);
+
 		}
 		sprintf(myStringTime1,"Sum of external angles is %11.7f (should be 360 degrees)\n",sumAng);
 		fputs(myStringTime1,pF);
+		HPDF_Page_MoveTextPos (page, 0, -10);
+		HPDF_Page_ShowText(page, myStringTime1);
+		pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
+		sprintf(myStringTime1,"GetCurrentTextPos%7.2f%7.2f",pos.x,pos.y);
+		HPDF_Page_ShowText(page, myStringTime1);
 	}		
 	fclose(pF);
-	
+
+	//HPDF_Page_MoveTextPos (page, 0, -10);
+	//pos = HPDF_Page_GetCurrentTextPos(page);
 	// Now output a PDF file
+	HPDF_Page_EndText (page);
 	HPDF_SaveToFile(pdf, pdfName);
 	
 	HPDF_Free(pdf);
