@@ -26040,6 +26040,23 @@ void nextModelVert(int faceNum, int faceVert, int *prevVert, int *thisVert, int 
 	*prevVert = (faceVert == 0) ? modelInfo.faceStartIndex[faceNum] + modelInfo.vertsPerFace[faceNum] - 1: *thisVert - 1;
 }
 
+double checkUnitVec2D(double *v1) {
+	double l1;
+	//double l1, l2, resl;
+	//l1 = sqrt( v1[0]*v1[0] + v1[1]*v1[1] ); 
+	//l2 = sqrt( v2[0]*v2[0] + v2[1]*v2[1] ); 
+	
+	//resl = sqrt (l1 * l1 + l2 * l2)
+	
+	l1 = abs( 1.0 - sqrt(v1[0]*v1[0] + v1[1]*v1[1])); 
+	//l2 = v2[0]*v2[0] + v2[1]*v2[1]; 
+	//l1 = v1[0]*v1[0] + v1[1]*v1[1]; 
+	//l2 = v2[0]*v2[0] + v2[1]*v2[1]; 
+	
+	//resl = sqrt (l1 + l2);
+	return l1;
+}
+
 void writeModelFile() {
 	FILE *pF;
 	time_t myTime1;
@@ -26062,6 +26079,7 @@ void writeModelFile() {
 	HPDF_Page page;
 	HPDF_Point pos;
 	HPDF_REAL page_height;
+	HPDF_REAL page_width;
 	float tw;
     HPDF_Font font;
 
@@ -26092,6 +26110,7 @@ void writeModelFile() {
     HPDF_Page_SetFontAndSize (page, font, 16);
     tw = HPDF_Page_TextWidth (page, pdfName);
     page_height = HPDF_Page_GetHeight (page);
+    page_width = HPDF_Page_GetWidth(page);
     HPDF_Page_SetTextLeading (page, 11);
     HPDF_Page_BeginText (page);
     // Output the Page title 
@@ -26289,7 +26308,7 @@ void writeModelFile() {
 
     HPDF_Page_EndText (page);
 
-
+	// The next part outputs details for each face, edge by edge.
 
 
 	for (i = 0; i < modelInfo.numOfModelFaces; ++i) {
@@ -26384,54 +26403,65 @@ void writeModelFile() {
 				modelInfo.edgeNum[vp]+1,modelInfo.edgeNum[vt]+1,thisVertPrev+1,thisVert1+1,thisVert2+1);
 			
 			vsub3(modelInfo.modelVert[vt], modelInfo.modelVert[vp], edge1);
-			myNormaliseVector3D(edge1);
+			myNormaliseVector3D(edge1); // A unit vector in the direction of the first edge of the angle
 			vsub3(modelInfo.modelVert[vn], modelInfo.modelVert[vt], edge2);
-			myNormaliseVector3D(edge2);
+			myNormaliseVector3D(edge2); // A unit vector in the direction of the second edge of the angle
 			
-			dotprod = vdot3(edge1,edge2); // This is the cosine of the angle between the edges.
-			sinAng = sqrt(1 - dotprod*dotprod);
+			dotprod = vdot3(edge1,edge2); // This is the cosine of the (exterior) angle between the edges.
+			sinAng = sqrt(1 - dotprod*dotprod); // Calculate the sine of the (exterior) angle between the edges
 			extAng = acos(dotprod)*M_RADIANS_TO_DEGREES; //
 			intAng = 180.0 - extAng;
-			sumAng += extAng;
+			sumAng += extAng; // This is to verify later that the sum of the external angles is 360 degrees.
 			ptr += sprintf(ptr, "Internal %11.7f  External %11.7f degrees\n",intAng,extAng);
 			fputs(myStringTime1,pF);
 			HPDF_Page_MoveTextPos (page, 0, -10);
 			HPDF_Page_ShowText(page, myStringTime1);
 			
-			// the array edges2D contains the normalised edges in 2D
+			// Now to calculate the 2D coordinates of this vertex (i.e. the jth vertex) of face i.
+			// the array edges2D contains the normalised vectors of each edge in 2D
 			// whereas edge1 and edge2 are the normalised edges in 3D
-			// The code below is for working out the 2D coordinates of the vertices of face 'i', where the 
-			// first vertex is defined to be at (0,0). The vertices are given in anticlockwise order.
+			// The first vertex is defined as being at (0,0). The vertices will be in anticlockwise order.
 			if (j == 0) {
 				verts2D[j][0] = 0.0; verts2D[j][1] = 0.0; // First vertex is the origin
-				verts2D[j+1][0] = edgeLength[j]; verts2D[j+1][1] = 0.0;
-				edges2D[j][0] = 1; edges2D[j][1] = 0; // unit vector
+				verts2D[j+1][0] = edgeLength[j]; verts2D[j+1][1] = 0.0; // Can immediately do the second vertex as well.
+				edges2D[j][0] = 1; edges2D[j][1] = 0; // unit vector in the direction of the first edge.
 			} else {
 				edgePerp2D[0] =  -edges2D[j-1][1]; // Get a vector, edgePerp, that is perp to the prev 2d edge
 				edgePerp2D[1] =   edges2D[j-1][0]; // Get a vector, edgePerp, that is perp to the prev 2d
+				
+				// Edges2d[j] is a unit vector along the direction of edge[j]. It goes between vertices j and j+1
 				edges2D[j][0] = edges2D[j-1][0]*dotprod + edgePerp2D[0]*sinAng;
 				edges2D[j][1] = edges2D[j-1][1]*dotprod + edgePerp2D[1]*sinAng;
+				// Edges2D[j] should always be a unit vector.
+				if (checkUnitVec2D(edges2D[j]) > 0.00000001) { //Crash if there is an error (probably delete this code later)
+					j = (1 - j)/(j - j);
+				}
+				// Now we can calculate the actual 2D vertices of the face
 				if (j < modelInfo.vertsPerFace[i] - 1) {
 					verts2D[j+1][0] = verts2D[j][0] + edgeLength[j+1]*edges2D[j][0]; // Remember, edgeLength is already calculated
 					verts2D[j+1][1] = verts2D[j][1] + edgeLength[j+1]*edges2D[j][1];
 				} else {
-					// This is the last 2d vertex, so it should be the same as the first one (the origin)
+					// This is 'beyond' the last 2d vertex, so when we calculate it, it should be the same as the first vertex (the origin)
+					// Strictly speaking, the code in this section is redundant since we already know that the next vertex
+					// will be the origin. It is done as a check.
 					tempVert2D[0] = verts2D[j][0] + edgeLength[j+1]*edges2D[j][0]; // Remember, edgeLength is already calculated
 					tempVert2D[1] = verts2D[j][1] + edgeLength[j+1]*edges2D[j][1];
-					if (abs(tempVert2D[0]) > 0.000001 || abs(tempVert2D[1]) > 0.000001) {
+					if (abs(tempVert2D[0]) > 0.000001 || abs(tempVert2D[1]) > 0.000001) { // This check is only for debug. Should never happen
 						// The last vertex should be back to the origin.
 						tempVert2D[0] = 1/ ( j - modelInfo.vertsPerFace[i] - 1); // crash!!!
 					}
 				}
 			}
 		}
-		// Here we have finished one face.
+		// Here we have finished one face. We have an array, verts2D, that contains the 2D coordinates of the vertices of face i.
 
 		sprintf(myStringTime1,"Sum of external angles is %11.7f (should be 360 degrees)\n",sumAng);
 		fputs(myStringTime1,pF);
 		HPDF_Page_MoveTextPos (page, 0, -10);
 		HPDF_Page_ShowText(page, myStringTime1);
 		pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
+
+
 		sprintf(myStringTime1,"GetCurrentTextPos%7.2f%7.2f",pos.x,pos.y);
 		HPDF_Page_ShowText(page, myStringTime1);
 		// Now to print 2D coordinates of a face.
