@@ -86,6 +86,7 @@ public:
 	//void leftMultByTrans(SquareMatrix &multiplier, SquareMatrix & result);
 	//void leftMultByTransInPlace(SquareMatrix &multiplier);
 	void transpose(std::vector<double> &vv);
+	void transposeThis();
 	void applyToVector(std::vector<double> &vect, std::vector<double> &result);
 	double calcColumnLength(int col);
 	void grammSchmidt();

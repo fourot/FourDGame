@@ -227,7 +227,7 @@ void SquareMatrix::multThisByParamTranspose(SquareMatrix &param, MATRIXDESTINATI
 
 
 void SquareMatrix::transpose(std::vector<double> &vv) {
-	//Transposes array matrix in place
+	//Transposes external array matrix in place
 	double x;
 	switch (numberOfDims) {
 		case 3:
@@ -242,6 +242,30 @@ void SquareMatrix::transpose(std::vector<double> &vv) {
 			x = vv[13]; vv[13] = vv[7]; vv[7] = x;
 			x = vv[14]; vv[14] = vv[11]; vv[11] = x;
 			x = vv[9]; vv[9] = vv[6]; vv[6] = x;
+			break;
+		default:
+			//printf("Transpose ONly for dims 3 and 4\n");
+			{1.0/0.0;};
+	}
+
+}
+
+void SquareMatrix::transposeThis() {
+	//Transposes this matrix in place
+	double x;
+	switch (numberOfDims) {
+		case 3:
+			x = v[3]; v[3] = v[1]; v[1] = x;
+			x = v[6]; v[6] = v[2]; v[2] = x;
+			x = v[7]; v[7] = v[5]; v[5] = x;
+			break;
+		case 4:
+			x = v[4]; v[4] = v[1]; v[1] = x;
+			x = v[8]; v[8] = v[2]; v[2] = x;
+			x = v[12]; v[12] = v[3]; v[3] = x;
+			x = v[13]; v[13] = v[7]; v[7] = x;
+			x = v[14]; v[14] = v[11]; v[11] = x;
+			x = v[9]; v[9] = v[6]; v[6] = x;
 			break;
 		default:
 			//printf("Transpose ONly for dims 3 and 4\n");
@@ -292,6 +316,7 @@ void SquareMatrix::applyToVector(std::vector<double> &vect, std::vector<double> 
 		result.push_back(sum);
 	}
 }
+
 
 void SquareMatrix::grammSchmidt(){
 // performs an in-situ gramm-schmidt orthonormalisation

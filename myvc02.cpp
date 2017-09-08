@@ -22186,6 +22186,59 @@ void vcentretriangle3(double *v1, double *v2, double *v3, double *result)
 	result[1] = (v1[1] + v2[1] + v3[1])/3.0;
 	result[2] = (v1[2] + v2[2] + v3[2])/3.0;
 }
+
+void vGrammInPlace(double *v) {
+// performs an in-situ gramm-schmidt orthonormalisation on a 3 x 3 matrix
+// Assumes that the first and second colums are already normalised.
+	double lngth, innera, innerb;
+
+	// Normalise the first column
+	//lngth = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+	
+	//~ if (lngth > 0.0 && lngth != 1.0) {
+		//~ lngth = sqrt(lngth);
+		//~ v[0] /= lngth;
+		//~ v[1] /= lngth;
+		//~ v[2] /= lngth;
+	//~ }
+	// derive the second column
+	innera = v[0]*v[3] + v[1]*v[4] + v[2]*v[5];
+	v[3] -= innera * v[0];
+	v[4] -= innera * v[1];
+	v[5] -= innera * v[2];
+	lngth = v[3]*v[3] + v[4]*v[4] + v[5]*v[5];
+	if (lngth > 0.0 && lngth != 1.0) {
+		lngth = sqrt(lngth);	
+		v[3] /= lngth;
+		v[4] /= lngth;
+		v[5] /= lngth;
+	}
+	
+	// derive the third column
+	innera = v[0]*v[6] + v[1]*v[7] + v[2]*v[8];
+	innerb = v[3]*v[6] + v[4]*v[7] + v[5]*v[8];
+
+	v[6] -= (innera * v[0] + innerb * v[3]);
+	v[7] -= (innera * v[1] + innerb * v[4]);
+	v[8] -= (innera * v[2] + innerb * v[5]);
+	lngth = v[6]*v[6] + v[7]*v[7] + v[8]*v[8];
+	if (lngth > 0.0 && lngth != 1.0) {
+		lngth = sqrt(lngth);	
+		v[6] /= lngth;
+		v[7] /= lngth;
+		v[8] /= lngth;
+	}
+}
+void multVect3byTrans(double *matr, double *v, double *result)
+{
+	// premultiplies a vector v by a matrix matr that is in column major form, after
+	// transposing the matrix. The vector must be of length 3, the 
+	// matrix must by 3 x 3.
+	result[0] = matr[0] * v[0] + matr[1] * v[1] + matr[2] * v[2];
+	result[1] = matr[3] * v[0] + matr[4] * v[1] + matr[5] * v[2];
+	result[2] = matr[6] * v[0] + matr[7] * v[1] + matr[8] * v[2];
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 double angleFromCosSin(double xcos, double xsin)
 {	// Given the cosine and sine of an angle,
@@ -22290,9 +22343,10 @@ int myNormaliseVector3D(double *v) { //normalises in place
 	double vlength;
 	char txt[50];
 	vlength = sqrt(v[0]*v[0] +v[1]*v[1] +v[2]*v[2]);
-	if (fabs(vlength) <= 0.0001) {
+	if (vlength <= 0.00000001) {
 		sprintf(txt,"!!!Length=%10.7f ",vlength);
 		{if (pFile) fputs(txt,pFile);}
+		vlength = 1.0/(vlength - vlength);
 		return 0;
 	}
 	v[0]/=vlength;
@@ -26040,6 +26094,22 @@ void nextModelVert(int faceNum, int faceVert, int *prevVert, int *thisVert, int 
 	*prevVert = (faceVert == 0) ? modelInfo.faceStartIndex[faceNum] + modelInfo.vertsPerFace[faceNum] - 1: *thisVert - 1;
 }
 
+double distBetweenTwo3DPoints(double *v1, double *v2) {
+	// Returns the distance between two 3D points (i.e. two 3D vectors
+	return (
+			   sqrt((v1[0] - v2[0])*(v1[0] - v2[0]) +
+					(v1[1] - v2[1])*(v1[1] - v2[1]) +
+					(v1[2] - v2[2])*(v1[2] - v2[2]) )
+			);
+}
+double distBetweenTwo2DPoints(double *v1, double *v2) {
+	// Returns the distance between two 3D points (i.e. two 3D vectors
+	return (
+			   sqrt((v1[0] - v2[0])*(v1[0] - v2[0]) +
+					(v1[1] - v2[1])*(v1[1] - v2[1]) )
+			);
+}
+
 double checkUnitVec2D(double *v1) {
 	double l1;
 	//double l1, l2, resl;
@@ -26048,7 +26118,7 @@ double checkUnitVec2D(double *v1) {
 	
 	//resl = sqrt (l1 * l1 + l2 * l2)
 	
-	l1 = abs( 1.0 - sqrt(v1[0]*v1[0] + v1[1]*v1[1])); 
+	l1 = fabs( 1.0 - sqrt(v1[0]*v1[0] + v1[1]*v1[1])); 
 	//l2 = v2[0]*v2[0] + v2[1]*v2[1]; 
 	//l1 = v1[0]*v1[0] + v1[1]*v1[1]; 
 	//l2 = v2[0]*v2[0] + v2[1]*v2[1]; 
@@ -26060,18 +26130,18 @@ double checkUnitVec2D(double *v1) {
 void writeModelFile() {
 	FILE *pF;
 	time_t myTime1;
-	char myStringTime1[200];
+	char myStringTime1[300];
 	char pdfName[50];
 	char *ptr;
 	struct tm *tnow1;
 	int countVerts;
-	double edge1[3], edge2[3], edgePerp2D[2];
+	double edge1[3], edge2[3], crossv[3], tempEdge[2];
+	double normed[2];
 	double edgeLength[10];
-	double verts2D[10][2];
+	double verts2D[11][2], verts3D[11][3], edgeLen3[11];
 	double edges2D[10][2];
-	double tempVert2D[2];
-	double dist,dotprod,intAng,extAng,sumAng,maxDist,minDist,sinAng;
-	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,startSearchingIndex,vertexNumber,edgeNumber;
+	double dist,dotprod,intAng,extAng,sumAng,maxDist,minDist,sinAng, cumulativeAngle;
+	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,thisVertIndex2,startSearchingIndex,vertexNumber,edgeNumber,minEdge;
 	int prevVertex;
 	int thisVert1,thisVert2,possibleVert1,possibleVert2,thisVertPrev,maxv1,maxv2,minv1,minv2; // Used to discover common edges
 	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
@@ -26082,6 +26152,9 @@ void writeModelFile() {
 	HPDF_REAL page_width;
 	float tw;
     HPDF_Font font;
+    SquareMatrix *rotmat;
+    
+    rotmat = new SquareMatrix(3,MIZERO);
 
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
@@ -26135,29 +26208,32 @@ void writeModelFile() {
 	
 	modelInfo.numOfModelEdges /= 2; // This is because edges are counted for each face, so each edge is counted twice.
 	countVerts = modelInfo.numOfModelEdges - modelInfo.numOfModelFaces + 2; // From V + F = E + 2
-	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:    %3d        F1 - F%d\nEdges:    %3d        E1 - E%d\nVertices: %3d        V1 - V%d\n\n",
-		modelInfo.numOfModelFaces,modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,modelInfo.numOfModelEdges,countVerts,countVerts);
+	sprintf(myStringTime1,"Characteristics of 3D Model\n\nFaces:           F1 - F%d\nEdges:           E1 - E%d\nVertices:        V1 - V%d\n\n",
+		modelInfo.numOfModelFaces,modelInfo.numOfModelEdges,countVerts);
 	fputs(myStringTime1,pF);
     HPDF_Page_MoveTextPos (page, 0, -30);
 	sprintf(myStringTime1,"Characteristics of 3D Model");
     HPDF_Page_ShowText(page, myStringTime1);
-    HPDF_Page_MoveTextPos (page, 0, -10);
-	sprintf(myStringTime1,"Faces:    %3d        F1 - F%d",modelInfo.numOfModelFaces,modelInfo.numOfModelFaces);
+    HPDF_Page_MoveTextPos (page, 0, -15);
+	sprintf(myStringTime1,"Faces:       F1 - F%d",modelInfo.numOfModelFaces);
     HPDF_Page_ShowText(page, myStringTime1);
-    HPDF_Page_MoveTextPos (page, 0, -10);
-	sprintf(myStringTime1,"Edges:    %3d        E1 - E%d",modelInfo.numOfModelEdges,modelInfo.numOfModelEdges);
+    HPDF_Page_MoveTextPos (page, 0, -12);
+	sprintf(myStringTime1,"Edges:       E1 - E%d",modelInfo.numOfModelEdges);
     HPDF_Page_ShowText(page, myStringTime1);
-    HPDF_Page_MoveTextPos (page, 0, -10);
-	sprintf(myStringTime1,"Vertices: %3d        V1 - V%d\n\n",countVerts,countVerts);
+    HPDF_Page_MoveTextPos (page, 0, -12);
+	sprintf(myStringTime1,"Vertices:    V1 - V%d\n\n",countVerts);
     HPDF_Page_ShowText(page, myStringTime1);
-    //HPDF_Page_EndText (page);
 
 
 	// This loop identifies vertices which are the same, i.e. vertices shared by different faces.
 	startOfFaceIndex = 0;
 	vertexNumber = -1;
-	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
+	for (i=0; i < modelInfo.numOfModelFaces; ++i) { // All the faces
 		modelInfo.faceStartIndex[i] = startOfFaceIndex;
+		if (0) { // Debug only
+			sprintf(myStringTime1,"Debug face %-2d has %2d verts. FaceStart=%d\n",i,modelInfo.vertsPerFace[i],modelInfo.faceStartIndex[i]);
+			fputs(myStringTime1,pF);
+		}
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			thisVertIndex = startOfFaceIndex + j;
 			
@@ -26165,10 +26241,7 @@ void writeModelFile() {
 				startSearchingIndex = startOfFaceIndex + modelInfo.vertsPerFace[i];
 				modelInfo.vertNum[thisVertIndex] = ++vertexNumber;
 				for (k = startSearchingIndex; k < modelInfo.mIndex; ++k) {
-					dist = sqrt(
-						pow(modelInfo.modelVert[thisVertIndex][0] - modelInfo.modelVert[k][0], 2) +
-						pow(modelInfo.modelVert[thisVertIndex][1] - modelInfo.modelVert[k][1], 2) +
-						pow(modelInfo.modelVert[thisVertIndex][2] - modelInfo.modelVert[k][2], 2) );
+					dist = distBetweenTwo3DPoints(modelInfo.modelVert[thisVertIndex],modelInfo.modelVert[k]);
 					if (dist < 0.00000001) { // These are the same vertices, so assign a vertex number.
 						modelInfo.vertNum[k] = vertexNumber;
 					}
@@ -26177,50 +26250,32 @@ void writeModelFile() {
 			
 		}
 		startOfFaceIndex += modelInfo.vertsPerFace[i];
-	}
+	} // Finish the loop round all the faces
+	
 	
 	// Find the maximum and minimum distance between vertices
 	maxDist = 0.0; minDist = 999999999.9;
-	for (j = 0; j < modelInfo.mIndex-1; ++j) {
+	for (j = 0; j < modelInfo.mIndex-1; ++j) { // All the faces
 		for (k = j+1; k < modelInfo.mIndex; ++k) {
 			if (modelInfo.vertNum[j] != modelInfo.vertNum[k] ) {
-				dist = sqrt(
-						pow(modelInfo.modelVert[j][0] - modelInfo.modelVert[k][0], 2) +
-						pow(modelInfo.modelVert[j][1] - modelInfo.modelVert[k][1], 2) +
-						pow(modelInfo.modelVert[j][2] - modelInfo.modelVert[k][2], 2) );
+				dist = distBetweenTwo3DPoints(modelInfo.modelVert[j],modelInfo.modelVert[k]);
 				if (dist > maxDist) {
-					maxDist = dist;
-					maxv1 = modelInfo.vertNum[j];
-					maxv2 = modelInfo.vertNum[k];
+					maxDist = dist;	maxv1 = modelInfo.vertNum[j];	maxv2 = modelInfo.vertNum[k];
 				} else if (dist < minDist) {
-					minDist = dist;
-					minv1 = modelInfo.vertNum[j];
-					minv2 = modelInfo.vertNum[k];
+					minDist = dist;	minv1 = modelInfo.vertNum[j];	minv2 = modelInfo.vertNum[k];
 				}					
 			}
 		}
-	}
-	
-	if (0) { //Dump the vertices if debugging
-		//ptr = myStringTime1;
-		for (thisVertIndex = 0; thisVertIndex < modelInfo.mIndex; ++thisVertIndex) {
-			sprintf(myStringTime1,"thisVertIndex=%3d Vertnum=%3d %14.10f %14.10f %14.10f\n",thisVertIndex,
-			modelInfo.vertNum[thisVertIndex],
-			modelInfo.modelVert[thisVertIndex][0],
-			modelInfo.modelVert[thisVertIndex][1],
-			modelInfo.modelVert[thisVertIndex][2]);
-			fputs(myStringTime1,pF);		
-		}
-	}	
-		
-	// At this point we have worked out the common vertices
+	} // Finish the loop round all the faces
+			
+	// At this point we have worked out the common vertices.
 	// Now to work out the common edges from the common vertices
 	// Each edge will appear twice.
 
-	for (i = 0; i < modelInfo.mIndex; ++i) { // initialise the edge numbers
+	for (i = 0; i < modelInfo.mIndex; ++i) { // initialise the edge numbers to 'not yet processed'.
 		modelInfo.edgeNum[i] = -1;
 	}
-	
+	minEdge = -1; // Initialise to -1 to make sure that a correct edge num (non-negative) is later found
 	edgeNumber = -1; // Initialise this so that numbers start from zero.
 	for (i=0; i < modelInfo.numOfModelFaces; ++i) { // outer loop round each face
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // for each face, create the edges from adjacent vertices
@@ -26231,8 +26286,15 @@ void writeModelFile() {
 				modelInfo.edgeNum[thisVertIndex] = ++edgeNumber; // We have found the first vertex of an edge, so get a new edge number
 				thisVert1 = modelInfo.vertNum[thisVertIndex];
 				// If we are at the last vertex for this face, we need to connect to the first vertex to create an edge.
-				thisVert2 = (j == modelInfo.vertsPerFace[i] - 1 ?
-					modelInfo.vertNum[modelInfo.faceStartIndex[i]] : modelInfo.vertNum[thisVertIndex+1]);
+				thisVertIndex2 = (j == modelInfo.vertsPerFace[i] - 1 ? modelInfo.faceStartIndex[i] : thisVertIndex+1);
+				thisVert2 = modelInfo.vertNum[thisVertIndex2];
+				
+				// Now to check if this is the minimum edge. This is only for reporting info to the user, it is not necessary for 
+				// finding the matching edge.
+				if ((thisVert1 == minv1 && thisVert2 == minv2) || (thisVert2 == minv1 && thisVert1 == minv2)) minEdge = edgeNumber;
+
+				// Calculate the length of the edge, indexed by edgeNumber.
+				modelInfo.edgeLength[edgeNumber] = distBetweenTwo3DPoints(modelInfo.modelVert[thisVertIndex],modelInfo.modelVert[thisVertIndex2]);
 				// Now we have found the vertices of an edge (namely thisvert1 and thisvert2).
 				// Search the remainder of the figure for a matching edge. There must be one since each edge
 				// is shared by two faces.
@@ -26261,7 +26323,8 @@ void writeModelFile() {
 									modelInfo.edgeNum[startSearchEdgeIndex + k] = edgeNumber;
 									// So now we have found an edge and the two faces that share it
 									// The edge is 'edgeNumber'
-									// The two faces are 'i' and 'currSearchFaceNum'
+									// The two faces are indexed by 'i' and 'currSearchFaceNum'. Store this info in edgeToFaceModel so that later
+									// we can access which faces are joined at a given edge.
 									modelInfo.edgeToFaceModel[edgeNumber][0] = i;
 									modelInfo.edgeToFaceModel[edgeNumber][1] = currSearchFaceNum;
 									edgeSearchFinished = 1; // flag the end of processing for this face.
@@ -26283,7 +26346,7 @@ void writeModelFile() {
 			}
 		}
 	}
-	for (i = 0; i < 10; ++i) {modelInfo.vertFreq[i]=0;} // For counting the number of sides in each face
+	for (i = 0; i < 10; ++i) {modelInfo.vertFreq[i]=0;} // Initialise, for counting the number of sides in each face
 	modelInfo.maxVertFreq = 0;
 	for (i=0; i < modelInfo.numOfModelFaces; ++i) {
 		modelInfo.vertFreq[modelInfo.vertsPerFace[i]-1]++;
@@ -26294,59 +26357,64 @@ void writeModelFile() {
 		sprintf(myStringTime1,"Number of faces with %2d sides is %3d\n", i+1 , modelInfo.vertFreq[i]);
 		fputs(myStringTime1,pF);
 	
-		HPDF_Page_MoveTextPos (page, 0, -10);
+		HPDF_Page_MoveTextPos (page, 0, -12);
 		HPDF_Page_ShowText(page, myStringTime1);
 	}
 	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1+1,maxv2+1,maxDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);
-	sprintf(myStringTime1,"Minimum distance between vertices (V%-3d - V%-3d) is %13.10f\n",minv1+1,minv2+1,minDist);
+	sprintf(myStringTime1,  "Minimum distance (Edge E%-3d)      (V%-3d - V%-3d) is %13.10f\n",minEdge+1,minv1+1,minv2+1,minDist);
 	fputs(myStringTime1,pF);	
-	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);
 
     HPDF_Page_EndText (page);
 
+	if (0) { //Dump the vertices if debugging
+		for (thisVertIndex = 0; thisVertIndex < modelInfo.mIndex; ++thisVertIndex) {
+			sprintf(myStringTime1,"thisVertIndex=%3d Vertnum=%3d EdgeNum=%3d %14.10f %14.10f %14.10f EdgeLen %13.10f\n",thisVertIndex,
+			modelInfo.vertNum[thisVertIndex],modelInfo.edgeNum[thisVertIndex],modelInfo.modelVert[thisVertIndex][0],
+			modelInfo.modelVert[thisVertIndex][1],modelInfo.modelVert[thisVertIndex][2], modelInfo.edgeLength[modelInfo.edgeNum[thisVertIndex]]);
+			fputs(myStringTime1,pF);		
+		}
+	}	
+
 	// The next part outputs details for each face, edge by edge.
 
-
-	for (i = 0; i < modelInfo.numOfModelFaces; ++i) {
-		//ptr = myStringTime1;
+	for (i = 0; i < modelInfo.numOfModelFaces; ++i) { // Loop each face. This is a big loop!
+		// In each pass through this loop, we output one .pdf page of information
 		// Start of a new Face and a new pdf page.		
 		sprintf(myStringTime1,"\n\nDetails of face F%-3d   (%d edges)\n",i+1,modelInfo.vertsPerFace[i]);
 		fputs(myStringTime1,pF);
 		
-		page = HPDF_AddPage(pdf);
+		page = HPDF_AddPage(pdf); // New page for each face
         HPDF_Page_SetSize (page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
 		HPDF_Page_SetFontAndSize (page, font, 16);
 		HPDF_Page_SetTextLeading (page, 11);
 		HPDF_Page_BeginText (page);
-		HPDF_Page_MoveTextPos (page, 20, // Need to do this before moving to relative text posn
+		HPDF_Page_MoveTextPos (page, 20, // Need to do this before using relative text posn
                 HPDF_Page_GetHeight (page) - 50);
 		HPDF_Page_ShowText(page, myStringTime1);
-		HPDF_Page_SetFontAndSize (page, font, 9);
-
+		HPDF_Page_SetFontAndSize (page, font, 8);
 
 		ptr = myStringTime1;		
 		ptr += sprintf(ptr,"Face F%-3d has edges ", i+1);
 
-
-		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // List all the edges that are the boundary of this face (face i)
 			ptr += sprintf(ptr, " E%-4d",modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j] + 1);
 		}
 		
 		fputs(myStringTime1,pF);
 		HPDF_Page_MoveTextPos (page, 0, -10);
 		HPDF_Page_ShowText(page, myStringTime1);
-
 		
 		ptr = myStringTime1;		
 		ptr += sprintf(ptr,"\nWhich adjoin faces  ");
-		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // For each edge, give the face number of the adjoining face
 			k = modelInfo.edgeToFaceModel[modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j]][0];
 			if (k == i) {
-				// We don't want to duplicate the current face, we want the adjoining face
+				// We don't want to duplicate the current face (i.e. face i), we want the adjoining face
 				k = modelInfo.edgeToFaceModel[modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j]][1];
 			}
 			ptr += sprintf(ptr, " F%-4d",k + 1);
@@ -26356,12 +26424,13 @@ void writeModelFile() {
 
 		HPDF_Page_MoveTextPos (page, 0, -10);
 		HPDF_Page_ShowText(page, myStringTime1);
+		HPDF_Page_MoveTextPos (page, 0, -10);
 
-		// Now to output the fine details of each fig.
+		// Now to output the fine details of each face.
 		// The face index is i (hence the face number as printed is i+1)
-		
+				
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // This loop gives us the length of each edge in face 'i'
-			ptr = myStringTime1;
+			//ptr = myStringTime1;
 			
 			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
 			edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
@@ -26370,22 +26439,20 @@ void writeModelFile() {
 			thisVert1 = modelInfo.vertNum[vt]; // Get the first vertex of the edge
 			thisVert2 = modelInfo.vertNum[vn];
 			// We now have the indices of the two vertices of the edge: thisVert1 and thisVert2.
-			dist = sqrt(pow(modelInfo.modelVert[vt][0] - modelInfo.modelVert[vn][0], 2) +
-						pow(modelInfo.modelVert[vt][1] - modelInfo.modelVert[vn][1], 2) +
-						pow(modelInfo.modelVert[vt][2] - modelInfo.modelVert[vn][2], 2) );
-			edgeLength[j] = dist;
-			ptr += sprintf(ptr, "%13.10f  V%-3d - V%-3d\n",dist,thisVert1+1,thisVert2+1);
+			ptr += sprintf(myStringTime1,"E%-3d has length %13.10f  V%-3d - V%-3d\n",edgeNumber+1,
+				modelInfo.edgeLength[edgeNumber],thisVert1+1,thisVert2+1);
 			fputs(myStringTime1,pF);
-			
 			HPDF_Page_MoveTextPos (page, 0, -10);
-			HPDF_Page_ShowText(page, myStringTime1);	
+			HPDF_Page_ShowText(page, myStringTime1);
 			
-			if (dist < 0.00000001) { // Something is wrong, so dump the vertex details. (used for debugging: it should never happen!)
+			if (0) { // Something is wrong, so dump the vertex details. (used for debugging: it should never happen!)
 				ptr = myStringTime1;
-				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f\n",thisVert1+1,
-					modelInfo.modelVert[vt][0],	modelInfo.modelVert[vt][1],	modelInfo.modelVert[vt][2]);
-				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f\n",thisVert2+1,
-					modelInfo.modelVert[vn][0],	modelInfo.modelVert[vn][1],	modelInfo.modelVert[vn][2]);
+				dist = sqrt(pow(modelInfo.modelVert[vt][0],2)+pow(modelInfo.modelVert[vt][1],2)+pow(modelInfo.modelVert[vt][2],2));							
+				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f Vlen=%13.10f\n",thisVert1+1,
+					modelInfo.modelVert[vt][0],	modelInfo.modelVert[vt][1],	modelInfo.modelVert[vt][2],dist);
+				dist = sqrt(pow(modelInfo.modelVert[vn][0],2)+pow(modelInfo.modelVert[vn][1],2)+pow(modelInfo.modelVert[vn][2],2));
+				ptr += sprintf(ptr,"V%-3d is %13.10f %13.10f %13.10f Vlen=%13.10f\n",thisVert2+1,
+					modelInfo.modelVert[vn][0],	modelInfo.modelVert[vn][1],	modelInfo.modelVert[vn][2],dist);
 				fputs(myStringTime1,pF);
 			}
 		}
@@ -26398,21 +26465,24 @@ void writeModelFile() {
 			thisVert1 =    modelInfo.vertNum[vt]; // Get the first vertex of the edge
 			thisVert2 =    modelInfo.vertNum[vn];
 			thisVertPrev = modelInfo.vertNum[vp];
+			edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
 
 			ptr += sprintf(ptr,"Angle between edges E%-3d E%-3d  (V%-3d V%-3d V%-3d) ",
 				modelInfo.edgeNum[vp]+1,modelInfo.edgeNum[vt]+1,thisVertPrev+1,thisVert1+1,thisVert2+1);
 			
 			vsub3(modelInfo.modelVert[vt], modelInfo.modelVert[vp], edge1);
-			myNormaliseVector3D(edge1); // A unit vector in the direction of the first edge of the angle
+			myNormaliseVector3D(edge1); // A unit 3D vector in the direction of the first edge of the angle
+			normed[0] = vlength3(edge1);
 			vsub3(modelInfo.modelVert[vn], modelInfo.modelVert[vt], edge2);
-			myNormaliseVector3D(edge2); // A unit vector in the direction of the second edge of the angle
+			myNormaliseVector3D(edge2); // A unit 3D vector in the direction of the second edge of the angle
+			normed[1] = vlength3(edge2);
 			
 			dotprod = vdot3(edge1,edge2); // This is the cosine of the (exterior) angle between the edges.
-			sinAng = sqrt(1 - dotprod*dotprod); // Calculate the sine of the (exterior) angle between the edges
-			extAng = acos(dotprod)*M_RADIANS_TO_DEGREES; //
-			intAng = 180.0 - extAng;
+			extAng = acos(dotprod); // The face must be a convex polygon. This is the external angle at edge1 to edge2.
+			intAng = M_PI - extAng; // Internal angle
 			sumAng += extAng; // This is to verify later that the sum of the external angles is 360 degrees.
-			ptr += sprintf(ptr, "Internal %11.7f  External %11.7f degrees\n",intAng,extAng);
+			ptr += sprintf(ptr, "Interior %7.3f  Exterior %7.3f Ext Sum %7.3f\n",
+				intAng*M_RADIANS_TO_DEGREES,extAng*M_RADIANS_TO_DEGREES,sumAng*M_RADIANS_TO_DEGREES);
 			fputs(myStringTime1,pF);
 			HPDF_Page_MoveTextPos (page, 0, -10);
 			HPDF_Page_ShowText(page, myStringTime1);
@@ -26423,55 +26493,54 @@ void writeModelFile() {
 			// The first vertex is defined as being at (0,0). The vertices will be in anticlockwise order.
 			if (j == 0) {
 				verts2D[j][0] = 0.0; verts2D[j][1] = 0.0; // First vertex is the origin
-				verts2D[j+1][0] = edgeLength[j]; verts2D[j+1][1] = 0.0; // Can immediately do the second vertex as well.
-				edges2D[j][0] = 1; edges2D[j][1] = 0; // unit vector in the direction of the first edge.
+				verts2D[j+1][0] = modelInfo.edgeLength[edgeNumber]; verts2D[j+1][1] = 0.0; // Can immediately do the second vertex as well.
+				cumulativeAngle = 0.0; // Initialise this
 			} else {
-				edgePerp2D[0] =  -edges2D[j-1][1]; // Get a vector, edgePerp, that is perp to the prev 2d edge
-				edgePerp2D[1] =   edges2D[j-1][0]; // Get a vector, edgePerp, that is perp to the prev 2d
+
+				cumulativeAngle += extAng;
+				dotprod = cos(cumulativeAngle); // Re-use the variable dotprod: The cos of the cumulative external angle
+				sinAng = sin(cumulativeAngle); // Calculate the sine of the cumulative external angle
 				
-				// Edges2d[j] is a unit vector along the direction of edge[j]. It goes between vertices j and j+1
-				edges2D[j][0] = edges2D[j-1][0]*dotprod + edgePerp2D[0]*sinAng;
-				edges2D[j][1] = edges2D[j-1][1]*dotprod + edgePerp2D[1]*sinAng;
-				// Edges2D[j] should always be a unit vector.
-				if (checkUnitVec2D(edges2D[j]) > 0.00000001) { //Crash if there is an error (probably delete this code later)
-					j = (1 - j)/(j - j);
-				}
-				// Now we can calculate the actual 2D vertices of the face
-				if (j < modelInfo.vertsPerFace[i] - 1) {
-					verts2D[j+1][0] = verts2D[j][0] + edgeLength[j+1]*edges2D[j][0]; // Remember, edgeLength is already calculated
-					verts2D[j+1][1] = verts2D[j][1] + edgeLength[j+1]*edges2D[j][1];
-				} else {
-					// This is 'beyond' the last 2d vertex, so when we calculate it, it should be the same as the first vertex (the origin)
-					// Strictly speaking, the code in this section is redundant since we already know that the next vertex
-					// will be the origin. It is done as a check.
-					tempVert2D[0] = verts2D[j][0] + edgeLength[j+1]*edges2D[j][0]; // Remember, edgeLength is already calculated
-					tempVert2D[1] = verts2D[j][1] + edgeLength[j+1]*edges2D[j][1];
-					if (abs(tempVert2D[0]) > 0.000001 || abs(tempVert2D[1]) > 0.000001) { // This check is only for debug. Should never happen
-						// The last vertex should be back to the origin.
-						tempVert2D[0] = 1/ ( j - modelInfo.vertsPerFace[i] - 1); // crash!!!
+				tempEdge[0] = modelInfo.edgeLength[edgeNumber]*dotprod; // the x increment from vertex j to vertex j+1
+				tempEdge[1] = modelInfo.edgeLength[edgeNumber]*sinAng;  // the y increment from vertex j to vertex j+1
+				
+				verts2D[j+1][0] = verts2D[j][0] + tempEdge[0]; // x value of new vertex
+				verts2D[j+1][1] = verts2D[j][1] + tempEdge[1]; // y vertex of new vertex
+
+				if (0) { // This is only a debug aid
+					sprintf(myStringTime1,"j=%2d cumAng=%8.3f Cos=%13.10f sin=%13.10f len=%13.10f vert(j+1)=%13.10f,%13.10f\n",
+						j,cumulativeAngle*M_RADIANS_TO_DEGREES,dotprod,sinAng,modelInfo.edgeLength[edgeNumber],verts2D[j+1][0],verts2D[j+1][0]);
+					fputs(myStringTime1,pF);
+					if (j == modelInfo.vertsPerFace[i] - 1) { // If this is the last vertex, then vert j+1 should be the origin
+						if ( distBetweenTwo2DPoints(verts2D[j+1], verts2D[0]) > 0.00000001){
+							j = (1 - j)/(j - j); // Crash the program if it is not the origin
+						}
 					}
 				}
 			}
 		}
 		// Here we have finished one face. We have an array, verts2D, that contains the 2D coordinates of the vertices of face i.
 
-		sprintf(myStringTime1,"Sum of external angles is %11.7f (should be 360 degrees)\n",sumAng);
-		fputs(myStringTime1,pF);
-		HPDF_Page_MoveTextPos (page, 0, -10);
-		HPDF_Page_ShowText(page, myStringTime1);
+		//HPDF_Page_MoveTextPos (page, 0, -10);
+		//HPDF_Page_ShowText(page, myStringTime1);
 		pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
+		//sprintf(myStringTime1,"GetCurrentTextPos%7.2f%7.2f",pos.x,pos.y);
+		//HPDF_Page_ShowText(page, myStrin gTime1);
 
-
-		sprintf(myStringTime1,"GetCurrentTextPos%7.2f%7.2f",pos.x,pos.y);
-		HPDF_Page_ShowText(page, myStringTime1);
 		// Now to print 2D coordinates of a face.
-		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
-			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
-			thisVert1 = modelInfo.vertNum[vt]; // Get the first vertex of the edge
-			sprintf(myStringTime1, "Vertex V%-3d %13.8f %13.8f\n", thisVert1+1, verts2D[j][0], verts2D[j][1]);
+		
+		if (0) { // Only a debug aid
+			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+				nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
+				thisVert1 = modelInfo.vertNum[vt]; // Get the first vertex of the edge
+				sprintf(myStringTime1,  "j=%-2d Vertex V%-3d %12.8f %12.8f\n",
+					j, thisVert1+1, verts2D[j][0], verts2D[j][1]);
+				fputs(myStringTime1,pF);
+			}
+			sprintf(myStringTime1, "j=%-2d Vertex 00   %12.8f %12.8f\n",j, verts2D[j][0], verts2D[j][1]);
 			fputs(myStringTime1,pF);
 		}
-	}		
+	} // End of the loop for each face		
 	fclose(pF);
 
 	//HPDF_Page_MoveTextPos (page, 0, -10);
@@ -26546,7 +26615,7 @@ void drawIntersectionPlane3D(struct Intersection3DInfo *i3D,int flattened, int n
 		vcopy3(localVerts[0],localVerts[iedge]);
 
 		// Localverts now contains the vertices of the flattened intersection point. They trace out a convex figure
-		// Edge vector contains the the edge vectors (surprise0
+		// Edge vector contains the the edge vectors (surprise)
 		vcross(edgeVector[0],edgeVector[1],crossV);
 		if (crossV[2] > 0) {
 			edgesAnticlockwise = 1;// The edges go in an anticlockwise order
@@ -26973,6 +27042,8 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 				// This is the vertex for this face that should be stored for a model.
 				// When writing a model, stereo should be suppressed
 				//
+				// Each vertex appears at least 3 times in the modelVert array, since for each face all the vertices of that
+				// face are listed.
 				glVertex3dv(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D);
 				if (modelInfo.modelFlag) {
 					modelInfo.modelVert[modelInfo.mIndex][0] = i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D[0];
