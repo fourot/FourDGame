@@ -22338,6 +22338,14 @@ int vangle3D(double *v, double angle,  double *rej, double *result, int restrctd
 
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
+int myNormaliseVector2D(double *v) { //normalises in place
+	double vlength;
+	vlength = sqrt(v[0] * v[0] + v[1] * v[1]);
+	v[0] /= vlength;
+	v[1] /= vlength;
+	return 1;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 int myNormaliseVector3D(double *v) { //normalises in place
 	// Return zero if the normalised vector is too short (i.e. 
 	double vlength;
@@ -26138,7 +26146,7 @@ void writeModelFile() {
 	double edge1[3], edge2[3], crossv[3], tempEdge[2];
 	double normed[2];
 	double edgeLength[10];
-	double verts2D[11][2], verts3D[11][3], edgeLen3[11];
+	double verts2D[11][2], verts3D[11][3];
 	double edges2D[10][2];
 	double dist,dotprod,intAng,extAng,sumAng,maxDist,minDist,sinAng, cumulativeAngle;
 	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,thisVertIndex2,startSearchingIndex,vertexNumber,edgeNumber,minEdge;
@@ -26521,11 +26529,8 @@ void writeModelFile() {
 		}
 		// Here we have finished one face. We have an array, verts2D, that contains the 2D coordinates of the vertices of face i.
 
-		//HPDF_Page_MoveTextPos (page, 0, -10);
-		//HPDF_Page_ShowText(page, myStringTime1);
+		HPDF_Page_MoveTextPos (page, 0, -10);
 		pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
-		//sprintf(myStringTime1,"GetCurrentTextPos%7.2f%7.2f",pos.x,pos.y);
-		//HPDF_Page_ShowText(page, myStrin gTime1);
 
 		// Now to print 2D coordinates of a face.
 		
@@ -26533,20 +26538,78 @@ void writeModelFile() {
 			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 				nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
 				thisVert1 = modelInfo.vertNum[vt]; // Get the first vertex of the edge
-				sprintf(myStringTime1,  "j=%-2d Vertex V%-3d %12.8f %12.8f\n",
-					j, thisVert1+1, verts2D[j][0], verts2D[j][1]);
+				sprintf(myStringTime1,  "Vertex V%-3d %12.8f %12.8f\n",thisVert1+1, verts2D[j][0], verts2D[j][1]);
 				fputs(myStringTime1,pF);
 			}
-			sprintf(myStringTime1, "j=%-2d Vertex 00   %12.8f %12.8f\n",j, verts2D[j][0], verts2D[j][1]);
+			sprintf(myStringTime1, "Vertex 00   %12.8f %12.8f (This should be the same as the first vertex\n",j, verts2D[j][0], verts2D[j][1]);
 			fputs(myStringTime1,pF);
 		}
+		
+		//pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
+		HPDF_Page_EndText (page);
+		
+		if (1) {
+			//pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
+			// For A4 paper the dimensions are 595.276 by 841.89.
+			// The current y position indicates how much vertical space there is
+			// The variable page_width has the available width
+			// Available y space is pos.y - 30 (30 for annotations)
+			// Available x space is page_width - 30.
+			//Allow 30 units of space at top and bottom
+			double min_x = 1e10;
+			double min_y = 1e10;
+			double max_x = -1e10;
+			double max_y = -1e10;
+			double hx, hy, x_margin = 20, y_margin=20;
+			double available_x, available_y, mult_x, mult_y, mult;
+			HPDF_REAL plot_x, plot_y;
+			HPDF_STATUS pstat;
+			//int is_x;
+			
+			available_x = page_width - 2*x_margin;
+			available_y = pos.y - 2*y_margin;
+			sprintf(myStringTime1,"Avail_x=%12.4f Pos.y=%12.4f Avail_y=%12.4f\n",available_x,pos.y,available_y);
+			fputs(myStringTime1,pF);
+			
+			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+				if (verts2D[j][0] < min_x) min_x = verts2D[j][0];
+				if (verts2D[j][1] < min_y) min_y = verts2D[j][1];
+				if (verts2D[j][0] > max_x) max_x = verts2D[j][0];
+				if (verts2D[j][1] > max_y) max_y = verts2D[j][1];
+			}
+			
+			hx = max_x - min_x;
+			hy = max_y - min_y;
+			mult_x = available_x/hx; //pixels per unit of measure
+			mult_y = available_y/hy; //pixels per unit of measure
+			mult = mult_x < mult_y ? mult_x : mult_y;
+			sprintf(myStringTime1,"hx=%12.5f hy=%12.5f mult_x=%12.5f mult_y=%12.5f mult=%12.5f\n",
+				hx,hy,mult_x, mult_y, mult);
+			fputs(myStringTime1,pF);
+			HPDF_Page_SetLineWidth(page,0.5);
+			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+				plot_x = x_margin + (verts2D[j][0] - min_x)*mult;
+				plot_y = y_margin + (verts2D[j][1] - min_y)*mult; 
+				sprintf(myStringTime1,"move_x=%8.1f move_y=%8.1f", plot_x, plot_y);
+				fputs(myStringTime1,pF);
+				pstat = HPDF_Page_MoveTo(page,plot_x,plot_y);
+				plot_x = x_margin + (verts2D[j+1][0] - min_x)*mult;
+				plot_y = y_margin + (verts2D[j+1][1] - min_y)*mult; 
+				sprintf(myStringTime1," line_x=%8.1f line_y=%8.1f\n", plot_x, plot_y);
+				fputs(myStringTime1,pF);
+				HPDF_Page_LineTo(page,plot_x,plot_y);
+				HPDF_Page_Stroke(page);
+			}	
+		}
+		
 	} // End of the loop for each face		
 	fclose(pF);
+	
 
 	//HPDF_Page_MoveTextPos (page, 0, -10);
 	//pos = HPDF_Page_GetCurrentTextPos(page);
 	// Now output a PDF file
-	HPDF_Page_EndText (page);
+	//HPDF_Page_EndText (page);
 	HPDF_SaveToFile(pdf, pdfName);
 	
 	HPDF_Free(pdf);
