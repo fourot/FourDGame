@@ -26139,6 +26139,7 @@ void writeModelFile() {
 	FILE *pF;
 	time_t myTime1;
 	char myStringTime1[300];
+	char tempstring[100];
 	char pdfName[50];
 	char *ptr;
 	struct tm *tnow1;
@@ -26148,6 +26149,9 @@ void writeModelFile() {
 	double edgeLength[10];
 	double verts2D[11][2], verts3D[11][3];
 	double edges2D[10][2];
+	double faceNormal[3];
+	int adjoiningFace[11];
+	double dihedral[11];
 	double dist,dotprod,intAng,extAng,sumAng,maxDist,minDist,sinAng, cumulativeAngle;
 	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,thisVertIndex2,startSearchingIndex,vertexNumber,edgeNumber,minEdge;
 	int prevVertex;
@@ -26442,10 +26446,11 @@ void writeModelFile() {
 			
 			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
 			edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
-			ptr += sprintf(ptr,"E%-3d has length ",edgeNumber+1);
+			//ptr += sprintf(ptr,"E%-3d has length ",edgeNumber+1);
 			
 			thisVert1 = modelInfo.vertNum[vt]; // Get the first vertex of the edge
 			thisVert2 = modelInfo.vertNum[vn];
+			
 			// We now have the indices of the two vertices of the edge: thisVert1 and thisVert2.
 			ptr += sprintf(myStringTime1,"E%-3d has length %13.10f  V%-3d - V%-3d\n",edgeNumber+1,
 				modelInfo.edgeLength[edgeNumber],thisVert1+1,thisVert2+1);
@@ -26465,6 +26470,8 @@ void writeModelFile() {
 			}
 		}
 
+
+		modelInfo.modelNormal[i][0] = 0.0;modelInfo.modelNormal[i][1] = 0.0;modelInfo.modelNormal[i][2] = 0.0;
 		// Now to do details of the angles, still in face 'i'
 		sumAng = 0.0;
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
@@ -26480,10 +26487,14 @@ void writeModelFile() {
 			
 			vsub3(modelInfo.modelVert[vt], modelInfo.modelVert[vp], edge1);
 			myNormaliseVector3D(edge1); // A unit 3D vector in the direction of the first edge of the angle
-			normed[0] = vlength3(edge1);
+			//normed[0] = vlength3(edge1);
 			vsub3(modelInfo.modelVert[vn], modelInfo.modelVert[vt], edge2);
 			myNormaliseVector3D(edge2); // A unit 3D vector in the direction of the second edge of the angle
-			normed[1] = vlength3(edge2);
+			//normed[1] = vlength3(edge2);
+			
+			vcross(edge1, edge2, faceNormal);
+			myNormaliseVector3D(faceNormal);
+			modelInfo.modelNormal[i][0]+=faceNormal[0];modelInfo.modelNormal[i][1]+=faceNormal[1];modelInfo.modelNormal[i][2]+=faceNormal[2];
 			
 			dotprod = vdot3(edge1,edge2); // This is the cosine of the (exterior) angle between the edges.
 			extAng = acos(dotprod); // The face must be a convex polygon. This is the external angle at edge1 to edge2.
@@ -26492,6 +26503,8 @@ void writeModelFile() {
 			ptr += sprintf(ptr, "Interior %7.3f  Exterior %7.3f Ext Sum %7.3f\n",
 				intAng*M_RADIANS_TO_DEGREES,extAng*M_RADIANS_TO_DEGREES,sumAng*M_RADIANS_TO_DEGREES);
 			fputs(myStringTime1,pF);
+			//sprintf(tempstring,"j=%2d facenorm %10.6f %10.6f %10.6f\n",j,faceNormal[0],faceNormal[1],faceNormal[2]);
+			//fputs(tempstring,pF); 
 			HPDF_Page_MoveTextPos (page, 0, -10);
 			HPDF_Page_ShowText(page, myStringTime1);
 			
@@ -26515,7 +26528,7 @@ void writeModelFile() {
 				verts2D[j+1][0] = verts2D[j][0] + tempEdge[0]; // x value of new vertex
 				verts2D[j+1][1] = verts2D[j][1] + tempEdge[1]; // y vertex of new vertex
 
-				if (0) { // This is only a debug aid
+				if (1) { // This is only a debug aid
 					sprintf(myStringTime1,"j=%2d cumAng=%8.3f Cos=%13.10f sin=%13.10f len=%13.10f vert(j+1)=%13.10f,%13.10f\n",
 						j,cumulativeAngle*M_RADIANS_TO_DEGREES,dotprod,sinAng,modelInfo.edgeLength[edgeNumber],verts2D[j+1][0],verts2D[j+1][0]);
 					fputs(myStringTime1,pF);
@@ -26527,10 +26540,18 @@ void writeModelFile() {
 				}
 			}
 		}
+		// The normal to this face is the average of the normals from the edges. (This is a kind of playing safe
+		// rather than just taking one value
+		modelInfo.modelNormal[i][0]/=modelInfo.vertsPerFace[i];
+		modelInfo.modelNormal[i][1]/=modelInfo.vertsPerFace[i];
+		modelInfo.modelNormal[i][2]/=modelInfo.vertsPerFace[i];
+		//sprintf(tempstring,"Finalfacenorm %10.6f %10.6f %10.6f\n",modelInfo.modelNormal[i][0],modelInfo.modelNormal[i][1],modelInfo.modelNormal[i][2]);
+		//fputs(tempstring,pF); 
+		
 		// Here we have finished one face. We have an array, verts2D, that contains the 2D coordinates of the vertices of face i.
 
-		HPDF_Page_MoveTextPos (page, 0, -10);
-		pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
+		//HPDF_Page_MoveTextPos (page, 0, -10);
+		pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position for the graphical output)
 
 		// Now to print 2D coordinates of a face.
 		
@@ -26545,11 +26566,9 @@ void writeModelFile() {
 			fputs(myStringTime1,pF);
 		}
 		
-		//pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
 		HPDF_Page_EndText (page);
 		
 		if (1) {
-			//pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position)
 			// For A4 paper the dimensions are 595.276 by 841.89.
 			// The current y position indicates how much vertical space there is
 			// The variable page_width has the available width
@@ -26560,7 +26579,7 @@ void writeModelFile() {
 			double min_y = 1e10;
 			double max_x = -1e10;
 			double max_y = -1e10;
-			double hx, hy, x_margin = 20, y_margin=20;
+			double hx, hy, x_margin = 40, y_margin=40;
 			double available_x, available_y, mult_x, mult_y, mult;
 			HPDF_REAL plot_x, plot_y;
 			HPDF_STATUS pstat;
@@ -26588,21 +26607,104 @@ void writeModelFile() {
 			fputs(myStringTime1,pF);
 			HPDF_Page_SetLineWidth(page,0.5);
 			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+				// Each time round the loop draws an edge of the face
 				plot_x = x_margin + (verts2D[j][0] - min_x)*mult;
 				plot_y = y_margin + (verts2D[j][1] - min_y)*mult; 
 				sprintf(myStringTime1,"move_x=%8.1f move_y=%8.1f", plot_x, plot_y);
 				fputs(myStringTime1,pF);
-				pstat = HPDF_Page_MoveTo(page,plot_x,plot_y);
+				pstat = HPDF_Page_MoveTo(page,plot_x,plot_y); // move to the position of the first vertex
 				plot_x = x_margin + (verts2D[j+1][0] - min_x)*mult;
 				plot_y = y_margin + (verts2D[j+1][1] - min_y)*mult; 
 				sprintf(myStringTime1," line_x=%8.1f line_y=%8.1f\n", plot_x, plot_y);
 				fputs(myStringTime1,pF);
-				HPDF_Page_LineTo(page,plot_x,plot_y);
+				HPDF_Page_LineTo(page,plot_x,plot_y); // draw a line to the second vertex
 				HPDF_Page_Stroke(page);
 			}	
 		}
 		
-	} // End of the loop for each face		
+	} // End of the loop for each face
+	// Now we can do the angles between the faces
+	
+	//if (0) {
+		i = 0; // Count of faces
+		k = 0; // Counts the number of faces per page
+		while (i < modelInfo.numOfModelFaces) {
+			if (k == 0) {		
+				page = HPDF_AddPage(pdf); // New page for each face
+				HPDF_Page_SetSize (page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
+				HPDF_Page_SetFontAndSize (page, font, 16);
+				HPDF_Page_SetTextLeading (page, 10);
+				HPDF_Page_BeginText (page);
+				HPDF_Page_MoveTextPos (page, 20, // Need to do this before using relative text posn
+				HPDF_Page_GetHeight (page) - 50);
+				//HPDF_Page_ShowText(page, myStringTime1);
+				HPDF_Page_SetFontAndSize (page, font, 8);
+			}
+			sprintf(myStringTime1,"\n\nThe angles between face F%-3d and surrounding faces\n\n",i+1);
+			fputs(myStringTime1,pF);
+			
+			
+			// Firstly output a line that lists the edges of this face
+			ptr = myStringTime1;
+			ptr += sprintf(ptr,"Edge         ");
+			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // List all the edges that are the boundary of this face (face i)
+				ptr += sprintf(ptr, "   E%-4d",modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j] + 1);
+			}
+
+			ptr += sprintf(ptr, "\n");
+			fputs(myStringTime1,pF);
+			
+			
+			// Now output a line of face numbers
+			ptr = myStringTime1;
+			ptr += sprintf(ptr,"Face         ");
+			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+				nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
+				//thisVert1 =    modelInfo.vertNum[vt]; // Get the first vertex of the edge
+				//thisVert2 =    modelInfo.vertNum[vn];
+				//thisVertPrev = modelInfo.vertNum[vp];
+				edgeNumber = modelInfo.edgeNum[ vt];
+
+				currSearchFaceNum = modelInfo.edgeToFaceModel[edgeNumber][0];
+				if (currSearchFaceNum == i) currSearchFaceNum = modelInfo.edgeToFaceModel[edgeNumber][1];
+				// We now have this face number (i + 1) and the adjacent face number (currSearchFaceNum + 1) and the common edge (edgeNumber + 1)
+				// The normal to face i is modelInfo.modelNormal[i]
+				// dotprod gives the angle between the two normals, i.e. the dihedral angle between the faces.
+				dotprod = vdot3(modelInfo.modelNormal[i], modelInfo.modelNormal[currSearchFaceNum]);
+				
+				dihedral[j] = acos(dotprod); //  the dihedral angle between the faces
+				// The bevel angle is 0.5 * (PI - Dihedral angle)
+				ptr += sprintf(ptr,"   F%-4d",currSearchFaceNum + 1);
+			}
+			ptr += sprintf(ptr, "\n");
+			fputs(myStringTime1,pF);
+
+			// Now output the dihedral angle.
+			
+			ptr = myStringTime1;
+			ptr += sprintf(ptr,"Dihedral angle");
+			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+				ptr += sprintf(ptr, "%8.3f",dihedral[j]*M_RADIANS_TO_DEGREES);
+			}
+			ptr += sprintf(ptr, "\n");
+			fputs(myStringTime1,pF);
+			
+			// Now output the bevel angle
+			
+			
+			ptr = myStringTime1;
+			ptr += sprintf(ptr,"Bevel angle   ");
+			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
+				ptr += sprintf(ptr, "%8.3f",0.5*(M_PI - dihedral[j])*M_RADIANS_TO_DEGREES);
+			}
+			ptr += sprintf(ptr, "\n");
+			fputs(myStringTime1,pF);
+			
+			++i;
+			if (++k == 5)
+				k=0;
+		}
+	//}		
 	fclose(pF);
 	
 
