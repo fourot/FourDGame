@@ -26199,9 +26199,6 @@ void writeModelFile() {
 	HPDF_REAL page_width;
 	float tw;
     HPDF_Font font;
-    SquareMatrix *rotmat;
-    
-    rotmat = new SquareMatrix(3,MIZERO);
 
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
@@ -26522,10 +26519,8 @@ void writeModelFile() {
 			
 			vsub3(modelInfo.modelVert[vt], modelInfo.modelVert[vp], edge1);
 			myNormaliseVector3D(edge1); // A unit 3D vector in the direction of the first edge of the angle
-			//normed[0] = vlength3(edge1);
 			vsub3(modelInfo.modelVert[vn], modelInfo.modelVert[vt], edge2);
 			myNormaliseVector3D(edge2); // A unit 3D vector in the direction of the second edge of the angle
-			//normed[1] = vlength3(edge2);
 			
 			vcross(edge1, edge2, faceNormal);
 			myNormaliseVector3D(faceNormal);
@@ -26538,8 +26533,6 @@ void writeModelFile() {
 			ptr += sprintf(ptr, "Interior %7.3f  Exterior %7.3f Ext Sum %7.3f\n",
 				intAng*M_RADIANS_TO_DEGREES,extAng*M_RADIANS_TO_DEGREES,sumAng*M_RADIANS_TO_DEGREES);
 			fputs(myStringTime1,pF);
-			//sprintf(tempstring,"j=%2d facenorm %10.6f %10.6f %10.6f\n",j,faceNormal[0],faceNormal[1],faceNormal[2]);
-			//fputs(tempstring,pF); 
 			HPDF_Page_MoveTextPos (page, 0, -10);
 			HPDF_Page_ShowText(page, myStringTime1);
 			
@@ -26569,7 +26562,7 @@ void writeModelFile() {
 				verts2D[j+1][1] = verts2D[j][1] + tempEdge[1]; // y vertex of new vertex
 				
 
-				if (1) { // This is only a debug aid
+				if (0) { // This is only a debug aid
 					sprintf(myStringTime1,"j=%2d cumAng=%8.3f Cos=%13.10f sin=%13.10f len=%13.10f vert(j+1)=%13.10f,%13.10f\n",
 						j,cumulativeAngle*M_RADIANS_TO_DEGREES,dotprod,sinAng,modelInfo.edgeLength[edgeNumber],verts2D[j+1][0],verts2D[j+1][0]);
 					fputs(myStringTime1,pF);
@@ -26586,12 +26579,9 @@ void writeModelFile() {
 		modelInfo.modelNormal[i][0]/=modelInfo.vertsPerFace[i];
 		modelInfo.modelNormal[i][1]/=modelInfo.vertsPerFace[i];
 		modelInfo.modelNormal[i][2]/=modelInfo.vertsPerFace[i];
-		//sprintf(tempstring,"Finalfacenorm %10.6f %10.6f %10.6f\n",modelInfo.modelNormal[i][0],modelInfo.modelNormal[i][1],modelInfo.modelNormal[i][2]);
-		//fputs(tempstring,pF); 
 		
 		// Here we have finished one face. We have an array, verts2D, that contains the 2D coordinates of the vertices of face i.
 
-		//HPDF_Page_MoveTextPos (page, 0, -10);
 		pos = HPDF_Page_GetCurrentTextPos(page); // Gets the x and y position (use the y position for the graphical output)
 
 		// Now to print 2D coordinates of a face.
@@ -26609,7 +26599,7 @@ void writeModelFile() {
 		
 		HPDF_Page_EndText (page);
 		
-		if (1) {
+//		if (1) {
 			// For A4 paper the dimensions are 595.276 by 841.89.
 			// The current y position indicates how much vertical space there is
 			// The variable page_width has the available width
@@ -26629,8 +26619,8 @@ void writeModelFile() {
 			
 			available_x = page_width - 2*x_margin;
 			available_y = pos.y - 2*y_margin;
-			sprintf(myStringTime1,"Avail_x=%12.4f Pos.y=%12.4f Avail_y=%12.4f\n",available_x,pos.y,available_y);
-			fputs(myStringTime1,pF);
+			//sprintf(myStringTime1,"Avail_x=%12.4f Pos.y=%12.4f Avail_y=%12.4f\n",available_x,pos.y,available_y);
+			//fputs(myStringTime1,pF);
 			
 			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 				if (verts2D[j][0] < min_x) min_x = verts2D[j][0];
@@ -26644,27 +26634,27 @@ void writeModelFile() {
 			mult_x = available_x/hx; //pixels per unit of measure
 			mult_y = available_y/hy; //pixels per unit of measure
 			mult = mult_x < mult_y ? mult_x : mult_y;
-			sprintf(myStringTime1,"hx=%12.5f hy=%12.5f mult_x=%12.5f mult_y=%12.5f mult=%12.5f\n",
-				hx,hy,mult_x, mult_y, mult);
-			fputs(myStringTime1,pF);
+			//sprintf(myStringTime1,"hx=%12.5f hy=%12.5f mult_x=%12.5f mult_y=%12.5f mult=%12.5f\n",
+			//	hx,hy,mult_x, mult_y, mult);
+			//fputs(myStringTime1,pF);
 			HPDF_Page_SetLineWidth(page,0.5);
 			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 				// Each time round the loop draws an edge of the face
 				nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
-				thisVert1 =    modelInfo.vertNum[vt]; // Get the first vertex of the edge
+				//thisVert1 =    modelInfo.vertNum[vt]; // Get the first vertex of the edge
 				thisVert2 =    modelInfo.vertNum[vn];
-				thisVertPrev = modelInfo.vertNum[vp];
+				//thisVertPrev = modelInfo.vertNum[vp];
 				edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
 
 				plot_x1 = x_margin + (verts2D[j][0] - min_x)*mult;
 				plot_y1 = y_margin + (verts2D[j][1] - min_y)*mult; 
-				sprintf(myStringTime1,"move_x=%8.1f move_y=%8.1f", plot_x1, plot_y1);
-				fputs(myStringTime1,pF);
+				//sprintf(myStringTime1,"move_x=%8.1f move_y=%8.1f", plot_x1, plot_y1);
+				//fputs(myStringTime1,pF);
 				pstat = HPDF_Page_MoveTo(page,plot_x1,plot_y1); // move to the position of the first vertex
 				plot_x2 = x_margin + (verts2D[j+1][0] - min_x)*mult;
 				plot_y2 = y_margin + (verts2D[j+1][1] - min_y)*mult; 
-				sprintf(myStringTime1," line_x=%8.1f line_y=%8.1f\n", plot_x2, plot_y2);
-				fputs(myStringTime1,pF);
+				//sprintf(myStringTime1," line_x=%8.1f line_y=%8.1f\n", plot_x2, plot_y2);
+				//fputs(myStringTime1,pF);
 				HPDF_Page_LineTo(page,plot_x2,plot_y2); // draw a line to the second vertex
 				HPDF_Page_Stroke(page);
 				
@@ -26676,7 +26666,7 @@ void writeModelFile() {
 				} else {
 					vsub2(edges2D[j], edges2D[j+1], tempEdge);
 				}
-				vMakeNewLength2(tempEdge, 15);
+				vMakeNewLength2(tempEdge, 10);
 				sprintf(myStringTime1,"V%d",thisVert2+1);
 				tw = HPDF_Page_TextWidth(page,myStringTime1);				
 				
@@ -26684,36 +26674,40 @@ void writeModelFile() {
 				plot_y2 += (tempEdge[1]- my_font_size/2.0);				
 				HPDF_Page_MoveTextPos(page, plot_x2, plot_y2);
 				HPDF_Page_ShowText(page,myStringTime1);
-
-
-				// Now output the edge number Caution , doesn't work.
+				HPDF_Page_EndText(page);	
 				
-				if (j == 0) {
-					vsub2(edges2D[modelInfo.vertsPerFace[i] - 1], edges2D[0], tempEdge);
-				} else {
-					vsub2(edges2D[j-1], edges2D[j], tempEdge);
-				}
-				vMakeNewLength2(tempEdge, 15);
-				sprintf(myStringTime1,"V%d",thisVert1+1);
-				tw = HPDF_Page_TextWidth(page,myStringTime1);				
+				//sprintf(myStringTime1,"Vertex label V%-3d is at position %8.1f %8.1f\n",thisVert2+1,plot_x2,plot_y2);
+				//fputs(myStringTime1,pF);
 				
-				plot_x1 += (tempEdge[0]- tw/2);				
-				plot_y1 += (tempEdge[1]- my_font_size/2.0);				
+				// Now output the edge number.
+				// Get a vector perpendicular to the edge which is to be labelled.
+				tempEdge[0] = edges2D[j][1];
+				tempEdge[1] = -edges2D[j][0];
+
+				HPDF_Page_BeginText(page);
+
 				sprintf(myStringTime1,"E%d",edgeNumber+1);
-				tw = HPDF_Page_TextWidth(page,myStringTime1) - tw;
-				plot_x1 = 0.5*(plot_x1 + plot_x2) - tw/2.0;			
-				plot_y1 = 0.5*(plot_y1 + plot_y2);			
+				tw = HPDF_Page_TextWidth(page,myStringTime1);
+				
+				plot_x1 = x_margin + ((verts2D[j][0]+verts2D[j+1][0])*0.5 - min_x)*mult;
+				plot_y1 = y_margin + ((verts2D[j][1]+verts2D[j+1][1])*0.5 - min_y)*mult;
+				
+				plot_x1 += tempEdge[0]*15 - tw/2.0; //15 is magic number
+				plot_y1 += tempEdge[1]*15 - my_font_size/2.0; //15 is magic number
+
 				HPDF_Page_MoveTextPos(page, plot_x1, plot_y1);
 				HPDF_Page_ShowText(page,myStringTime1);
 				
+				//sprintf(myStringTime1,"Edge   label E%-3d is at position %8.1f %8.1f\n",edgeNumber+1,plot_x1,plot_y1);
+				//fputs(myStringTime1,pF);
+				
 				HPDF_Page_EndText(page);	
 			}			
-		} // The debug if
+//		} // The debug if
 		
 	} // End of the loop for each face
 	// Now we can do the angles between the faces
 	
-	//if (0) {
 		i = 0; // Count of faces
 		k = 0; // Counts the number of faces per page
 		while (i < modelInfo.numOfModelFaces) {
@@ -26730,6 +26724,8 @@ void writeModelFile() {
 			}
 			sprintf(myStringTime1,"\n\nThe angles between face F%-3d and surrounding faces\n\n",i+1);
 			fputs(myStringTime1,pF);
+			HPDF_Page_ShowText(page,myStringTime1);
+			HPDF_Page_MoveTextPos (page, 0, -10);
 			
 			
 			// Firstly output a line that lists the edges of this face
@@ -26738,6 +26734,8 @@ void writeModelFile() {
 			for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // List all the edges that are the boundary of this face (face i)
 				ptr += sprintf(ptr, "   E%-4d",modelInfo.edgeNum[ modelInfo.faceStartIndex[i] + j] + 1);
 			}
+			HPDF_Page_ShowText(page,myStringTime1);
+			HPDF_Page_MoveTextPos (page, 0, -10);
 
 			ptr += sprintf(ptr, "\n");
 			fputs(myStringTime1,pF);
@@ -26766,6 +26764,8 @@ void writeModelFile() {
 			}
 			ptr += sprintf(ptr, "\n");
 			fputs(myStringTime1,pF);
+			HPDF_Page_ShowText(page,myStringTime1);
+			HPDF_Page_MoveTextPos (page, 0, -10);
 
 			// Now output the dihedral angle.
 			
@@ -26776,6 +26776,8 @@ void writeModelFile() {
 			}
 			ptr += sprintf(ptr, "\n");
 			fputs(myStringTime1,pF);
+			HPDF_Page_ShowText(page,myStringTime1);
+			HPDF_Page_MoveTextPos (page, 0, -10);
 			
 			// Now output the bevel angle
 			
@@ -26787,12 +26789,13 @@ void writeModelFile() {
 			}
 			ptr += sprintf(ptr, "\n");
 			fputs(myStringTime1,pF);
+			HPDF_Page_ShowText(page,myStringTime1);
+			HPDF_Page_MoveTextPos (page, 0, -20);
 			
 			++i;
-			if (++k == 7) // seven faces per page on the pdf file.
+			if (++k == 12) // 12 faces per page on the pdf file.
 				k=0;
 		}
-	//}		
 	fclose(pF);
 	
 
