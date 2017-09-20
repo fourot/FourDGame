@@ -77,7 +77,7 @@
 #include <FL/Fl_Output.H>
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Window.H>
-
+#include <FL/Fl_Float_Input.H>
 #include <FL/Fl_Sys_Menu_Bar.H>
 #include <FL/Fl_Toggle_Button.H>
 #include <FL/Fl_Menu_Button.H>
@@ -24726,7 +24726,7 @@ char myStringTime[70];
 struct tm *tnow;
 
 SquareMatrix sqm(4,MIZERO);
-
+Fl_Float_Input *multFact;
 Fl_Tabs * mtabs;
 Fl_Output * figRight;
 Fl_Button * toggleFig2D;
@@ -24880,7 +24880,7 @@ Fl_Output *modelFileLabel;
 
 Fl_Button * modelWrite;
 Fl_Check_Button * modelTextFile;
-Fl_Check_Button * modelPDFFile;
+//Fl_Check_Button * modelPDFFile;
 
 
 struct timespec gotres; // Use clock_getres
@@ -24891,8 +24891,6 @@ struct timespec ltfreezediff3;//3D
 struct timespec ltfreezediff4;//4D
 struct timespec ltend;
 struct timespec ltdiff;
-
-
 
 
 
@@ -26202,9 +26200,11 @@ void writeModelFile() {
 	tnow1 = localtime(&myTime1);
 	
 	// ModelInfo.mindex has twice the number number of edges in the model (i.e. modelINfo.numOfModelEdges)
-	sprintf(myStringTime1,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.txt",
-		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
+	sprintf(myStringTime1,"Fourot_%04d_%02d_%02d__%02d_%02d_%02d_K%03d.txt\n",
+		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec,info4D.fig->numCells);
 	pF = fopen(myStringTime1,"w");
+	modelFileNamestxtbuf->append(myStringTime1);
+	//modelFileNamestxtbuf->append("\n");
 	
 	pdf = HPDF_New(error_handler,NULL);
 	if (!pdf) {
@@ -26215,9 +26215,9 @@ void writeModelFile() {
 		HPDF_Free(pdf);
 		return;
 	}
-	sprintf(pdfName,"FourotM_%04d_%02d_%02d_%02d_%02d_%02d.pdf",
-		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec);
-	
+	sprintf(pdfName,"Fourot_%04d_%02d_%02d__%02d_%02d_%02d_K%03d.pdf",
+		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec,info4D.fig->numCells);
+
     /* add a new page object. */
     page = HPDF_AddPage (pdf);
     HPDF_Page_SetSize (page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
@@ -26799,8 +26799,11 @@ void writeModelFile() {
 	// Now output a PDF file
 	//HPDF_Page_EndText (page);
 	HPDF_SaveToFile(pdf, pdfName);
-	
 	HPDF_Free(pdf);
+	
+	modelFileNamestxtbuf->append(pdfName);
+	modelFileNamestxtbuf->append("\n");
+		
 	return;
 }
 
@@ -31987,48 +31990,43 @@ int	main(int argc, char **argv)
 	
 	
 	
-	
-	
-	
-
-	
-	
 
 	//modelwindow.resizable(mainWindow);
 	modelwindow.resizable(modelwindow);
 	modelwindow.label("Model information from 4D figure");
 	modelwindow.begin();
 
-	modelFileNamestxtbuf = new Fl_Text_Buffer();
-	modelFileNames = new Fl_Text_Display(10,85,470,300);
-	modelFileNames->buffer(modelFileNamestxtbuf);
-	modelFileNames->textsize(16);
-	modelFileNames->wrap_mode(4,0);
+	modelWrite = new Fl_Button(10,10,320,30,"Create a text and pdf file of a 3D model");
+	modelWrite->callback(cb_modelWrite);
+	modelWrite->tooltip(
+		"Create model files of the figure, which is on the left side of the screen during gameplay. Use the mouse to manipulate the figure\
+ into the position that you want, then click this button to produce the files. Both the text and pdf files contain the infomation\
+ that is needed to create a three-dimensional model of the figure. The pdf file has additional diagrams of each face of the model, and this may help\
+ in understanding the information. The Names of the files that are created are listed below.");
 	
-//	modelPDFFile = new Fl_Check_Button(300,13,75,18,"Also create PDF File");
+	multFact = new Fl_Float_Input(180,50,70,25,"Multiplication factor");
+	multFact->value("1");
+	multFact->tooltip(
+	"By default, the 4D figure has a maximum radius of 1 unit, so the intersection of that figure with 3D space has a maximum radius of 1 unit.\
+ If you want different units, for example if you are working in millimetres and want the maximum radius of the resulting model to be 1 metre,\
+ you will need to input a multiplier of 1000, so that all the lengths in the model are pre-multiplied by 1000\n\
+ If you want, for example, the model to have a maximum radius of 12 inches and you want to measure in inches, enter a multiplier of 12");
 
-	modelFileLabel = new Fl_Output(40,60,120,25);
-	modelFileLabel->value("Model File Name");
+	modelFileLabel = new Fl_Output(40,80,120,25);
+	modelFileLabel->value("Created Files");
 	modelFileLabel->color(FL_BACKGROUND_COLOR);
 	modelFileLabel->cursor_color(FL_BACKGROUND_COLOR);
 	modelFileLabel->box(FL_NO_BOX);
 
-	modelWrite = new Fl_Button(10,10,320,30,"Create a text and pdf file of the model");
-	modelWrite->callback(cb_modelWrite);
-	modelWrite->tooltip(
-		"Create a model file of the figure (the left side of the screen). Use the mouse to manipulate the figure\
- into the position that you want, then click this button to produce the file. The file contains the infomation\
- needed to create a three-dimensional model of the figure.");
+	modelFileNamestxtbuf = new Fl_Text_Buffer();
+	modelFileNames = new Fl_Text_Display(10,100,470,300);
+	modelFileNames->buffer(modelFileNamestxtbuf);
+	modelFileNames->textsize(16);
+	modelFileNames->wrap_mode(4,0);
 	
-
 	modelwindow.hide();
 	modelwindow.end();
 
-	
-	
-	
-	
-	
 
 	glGetIntegerv(GL_VIEWPORT, viewport); // This returns the viewport into viewport
 
