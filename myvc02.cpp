@@ -24985,7 +24985,7 @@ FigInfo *figp[NUMBEROFFIGS] = { // Info for all the different figures.
 };
 
 Fl_Window dbg4Dwindow(450,780); // This is used to dump information during 4d play.
-Fl_Window modelwindow(490,780); // Used to control the dump of the model, if required.
+Fl_Window modelwindow(490,500); // Used to control the dump of the model, if required.
 
 Fl_Window explainWelcomeWindow(500,800); // General info
 Fl_Window explain2DScoresWindow(500,800); // User info on 2D Game
@@ -26178,14 +26178,14 @@ void writeModelFile() {
 	struct tm *tnow1;
 	int countVerts;
 	double edge1[3], edge2[3], crossv[3], tempEdge[2];
-	double normed[2];
+	double maxArea, minArea, multFactor;
 	double edgeLength[10];
 	double verts2D[11][2];
 	double edges2D[11][2];
 	double faceNormal[3];
 	double dihedral[11];
 	double dist,dotprod,intAng,extAng,sumAng,maxDist,minDist,sinAng, cumulativeAngle;
-	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,thisVertIndex2,startSearchingIndex,vertexNumber,edgeNumber,minEdge;
+	int i,j,k,vp,vt,vn,startOfFaceIndex,thisVertIndex,thisVertIndex2,startSearchingIndex,vertexNumber,edgeNumber,minEdge,maxF,minF;
 	int thisVert1,thisVert2,possibleVert1,possibleVert2,thisVertPrev,maxv1,maxv2,minv1,minv2; // Used to discover common edges
 	int currSearchFaceNum, startSearchEdgeIndex, edgeSearchFinished;
 	HPDF_Doc pdf;
@@ -26198,31 +26198,39 @@ void writeModelFile() {
 
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
+
+	multFactor = atof(multFact->value());
+	if (multFactor < 0.005 || multFactor > 500000) {
+		modelFileNamestxtbuf->append("Multiplier should be between 0.005 and 500000\n");
+		return;
+	}
 	
 	// ModelInfo.mindex has twice the number number of edges in the model (i.e. modelINfo.numOfModelEdges)
-	sprintf(myStringTime1,"Fourot_%04d_%02d_%02d__%02d_%02d_%02d_K%03d.txt\n",
+	sprintf(myStringTime1,"Fourot_%04d_%02d_%02d__%02d_%02d_%02d_K%03d.txt",
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec,info4D.fig->numCells);
 	pF = fopen(myStringTime1,"w");
 	modelFileNamestxtbuf->append(myStringTime1);
-	//modelFileNamestxtbuf->append("\n");
+	modelFileNamestxtbuf->append("\n");
 	
 	pdf = HPDF_New(error_handler,NULL);
 	if (!pdf) {
-		printf("error: cannot create PdfDoc object\n");
+		modelFileNamestxtbuf->append("Error: cannot create Pdf object\n");
 		return;
 	}
 	if (setjmp(env)) {
 		HPDF_Free(pdf);
+		modelFileNamestxtbuf->append("Error in pdf file\n");
 		return;
 	}
 	sprintf(pdfName,"Fourot_%04d_%02d_%02d__%02d_%02d_%02d_K%03d.pdf",
 		1900+tnow1->tm_year,1+tnow1->tm_mon,tnow1->tm_mday,tnow1->tm_hour,tnow1->tm_min,tnow1->tm_sec,info4D.fig->numCells);
 
+
     /* add a new page object. */
     page = HPDF_AddPage (pdf);
     HPDF_Page_SetSize (page, HPDF_PAGE_SIZE_A4, HPDF_PAGE_PORTRAIT);
-    font = HPDF_GetFont (pdf, "Courier-Bold", NULL);
-    HPDF_Page_SetFontAndSize (page, font, 16);
+    font = HPDF_GetFont (pdf, "Courier", NULL);
+    HPDF_Page_SetFontAndSize (page, font, 10);
     tw = HPDF_Page_TextWidth (page, pdfName);
     page_height = HPDF_Page_GetHeight (page);
     page_width = HPDF_Page_GetWidth(page);
@@ -26235,8 +26243,8 @@ void writeModelFile() {
 
 
     HPDF_Page_BeginText (page);
-    font = HPDF_GetFont (pdf, "Courier", NULL);
-    HPDF_Page_SetFontAndSize (page, font, 12);
+    font = HPDF_GetFont (pdf, "Courier-Bold", NULL);
+    HPDF_Page_SetFontAndSize (page, font, 16);
     HPDF_Page_MoveTextPos (page, 20, // Need to do this before moving to relative text posn
                 HPDF_Page_GetHeight (page) - 80);
 
@@ -26247,6 +26255,11 @@ void writeModelFile() {
 
     HPDF_Page_MoveTextPos (page, 0, -25);
     HPDF_Page_ShowText(page, myStringTime1);
+	
+    font = HPDF_GetFont (pdf, "Courier", NULL);
+    HPDF_Page_SetFontAndSize (page, font, 12);
+	
+	
 	
 	modelInfo.numOfModelEdges /= 2; // This is because edges are counted for each face, so each edge is counted twice.
 	countVerts = modelInfo.numOfModelEdges - modelInfo.numOfModelFaces + 2; // From V + F = E + 2
@@ -26265,6 +26278,19 @@ void writeModelFile() {
     HPDF_Page_MoveTextPos (page, 0, -12);
 	sprintf(myStringTime1,"Vertices:    V1 - V%d\n\n",countVerts);
     HPDF_Page_ShowText(page, myStringTime1);
+    HPDF_Page_MoveTextPos (page, 0, -3);
+
+	// Firstly, find the faces with the maximum and minimum areas.
+	maxArea = 0; minArea = 1e20;
+	for (i = 0; i < modelInfo.numOfModelFaces; ++i) { // Loop each face. to get areas.
+		if (modelInfo.faceArea[i] > maxArea) {
+			maxArea = modelInfo.faceArea[i];
+			maxF = i;
+		} else if (modelInfo.faceArea[i] < minArea) {
+			minArea = modelInfo.faceArea[i];
+			minF = i;
+		}
+	}
 
 
 	// This loop identifies vertices which are the same, i.e. vertices shared by different faces.
@@ -26404,13 +26430,23 @@ void writeModelFile() {
 	}
 	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1+1,maxv2+1,maxDist);
 	fputs(myStringTime1,pF);	
-	HPDF_Page_MoveTextPos (page, 0, -12);
+	HPDF_Page_MoveTextPos (page, 0, -15);
 	HPDF_Page_ShowText(page, myStringTime1);
 	sprintf(myStringTime1,  "Minimum distance (Edge E%-3d)      (V%-3d - V%-3d) is %13.10f\n",minEdge+1,minv1+1,minv2+1,minDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);
+	
+	sprintf(myStringTime1,"\nLargest face  F%-3d   area %11.7f",maxF+1, maxArea);
+	fputs(myStringTime1,pF);
+	HPDF_Page_MoveTextPos (page, 0, -15);
+	HPDF_Page_ShowText(page, myStringTime1);
 
+	sprintf(myStringTime1,"\nSmallest face F%-3d   area %11.7f",minF+1, minArea);
+	fputs(myStringTime1,pF);
+	HPDF_Page_MoveTextPos (page, 0, -12);
+	HPDF_Page_ShowText(page, myStringTime1);
+	
     HPDF_Page_EndText (page);
 
 	if (0) { //Dump the vertices if debugging
@@ -26420,14 +26456,15 @@ void writeModelFile() {
 			modelInfo.modelVert[thisVertIndex][1],modelInfo.modelVert[thisVertIndex][2], modelInfo.edgeLength[modelInfo.edgeNum[thisVertIndex]]);
 			fputs(myStringTime1,pF);		
 		}
-	}	
+	}
+		
 
 	// The next part outputs details for each face, edge by edge.
 
 	for (i = 0; i < modelInfo.numOfModelFaces; ++i) { // Loop each face. This is a big loop!
 		// In each pass through this loop, we output one .pdf page of information
 		// Start of a new Face and a new pdf page.		
-		sprintf(myStringTime1,"\n\nDetails of face F%-3d   (%d edges)\n",i+1,modelInfo.vertsPerFace[i]);
+		sprintf(myStringTime1,"\n\nDetails of face F%-3d    %d edges      Cell %d\n",i+1,modelInfo.vertsPerFace[i],modelInfo.boundaryCellNumber[i]);
 		fputs(myStringTime1,pF);
 		
 		page = HPDF_AddPage(pdf); // New page for each face
@@ -26467,7 +26504,12 @@ void writeModelFile() {
 		HPDF_Page_MoveTextPos (page, 0, -10);
 		HPDF_Page_ShowText(page, myStringTime1);
 		HPDF_Page_MoveTextPos (page, 0, -10);
-
+		
+		sprintf(myStringTime1,"Area of F%-3d is %11.7f\n",i+1,modelInfo.faceArea[i]);
+		HPDF_Page_ShowText(page, myStringTime1);
+		fputs(myStringTime1,pF);
+				
+		
 		// Now to output the fine details of each face.
 		// The face index is i (hence the face number as printed is i+1)
 				
@@ -27171,7 +27213,7 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 					continue; // This face has already been processed in a previous pass round this loop.
 
 				gotAFace = 0;
-				// Look for a face that contains an edge that is the same as the last edge, so buid up a
+				// Look for a face that contains an edge that is the same as the last edge, so build up a
 				// continuous polygon.
 				if ((facIndx == 0 && alreadyGotCount == 0) || // If this is the first face, or...
 					(i4D->iObj.faceIntsct[xFaceIndex].edgeIntersectionIndex[0] ==
@@ -27313,8 +27355,11 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 		glEnd();
 		if (modelInfo.modelFlag) {
 			// Need to record the number vertices on each face
-			modelInfo.vertsPerFace[modelInfo.numOfModelFaces++] = numOfVertsInIntersectionFace;
+			modelInfo.vertsPerFace[modelInfo.numOfModelFaces] = numOfVertsInIntersectionFace;
 			modelInfo.numOfModelEdges += numOfVertsInIntersectionFace;
+			// Record the underlying boundary cell number so the user can match the pdf file to the image on the screen.
+			modelInfo.boundaryCellNumber[modelInfo.numOfModelFaces] = cellNumGlobal;
+			//modelInfo.numOfModelFaces++;
 		}
 		// Now draw the edges of the intersection
 		glColor3ub(127,127,127);
@@ -27338,7 +27383,7 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 		}
 		glEnd();
 
-		if (drawFaceNumbers) {
+		if (drawFaceNumbers || modelInfo.modelFlag) {
 			// Now calculate the centroid of the polygon
 			// Using a triangle fan, calculate the centroid of each triangle and cumulate them
 			// into the centroid of the polygon. The Idea is that the number will hover above the centroid
@@ -27420,7 +27465,7 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 					cumulativeArea += area;
 				}
 				j+=2;
-			}
+			} // End of loop round the internal triangles of the intersection face
 
 			polyDist = vlength3(centrePolygonCumulative);
 			// The following are hacks that more or less work
@@ -27428,7 +27473,12 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 			numbersLoc[1] = centrePolygonCumulative[1] * NUMBERSDISPLAY_DISTANCEFACTOR + NUMBERSDISPLAY_EXTRA_Y;
 			numbersLoc[2] = centrePolygonCumulative[2] * NUMBERSDISPLAY_DISTANCEFACTOR + NUMBERSDISPLAY_EXTRA_Z;
 
-			if (numbersLoc[2] > minz) {
+			if (modelInfo.modelFlag) {
+				modelInfo.faceArea[modelInfo.numOfModelFaces] = cumulativeArea;
+			}
+
+
+			if (drawFaceNumbers && numbersLoc[2] > minz) {
 				gl_font(1,(info4D.fig->numCells > 100? 18 : 24)); // Smaller font for 120 and 600 cells figures.
 				glColor3ub(255,255,255); // Numbers are white
 				sprintf(numstring,"%d",cellNumGlobal);
@@ -27437,7 +27487,10 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 				//sptr += sprintf(sptr,"x");
 				//sptr += sprintf(sptr,"%7.3f %7.3f %7.3f %7.3f\n",numbersLoc[0],numbersLoc[1],numbersLoc[2],minz);
 			}
-		}
+		} // End of draw face numbers
+
+		if (modelInfo.modelFlag) ++modelInfo.numOfModelFaces;
+		
 	} // End of the loop for the intersecting cells
 	loopsAvg = (double)loopsTot/(double)i4D->iObj.cellIntersectionIndex;  // Just debug and monitoring.
 	if (drawFaceNumbers) {
@@ -31991,7 +32044,6 @@ int	main(int argc, char **argv)
 	
 	
 
-	//modelwindow.resizable(mainWindow);
 	modelwindow.resizable(modelwindow);
 	modelwindow.label("Model information from 4D figure");
 	modelwindow.begin();

@@ -500,6 +500,8 @@ struct ModelInfo {
 	int mIndex;
 	int numOfModelFaces;
 	int numOfModelEdges;
+	int boundaryCellNumber[MAX_4D_VERTS];
+	double faceArea[MAX_4D_VERTS];
 	int vertsPerFace[MAX_4D_VERTS];
 	int edgeNum[2*MAX_4D_VERTS];
 	int vertNum[2*MAX_4D_VERTS];
