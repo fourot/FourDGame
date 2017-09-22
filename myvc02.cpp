@@ -26174,6 +26174,8 @@ void writeModelFile() {
 	char myStringTime1[300];
 	char tempstring[100];
 	char pdfName[50];
+	char mFormat[100];
+	char lForm[10];
 	char *ptr;
 	struct tm *tnow1;
 	int countVerts;
@@ -26199,11 +26201,21 @@ void writeModelFile() {
 	time(&myTime1);
 	tnow1 = localtime(&myTime1);
 
-	multFactor = atof(multFact->value());
-	if (multFactor < 0.005 || multFactor > 500000) {
+	multFactor = 2*atof(multFact->value());
+	if (multFactor < 0.01 || multFactor > 1000000) {
 		modelFileNamestxtbuf->append("Multiplier should be between 0.005 and 500000\n");
 		return;
+	} else {
+		if (multFactor < .1)      strcpy(lForm,"%11.9f"); else
+		if (multFactor < 1)       strcpy(lForm,"%11.8f"); else
+		if (multFactor < 10)      strcpy(lForm,"%11.7f"); else
+		if (multFactor < 100)     strcpy(lForm,"%11.6f"); else
+		if (multFactor < 1000)    strcpy(lForm,"%11.5f"); else
+		if (multFactor < 10000)   strcpy(lForm,"%11.4f"); else
+		if (multFactor < 100000)  strcpy(lForm,"%11.3f"); else
+		if (multFactor < 1000000) strcpy(lForm,"%11.2f");
 	}
+	multFactor *= 0.5;
 	
 	// ModelInfo.mindex has twice the number number of edges in the model (i.e. modelINfo.numOfModelEdges)
 	sprintf(myStringTime1,"Fourot_%04d_%02d_%02d__%02d_%02d_%02d_K%03d.txt",
@@ -26291,7 +26303,6 @@ void writeModelFile() {
 			minF = i;
 		}
 	}
-
 
 	// This loop identifies vertices which are the same, i.e. vertices shared by different faces.
 	startOfFaceIndex = 0;
@@ -26428,21 +26439,32 @@ void writeModelFile() {
 		HPDF_Page_MoveTextPos (page, 0, -12);
 		HPDF_Page_ShowText(page, myStringTime1);
 	}
-	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1+1,maxv2+1,maxDist);
+	
+	sprintf(mFormat,"%s%s\n","\nMaximum distance between vertices (V%-3d - V%-3d) is ",lForm);	
+	sprintf(myStringTime1,mFormat,maxv1+1,maxv2+1,maxDist*multFactor);
+
+//	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1+1,maxv2+1,maxDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -15);
 	HPDF_Page_ShowText(page, myStringTime1);
-	sprintf(myStringTime1,  "Minimum distance (Edge E%-3d)      (V%-3d - V%-3d) is %13.10f\n",minEdge+1,minv1+1,minv2+1,minDist);
+	sprintf(mFormat,"%s%s\n","Minimum distance (Edge E%-3d)      (V%-3d - V%-3d) is ",lForm);
+	sprintf(myStringTime1,mFormat,minEdge+1,minv1+1,minv2+1,minDist*multFactor);
+//	sprintf(myStringTime1,  "Minimum distance (Edge E%-3d)      (V%-3d - V%-3d) is %13.10f\n",minEdge+1,minv1+1,minv2+1,minDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);
 	
-	sprintf(myStringTime1,"\nLargest face  F%-3d   area %11.7f",maxF+1, maxArea);
+	sprintf(mFormat,"%s%s","\nLargest face  F%-3d   area ",lForm);
+	sprintf(myStringTime1,mFormat,maxF+1, maxArea*multFactor*multFactor);
+//	sprintf(myStringTime1,"\nLargest face  F%-3d   area %11.7f",maxF+1, maxArea);
 	fputs(myStringTime1,pF);
 	HPDF_Page_MoveTextPos (page, 0, -15);
 	HPDF_Page_ShowText(page, myStringTime1);
+	
 
-	sprintf(myStringTime1,"\nSmallest face F%-3d   area %11.7f",minF+1, minArea);
+	sprintf(mFormat,"%s%s","\nSmallest face F%-3d   area ",lForm);
+	sprintf(myStringTime1,mFormat,minF+1, minArea*multFactor*multFactor);
+//	sprintf(myStringTime1,"\nSmallest face F%-3d   area %11.7f",minF+1, minArea);
 	fputs(myStringTime1,pF);
 	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);
@@ -26505,7 +26527,9 @@ void writeModelFile() {
 		HPDF_Page_ShowText(page, myStringTime1);
 		HPDF_Page_MoveTextPos (page, 0, -10);
 		
-		sprintf(myStringTime1,"Area of F%-3d is %11.7f\n",i+1,modelInfo.faceArea[i]);
+		sprintf(mFormat,"%s%s\n","Area of F%-3d is ",lForm);
+		sprintf(myStringTime1,mFormat,i+1,modelInfo.faceArea[i]*multFactor*multFactor);
+//		sprintf(myStringTime1,"Area of F%-3d is %11.7f\n",i+1,modelInfo.faceArea[i]);
 		HPDF_Page_ShowText(page, myStringTime1);
 		fputs(myStringTime1,pF);
 				
@@ -26524,8 +26548,10 @@ void writeModelFile() {
 			thisVert2 = modelInfo.vertNum[vn];
 			
 			// We now have the indices of the two vertices of the edge: thisVert1 and thisVert2.
-			ptr += sprintf(myStringTime1,"E%-3d length %13.10f  V%-3d - V%-3d\n",edgeNumber+1,
-				modelInfo.edgeLength[edgeNumber],thisVert1+1,thisVert2+1);
+			sprintf(mFormat,"%s%s%s" ,"E%-3d length ",lForm,"  V%-3d - V%-3d\n");
+			ptr += sprintf(myStringTime1,mFormat,edgeNumber+1,modelInfo.edgeLength[edgeNumber]*multFactor,thisVert1+1,thisVert2+1);
+//			ptr += sprintf(myStringTime1,"E%-3d length %13.10f  V%-3d - V%-3d\n",edgeNumber+1,
+//				modelInfo.edgeLength[edgeNumber],thisVert1+1,thisVert2+1);
 			fputs(myStringTime1,pF);
 			HPDF_Page_MoveTextPos (page, 0, -10);
 			HPDF_Page_ShowText(page, myStringTime1);
