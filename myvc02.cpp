@@ -26440,6 +26440,11 @@ void writeModelFile() {
 		HPDF_Page_ShowText(page, myStringTime1);
 	}
 	
+	sprintf(myStringTime1,"\nMultiplication factor is %10.3f\n",multFactor);
+	fputs(myStringTime1,pF);
+	HPDF_Page_MoveTextPos (page, 0, -15);
+	HPDF_Page_ShowText(page, myStringTime1);
+	
 	sprintf(mFormat,"%s%s\n","\nMaximum distance between vertices (V%-3d - V%-3d) is ",lForm);	
 	sprintf(myStringTime1,mFormat,maxv1+1,maxv2+1,maxDist*multFactor);
 
@@ -26467,8 +26472,32 @@ void writeModelFile() {
 //	sprintf(myStringTime1,"\nSmallest face F%-3d   area %11.7f",minF+1, minArea);
 	fputs(myStringTime1,pF);
 	HPDF_Page_MoveTextPos (page, 0, -12);
-	HPDF_Page_ShowText(page, myStringTime1);
+	HPDF_Page_ShowText(page, myStringTime1);	
+
+//Now put some explanation in the pdf file 
+    HPDF_Page_SetFontAndSize (page, font, 10);
+	HPDF_Page_MoveTextPos (page, 0, -20);
+	HPDF_Page_ShowText(page,"On the following pages, details of each face are given, including edges and vertices.");	
+	HPDF_Page_MoveTextPos (page, 0, -20);
+	HPDF_Page_ShowText(page,"The cell number refers to the 3D cell on the boundary of the 4D figure.");	
+	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_ShowText(page,"The cell number is the number appearing above each face on the gameplay screen");	
+	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_ShowText(page,"when the 'numbers' option is active. You can move the figure around in 3D,");	
+	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_ShowText(page,"i.e. using only the left mouse button, and the correspondence between the numbers on");
+	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_ShowText(page,"the screen and the cell number in this file remains fixed. If you use the right mouse");
+	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_ShowText(page,"button, the figure will move in 4D and will no longer match this file.");
+	HPDF_Page_MoveTextPos (page, 0, -10);
+	HPDF_Page_ShowText(page,"The diagrams of each face are the correct shape but their relative sizes are inaccurate.");
+	HPDF_Page_MoveTextPos (page, 0, -20);
+	HPDF_Page_ShowText(page,"Details of the angles between faces are given at the end of this file.");	
 	
+	
+	
+
     HPDF_Page_EndText (page);
 
 	if (0) { //Dump the vertices if debugging
@@ -32083,12 +32112,15 @@ int	main(int argc, char **argv)
  in understanding the information. The Names of the files that are created are listed below.");
 	
 	multFact = new Fl_Float_Input(180,50,70,25,"Multiplication factor");
-	multFact->value("1");
+	multFact->value("100");
 	multFact->tooltip(
-	"By default, the 4D figure has a maximum radius of 1 unit, so the intersection of that figure with 3D space has a maximum radius of 1 unit.\
- If you want different units, for example if you are working in millimetres and want the maximum radius of the resulting model to be 1 metre,\
- you will need to input a multiplier of 1000, so that all the lengths in the model are pre-multiplied by 1000\n\
- If you want, for example, the model to have a maximum radius of 12 inches and you want to measure in inches, enter a multiplier of 12");
+	"By default, the figure is inscribed inside a 4D sphere of radius 100 units, so the intersection of the figure with 3D space also has a maximum radius of 100 units.\
+ However, in practice the 3D model will have a radius of less than 100. The 120-cell and 600-cell figures will be only slightly less but the other figures could be \
+substantially less. In the created file, the maximum diameter (not radius!) of the model is reported under the heading 'Maximum distance between vertices'.\n\
+Use the multiplication factor to change the units:\n\
+Example: if you are working in millimetres and want the maximum radius of the model to be 1000 millimetres,\
+ enter a factor of 1000.\n\
+Example: if you are working in inches and want the maximum radius of the model to be 24 inches, enter a factor of 24.");
 
 	modelFileLabel = new Fl_Output(40,80,120,25);
 	modelFileLabel->value("Created Files");
