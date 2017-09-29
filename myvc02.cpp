@@ -24985,7 +24985,7 @@ FigInfo *figp[NUMBEROFFIGS] = { // Info for all the different figures.
 };
 
 Fl_Window dbg4Dwindow(450,780); // This is used to dump information during 4d play.
-Fl_Window modelwindow(490,500); // Used to control the dump of the model, if required.
+Fl_Window modelwindow(490,420); // Used to control the dump of the model, if required.
 
 Fl_Window explainWelcomeWindow(500,800); // General info
 Fl_Window explain2DScoresWindow(500,800); // User info on 2D Game
@@ -25125,13 +25125,6 @@ void timespec_diff(struct timespec *start, struct timespec *stop,
         result->tv_sec = stop->tv_sec - start->tv_sec;
         result->tv_nsec = nsecdiff;
     }
-//    if ((stop->tv_nsec - start->tv_nsec) < 0) {
-//        result->tv_sec = stop->tv_sec - start->tv_sec - 1;
-//        result->tv_nsec = stop->tv_nsec - start->tv_nsec + 1000000000;
-//    } else {
-//        result->tv_sec = stop->tv_sec - start->tv_sec;
-//        result->tv_nsec = stop->tv_nsec - start->tv_nsec;
-//    }
     return;
 }
 
@@ -26150,23 +26143,6 @@ double distBetweenTwo2DPoints(double *v1, double *v2) {
 			);
 }
 
-double checkUnitVec2D(double *v1) {
-	double l1;
-	//double l1, l2, resl;
-	//l1 = sqrt( v1[0]*v1[0] + v1[1]*v1[1] ); 
-	//l2 = sqrt( v2[0]*v2[0] + v2[1]*v2[1] ); 
-	
-	//resl = sqrt (l1 * l1 + l2 * l2)
-	
-	l1 = fabs( 1.0 - sqrt(v1[0]*v1[0] + v1[1]*v1[1])); 
-	//l2 = v2[0]*v2[0] + v2[1]*v2[1]; 
-	//l1 = v1[0]*v1[0] + v1[1]*v1[1]; 
-	//l2 = v2[0]*v2[0] + v2[1]*v2[1]; 
-	
-	//resl = sqrt (l1 + l2);
-	return l1;
-}
-
 void writeModelFile() {
 #define my_font_size 8
 	FILE *pF;
@@ -26270,8 +26246,7 @@ void writeModelFile() {
 	
     font = HPDF_GetFont (pdf, "Courier", NULL);
     HPDF_Page_SetFontAndSize (page, font, 12);
-	
-	
+
 	
 	modelInfo.numOfModelEdges /= 2; // This is because edges are counted for each face, so each edge is counted twice.
 	countVerts = modelInfo.numOfModelEdges - modelInfo.numOfModelFaces + 2; // From V + F = E + 2
@@ -26448,20 +26423,17 @@ void writeModelFile() {
 	sprintf(mFormat,"%s%s\n","\nMaximum distance between vertices (V%-3d - V%-3d) is ",lForm);	
 	sprintf(myStringTime1,mFormat,maxv1+1,maxv2+1,maxDist*multFactor);
 
-//	sprintf(myStringTime1,"\nMaximum distance between vertices (V%-3d - V%-3d) is %13.10f\n",maxv1+1,maxv2+1,maxDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -15);
 	HPDF_Page_ShowText(page, myStringTime1);
 	sprintf(mFormat,"%s%s\n","Minimum distance (Edge E%-3d)      (V%-3d - V%-3d) is ",lForm);
 	sprintf(myStringTime1,mFormat,minEdge+1,minv1+1,minv2+1,minDist*multFactor);
-//	sprintf(myStringTime1,  "Minimum distance (Edge E%-3d)      (V%-3d - V%-3d) is %13.10f\n",minEdge+1,minv1+1,minv2+1,minDist);
 	fputs(myStringTime1,pF);	
 	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);
 	
 	sprintf(mFormat,"%s%s","\nLargest face  F%-3d   area ",lForm);
 	sprintf(myStringTime1,mFormat,maxF+1, maxArea*multFactor*multFactor);
-//	sprintf(myStringTime1,"\nLargest face  F%-3d   area %11.7f",maxF+1, maxArea);
 	fputs(myStringTime1,pF);
 	HPDF_Page_MoveTextPos (page, 0, -15);
 	HPDF_Page_ShowText(page, myStringTime1);
@@ -26469,7 +26441,6 @@ void writeModelFile() {
 
 	sprintf(mFormat,"%s%s","\nSmallest face F%-3d   area ",lForm);
 	sprintf(myStringTime1,mFormat,minF+1, minArea*multFactor*multFactor);
-//	sprintf(myStringTime1,"\nSmallest face F%-3d   area %11.7f",minF+1, minArea);
 	fputs(myStringTime1,pF);
 	HPDF_Page_MoveTextPos (page, 0, -12);
 	HPDF_Page_ShowText(page, myStringTime1);	
@@ -26495,9 +26466,6 @@ void writeModelFile() {
 	HPDF_Page_MoveTextPos (page, 0, -20);
 	HPDF_Page_ShowText(page,"Details of the angles between faces are given at the end of this file.");	
 	
-	
-	
-
     HPDF_Page_EndText (page);
 
 	if (0) { //Dump the vertices if debugging
@@ -26509,7 +26477,6 @@ void writeModelFile() {
 		}
 	}
 		
-
 	// The next part outputs details for each face, edge by edge.
 
 	for (i = 0; i < modelInfo.numOfModelFaces; ++i) { // Loop each face. This is a big loop!
@@ -26558,20 +26525,16 @@ void writeModelFile() {
 		
 		sprintf(mFormat,"%s%s\n","Area of F%-3d is ",lForm);
 		sprintf(myStringTime1,mFormat,i+1,modelInfo.faceArea[i]*multFactor*multFactor);
-//		sprintf(myStringTime1,"Area of F%-3d is %11.7f\n",i+1,modelInfo.faceArea[i]);
 		HPDF_Page_ShowText(page, myStringTime1);
 		fputs(myStringTime1,pF);
-				
-		
+						
 		// Now to output the fine details of each face.
 		// The face index is i (hence the face number as printed is i+1)
 				
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) { // This loop gives us the length of each edge in face 'i'
-			//ptr = myStringTime1;
 			
 			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
 			edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
-			//ptr += sprintf(ptr,"E%-3d has length ",edgeNumber+1);
 			
 			thisVert1 = modelInfo.vertNum[vt]; // Get the first vertex of the edge
 			thisVert2 = modelInfo.vertNum[vn];
@@ -26579,8 +26542,6 @@ void writeModelFile() {
 			// We now have the indices of the two vertices of the edge: thisVert1 and thisVert2.
 			sprintf(mFormat,"%s%s%s" ,"E%-3d length ",lForm,"  V%-3d - V%-3d\n");
 			ptr += sprintf(myStringTime1,mFormat,edgeNumber+1,modelInfo.edgeLength[edgeNumber]*multFactor,thisVert1+1,thisVert2+1);
-//			ptr += sprintf(myStringTime1,"E%-3d length %13.10f  V%-3d - V%-3d\n",edgeNumber+1,
-//				modelInfo.edgeLength[edgeNumber],thisVert1+1,thisVert2+1);
 			fputs(myStringTime1,pF);
 			HPDF_Page_MoveTextPos (page, 0, -10);
 			HPDF_Page_ShowText(page, myStringTime1);
@@ -26631,7 +26592,6 @@ void writeModelFile() {
 			HPDF_Page_MoveTextPos (page, 0, -10);
 			HPDF_Page_ShowText(page, myStringTime1);
 			
-			
 			// Now to calculate the 2D coordinates of this vertex (i.e. the jth vertex) of face i.
 			// the array edges2D contains the normalised vectors of each edge in 2D
 			// whereas edge1 and edge2 are the normalised edges in 3D
@@ -26656,7 +26616,6 @@ void writeModelFile() {
 				verts2D[j+1][0] = verts2D[j][0] + tempEdge[0]; // x value of new vertex
 				verts2D[j+1][1] = verts2D[j][1] + tempEdge[1]; // y vertex of new vertex
 				
-
 				if (0) { // This is only a debug aid
 					sprintf(myStringTime1,"j=%2d cumAng=%8.3f Cos=%13.10f sin=%13.10f len=%13.10f vert(j+1)=%13.10f,%13.10f\n",
 						j,cumulativeAngle*M_RADIANS_TO_DEGREES,dotprod,sinAng,modelInfo.edgeLength[edgeNumber],verts2D[j+1][0],verts2D[j+1][0]);
@@ -26738,9 +26697,7 @@ void writeModelFile() {
 		for (j = 0; j < modelInfo.vertsPerFace[i]; ++j) {
 			// Each time round the loop draws an edge of the face
 			nextModelVert(i, j, &vp, &vt, &vn); // Get the indices of this vertex (vt) prev vert (vp) next vert (vn)
-			//thisVert1 =    modelInfo.vertNum[vt]; // Get the first vertex of the edge
 			thisVert2 =    modelInfo.vertNum[vn];
-			//thisVertPrev = modelInfo.vertNum[vp];
 			edgeNumber = modelInfo.edgeNum[ vt]; // This just saves a bit of typing
 
 			plot_x1 = x_margin + (verts2D[j][0] - min_x)*mult;
@@ -26816,7 +26773,6 @@ void writeModelFile() {
 			HPDF_Page_BeginText (page);
 			HPDF_Page_MoveTextPos (page, 20, // Need to do this before using relative text posn
 			HPDF_Page_GetHeight (page) - 50);
-			//HPDF_Page_ShowText(page, myStringTime1);
 			HPDF_Page_SetFontAndSize (page, font, 8);
 		}
 		sprintf(myStringTime1,"\n\nThe angles between face F%-3d and surrounding faces\n\n",i+1);
@@ -26835,7 +26791,6 @@ void writeModelFile() {
 
 		ptr += sprintf(ptr, "\n");
 		fputs(myStringTime1,pF);
-		
 		
 		// Now output a line of face numbers
 		ptr = myStringTime1;
@@ -26890,11 +26845,6 @@ void writeModelFile() {
 	}
 	fclose(pF);
 	
-
-	//HPDF_Page_MoveTextPos (page, 0, -10);
-	//pos = HPDF_Page_GetCurrentTextPos(page);
-	// Now output a PDF file
-	//HPDF_Page_EndText (page);
 	HPDF_SaveToFile(pdf, pdfName);
 	HPDF_Free(pdf);
 	
@@ -27211,7 +27161,6 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 
 	double minz;
 	
-	
 	switch (info4D.fig->numCells) { // This is used for drawing face numbers in stereo. It sort of works.
 		case 5: minz = -1.0; break;
 		case 8: minz = -1.0; break;
@@ -27223,8 +27172,6 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 	}
 	/////// This is to check that there is a request to output a model
 	
-	
-
 	if (i4D->iObj.cellIntersectionIndex == 0) return;
 	
 	if (modelInfo.modelFlag) {
@@ -27502,7 +27449,6 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 							vcopy3(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D, thirdTriangleVertex);
 							break;
 						}
-						//vcopy3(i4D->iObj.edgeIntsct[isctEdges[myIndex]].intersectionPointProjTo3D, thirdTriangleVertex);
 						s1 = s3;
 						s2 = vlengthdiff3(thirdTriangleVertex, secondTriangleVertex);
 						s3 = vlengthdiff3(firstTriangleVertex, thirdTriangleVertex);
@@ -27532,7 +27478,6 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 				modelInfo.faceArea[modelInfo.numOfModelFaces] = cumulativeArea;
 			}
 
-
 			if (drawFaceNumbers && numbersLoc[2] > minz) {
 				gl_font(1,(info4D.fig->numCells > 100? 18 : 24)); // Smaller font for 120 and 600 cells figures.
 				glColor3ub(255,255,255); // Numbers are white
@@ -27553,11 +27498,10 @@ void drawFaces4D(struct Intersection4DInfo *i4D, int drawFaceNumbers, int useRan
 		//sprintf(txtout,"lmin=%3d, max=%4d, avg=%6.3f\n",loopsMin, loopsMax, loopsAvg); // for debug
 		//fputs(txtout,pFile);
 	}	
-	if (modelInfo.modelFlag) {
-		writeModelFile();
-		modelInfo.modelFlag = 0;
+	if (modelInfo.modelFlag) {	// If modelflag is set..
+		writeModelFile(); 		// Write the file
+		modelInfo.modelFlag = 0;// Then clear the flag.
 	}
-	
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -29522,11 +29466,9 @@ void newredraw(void)
 								correctAngle(intersection2DInfo.trueStartMov) -
 								correctAngle(intersection2DInfo.trueStartTarg))) -
 								ACCURACYWINANGLE);
-//				sprintf(counting,"Required angle:%6.2f %c\n", fullAngle*M_RADIANS_TO_DEGREES,176);
 				sprintf(counting,"Required angle:%6.2f %c", fullAngle*M_RADIANS_TO_DEGREES,176);
 				glTextOutput(0.80, ANGULARDISTANCEYVALUE, counting, twhite);
 				if (state2DGameDetail != haveSuccess) {if (pFile) fputs(counting,pFile);}
-//				sprintf(counting, "Time:%6.2f s\n", intersection2DInfo.successTime);
 				sprintf(counting, "Time:%6.2f s", intersection2DInfo.successTime);
 				glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.1, counting, twhite);
 				if (state2DGameDetail != haveSuccess) {if (pFile) fputs(counting,pFile);}
@@ -29537,7 +29479,6 @@ void newredraw(void)
 				if (fullAngle > intersection2DInfo.cumulativeAngularMotion) fullAngle = intersection2DInfo.cumulativeAngularMotion;
 				accuracy2D = 100.0*fullAngle/intersection2DInfo.cumulativeAngularMotion;
 				sprintf(counting, "Accuracy:%6.1f%%",accuracy2D);
-//					100.0*fullAngle/intersection2DInfo.cumulativeAngularMotion);
 				glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.3, counting, tredgreen);
 				if (state2DGameDetail != haveSuccess) {if (pFile) fputs(counting,pFile);}
 
@@ -29545,9 +29486,6 @@ void newredraw(void)
 				glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.4, counting, twhite);
 
 				sprintf(counting, "Score:%7.1f",intersection2DInfo.finalScore*M_RADIANS_TO_DEGREES*accuracy2D);
-				//sprintf(counting, "Score:%6.0f '/s\n",
-				//	intersection2DInfo.finalScore*M_RADIANS_TO_DEGREES*60*fullAngle/intersection2DInfo.cumulativeAngularMotion);
-
 				glTextOutput(0.80, ANGULARDISTANCEYVALUE-0.5, counting, twhite);
 				if (state2DGameDetail != haveSuccess) {if (pFile) fputs(counting,pFile);}
 			} else {
@@ -30059,7 +29997,7 @@ void init(void)
   glLightModelfv(GL_LIGHT_MODEL_TWO_SIDE, lmodel_twoside);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
   glEnable(GL_LIGHTING);
-  //glDisable(GL_LIGHTING);
+  glDisable(GL_LIGHTING);
 
   glMaterialfv(GL_FRONT, GL_AMBIENT, bevel_mat_ambient);
   glMaterialfv(GL_FRONT, GL_SHININESS, bevel_mat_shininess);
@@ -31162,15 +31100,6 @@ void startNew4D() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void cb_newGame4D(Fl_Widget *w, void *param) {
-	//int thisParam = (int)param;
-	//float randAngle1, randAngle2;
-	//char txtout[200];
-	//char *sptr = txtout;
-
-	//struct Bivector4D bvTemp;
-	//struct Rotor4D tempRotor;
-	
-	
 	startNew4D();
 	return;
 }
